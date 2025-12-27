@@ -1,0 +1,26 @@
+# Python/Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.pid
+
+# Miljø/hemmeligheter
+.env
+.env.*
+*.pem
+*.key
+
+# Bygg/artefakter
+venv/
+static/
+staticfiles/
+media/
+node_modules/
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/

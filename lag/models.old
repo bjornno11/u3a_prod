@@ -1,0 +1,96 @@
+# I filen: /srv/u3a/lag/models.py (eller din app/models.py)
+
+from django.db import models
+from django.utils import timezone
+import requests # <-- NY IMPORT
+from requests.exceptions import RequestException, Timeout
+
+
+class Organisasjon(models.Model):
+    # Statusvalg
+    STATUS_VALG = [
+        ('Aktiv', 'Aktiv'),
+        ('Ukjent', 'Ukjent'),
+        ('Passiv', 'Passiv'),
+    ]
+
+    # Kolonnene dine
+    fylke = models.CharField(max_length=100, verbose_name="Fylke")
+    kommune = models.CharField(max_length=100, verbose_name="Kommune")
+    organisasjon = models.CharField(max_length=200, unique=True, verbose_name="Organisasjonsnavn")
+    adresse = models.CharField(max_length=255, blank=True, null=True, verbose_name="Adresse")
+    nettside = models.URLField(max_length=200, blank=True, null=True, verbose_name="Nettside")
+    epost = models.EmailField(max_length=254, blank=True, null=True, verbose_name="E-post")
+    telefon = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefon")
+    breddegrad = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        blank=True, 
+        null=True, 
+        verbose_name="Breddegrad (Latitude)"
+        )
+    lengdegrad = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        blank=True, 
+        null=True, 
+        verbose_name="Lengdegrad (Longitude)"
+        )    
+    # Statusfelt med forhåndsdefinerte valg
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_VALG,
+        default='Ukjent',
+        verbose_name="Status"
+    )
+    
+    kilde = models.CharField(max_length=100, blank=True, null=True, verbose_name="Kilde")
+    
+    # Tidstempler (Django fyller ut disse automatisk)
+    opprettet = models.DateTimeField(default=timezone.now, verbose_name="Opprettet")
+    sist_endret = models.DateTimeField(auto_now=True, verbose_name="Sist endret")
+
+    class Meta:
+        verbose_name_plural = "Organisasjoner"
+        ordering = ['organisasjon'] # Sorterer etter organisasjonsnavn som standard
+
+    def __str__(self):
+        return self.organisasjon
+
+
+class Organisasjon(models.Model):
+    # ... (dine eksisterende felt) ...
+    nettside = models.URLField(max_length=200, blank=True, null=True, verbose_name="Nettside")
+    # ... (resten av felt og Meta) ...
+    
+    def is_website_active(self):
+        """
+        Sjekker om nettsiden er tilgjengelig (returnerer HTTP 200).
+        Fikser URL-protokollen før tilkobling.
+        """
+        if not self.nettside:
+            return False # Ingen URL oppgitt
+
+        # Fjerner eventuelle innledende/avsluttende mellomrom
+        url = self.nettside.strip()
+        
+        # Sjekker om URL-en starter med en protokoll. Hvis ikke, legg til https://
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+
+        try:
+            # Setter timeout til 5 sekunder og unngår SSL-verifisering for kompatibilitet
+            response = requests.get(url, timeout=5, verify=False, allow_redirects=True)
+            
+            # Returnerer True for suksesskoder (200-299)
+            return 200 <= response.status_code < 300 
+            
+        except RequestException:
+            # Hvis tilkoblingen feiler (DNS, Timeout, eller nettverksfeil)
+            return False
+        except Exception:
+            # Fanger opp andre ukjente feil
+            return False
+
+    def __str__(self):
+        return self.organisasjon

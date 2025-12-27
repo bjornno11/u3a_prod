@@ -1,0 +1,91 @@
+
+{% extends "base.html" %}
+
+{% block title %}U3A Norge – Læring for livet{% endblock %}
+
+{% block content %}
+
+<!-- HELTESEKSJON -->
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+    <div class="container py-5">
+        <h1 class="display-5 fw-bold">Universitetet for den tredje alder</h1>
+        <p class="col-md-8 fs-5 mt-3">
+            U3A Norge er et landsdekkende læringsfellesskap for voksne
+            som ønsker inspirasjon, kunnskap og sosialt fellesskap.
+            Lokallag over hele landet tilbyr kurs, foredrag, turer og møteplasser.
+        </p>
+        <a href="/lag" class="btn btn-primary btn-lg mt-2">
+            Finn ditt lokallag
+        </a>
+    </div>
+</div>
+
+<!-- TRE KORT: LAG, KURS, BLI MED -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h4 class="card-title">Lokallag</h4>
+                <p class="card-text">
+                    U3A har lag i hele Norge. Finn ditt lag og se hvilke
+                    aktiviteter som finnes i ditt område.
+                </p>
+                <a href="/lag" class="btn btn-outline-primary">Se lokallag</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h4 class="card-title">Kurs & aktiviteter</h4>
+                <p class="card-text">
+                    Vi tilbyr et bredt utvalg av kurs i alt fra historie og kunst
+                    til data og språk. Alltid læring – aldri eksamen.
+                </p>
+                <a href="/kurs" class="btn btn-outline-primary">Se kurs</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h4 class="card-title">Bli medlem</h4>
+                <p class="card-text">
+                    Du trenger ikke forkunnskaper. Bare nysgjerrighet!
+                    U3A er åpent for alle som ønsker å lære og være en del av et fellesskap.
+                </p>
+                <a href="/bli-med" class="btn btn-outline-primary">Les mer</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIDERAD MED INFO -->
+<div class="row mt-5">
+    <div class="col-md-6">
+        <h3 class="fw-bold">Hva er U3A?</h3>
+        <p>
+            U3A (University of the Third Age) er et internasjonalt læringskonsept
+            som tilbyr faglig påfyll, sosialt fellesskap og meningsfulle aktiviteter.
+            Det finnes ingen eksamener, ingen karakterer – bare ekte interesse.
+        </p>
+        <p>
+            I Norge organiseres U3A som lokallag, hver med sitt eget tilbud av kurs og arrangementer.
+        </p>
+    </div>
+
+    <div class="col-md-6">
+        <h3 class="fw-bold">Et fellesskap for livet</h3>
+        <p>
+            Mange opplever U3A som et sted hvor de møter nye mennesker,
+            holder hjernen aktiv og finner inspirasjon i hverdagen.
+        </p>
+        <p>
+            Læring er ikke forbeholdt ungdom. Læring er for livet.
+        </p>
+    </div>
+</div>
+
+{% endblock %}

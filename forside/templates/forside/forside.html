@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .forside-container {
+      display: grid;
+      grid-template-columns: 20% 60% 20%;
+      gap: 20px;
+      padding: 20px;
+  }
+  .forside-column {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 6px;
+      min-height: 200px;
+  }
+</style>
+
+<div class="forside-container">
+    <div class="forside-column">
+        {% if content %}{{ content.left_column|safe }}{% endif %}
+    </div>
+
+    <div class="forside-column">
+        {% if content %}{{ content.center_column|safe }}{% else %}
+            <h2>Velkommen til U3A – Senioruniversitetet</h2>
+            <p>Her kan du legge inn innhold fra admin senere.</p>
+        {% endif %}
+    </div>
+
+    <div class="forside-column">
+        {% if content %}{{ content.right_column|safe }}{% endif %}
+    </div>
+</div>
+{% endblock %}

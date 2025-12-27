@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Oversikt over Lokallag{% endblock %}
+
+{% block content %}
+    <h1>Oversikt over Aktive Lokallag ({{ antall_aktive }})</h1>
+    
+    <p class="lead">Her er alle aktive lokallag importert fra regnearket.</p>
+
+    {% if organisasjoner %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Organisasjon</th>
+                    <th>Kommune</th>
+                    <th>Fylke</th>
+                    <th>Nettside</th>
+                    <th>E-post</th>
+                    <th>Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for org in organisasjoner %}
+                <tr>
+                    <td>{{ org.organisasjon }}</td>
+                    <td>{{ org.kommune }}</td>
+                    <td>{{ org.fylke }}</td>
+                    <td>
+                        {% if org.nettside %}
+                            <a href="{{ org.nettside }}" target="_blank">Lenke</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td><a href="mailto:{{ org.epost }}">{{ org.epost }}</a></td>
+                    <td><a href="{% url 'admin:lag_organisasjon_change' org.pk %}">Rediger</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        Ingen aktive organisasjoner funnet. Sjekk dataene i <a href="{% url 'admin:index' %}">Admin-panelet</a>.
+    </div>
+    {% endif %}
+{% endblock content %}

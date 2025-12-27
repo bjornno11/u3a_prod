@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Starte U3A lokalt{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1>Starte U3A lokalt</h1>
+
+  <p class="fs-5">
+    Ønsker du å starte et U3A-tilbud der du bor?
+    Fyll ut skjemaet under, så tar U3A Norge kontakt.
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Navn</label>
+      <input type="text" name="navn" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">E-post</label>
+      <input type="email" name="epost" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Sted / kommune</label>
+      <input type="text" name="sted" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Kort beskrivelse</label>
+      <textarea name="melding" class="form-control" rows="4"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      Send forespørsel
+    </button>
+  </form>
+</div>
+{% endblock %}

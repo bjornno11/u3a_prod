@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Lokallag – kart{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Lokallag – kart</h1>
+
+<p class="text-muted">Markører: {{ antall_markorer }}</p>
+
+<div id="map" style="height: 70vh; border-radius: 12px;"></div>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Norge som start
+  const map = L.map('map').setView([64.5, 11.5], 4);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  const bounds = [];
+
+  {% for o in kartdata %}
+    (function () {
+      const lat = parseFloat("{{ o.breddegrad }}");
+      const lng = parseFloat("{{ o.lengdegrad }}");
+
+      // Sikkerhet: hopp over rare verdier
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const marker = L.marker([lat, lng]).addTo(map);
+
+      let popup = "<strong>{{ o.organisasjon|escapejs }}</strong><br>" +
+                  "{{ o.kommune|escapejs }}, {{ o.fylke|escapejs }}";
+
+      {% if o.nettside %}
+        popup += "<br><a href='{{ o.nettside|escapejs }}' target='_blank' rel='noopener'>Nettside</a>";
+      {% endif %}
+
+      marker.bindPopup(popup);
+      bounds.push([lat, lng]);
+    })();
+  {% endfor %}
+
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [30, 30] });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}U3A Norge{% endblock %}</title>
+
+    <!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="{% static 'lag/favicon.ico' %}">
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'lag/favicon.ico' %}">
+
+<!-- Moderne favicon-formater -->
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'lag/favicon.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'lag/favicon.png' %}">
+
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Egen CSS (valgfritt) -->
+    <link rel="stylesheet" href="{% static 'css/u3a_styles.css' %}?v=20251220-2">
+{% if not debug %}
+<script defer data-domain="u3a.no" src="https://plausible.io/js/script.js"></script>
+{% endif %}
+
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <div class="container">
+
+            <!-- Logo / Tittel -->
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+                <img src="{% static 'lag/img/u3a-logo.png' %}" alt="U3A-logo">
+                <span class="u3a-brand-text">U3A Norgee</span>
+            </a>
+
+            <!-- Mobil-knapp -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Meny -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/lokallag/liste/">Lokallag</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/lokallag/kart/">Kart</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/regnskap/">Regnskap</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'om_u3a_norge' %}">Om U3A Norge</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'for_pressen' %}">For pressen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Admin</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- HOVEDINNHOLD -->
+    <main class="container my-4">
+        {% block content %}
+        <!-- Sideinnhold kommer her -->
+        {% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-light py-3 mt-4">
+        <div class="container text-center">
+            <small>© 2025 U3A Norge – Universitetet for den tredje alder</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
