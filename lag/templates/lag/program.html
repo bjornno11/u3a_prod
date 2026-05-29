@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}
+Program – {{ lokallag.organisasjon }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-4 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      Program og aktiviteter
+    </h1>
+
+    {% if aktiviteter %}
+
+      <div style="max-height: 75vh; overflow-y: auto;">
+
+        <table class="table table-striped align-middle">
+
+          <thead class="table-light sticky-top">
+            <tr>
+              <th>Dato</th>
+              <th>Tid</th>
+              <th>Tittel</th>
+              <th>Sted</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for aktivitet in aktiviteter %}
+
+              <tr>
+
+                <td>
+                  {{ aktivitet.dato|date:"d.m.Y" }}
+                </td>
+
+                <td>
+                  {% if aktivitet.starttid %}
+                    {{ aktivitet.starttid|time:"H:i" }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+
+                <td>
+
+                  {% if aktivitet.id %}
+
+                    <a href="{% url 'aktivitet_detalj' aktivitet.id %}">
+                      {{ aktivitet.tittel }}
+                    </a>
+
+                  {% else %}
+
+                    {{ aktivitet.tittel }}
+
+                  {% endif %}
+
+                </td>
+
+                <td>
+                  {{ aktivitet.sted }}
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <p class="text-muted">
+        Ingen aktiviteter registrert.
+      </p>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}

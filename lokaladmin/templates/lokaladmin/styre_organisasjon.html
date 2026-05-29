@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+Styre / organisasjon – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til lokaladmin
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-3">Styre / organisasjon</h1>
+
+    <p class="text-muted">
+      Her kan lokallaget vedlikeholde styre, roller, utvalg og verv.
+    </p>
+
+    <div class="row g-3 mt-3">
+
+      <div class="col-md-6">
+	<a href="{% url 'lokaladmin:styremedlemmer' %}" class="btn btn-outline-primary w-100 text-start">
+	  Styremedlemmer
+	</a>
+      </div>
+
+      <div class="col-md-6">
+        <a href="{% url 'lokaladmin:roller' %}" class="btn btn-outline-primary w-100 text-start">
+          Roller / verv
+        </a>
+      </div>
+
+      <div class="col-md-6">
+	<a href="{% url 'lokaladmin:utvalg' %}" class="btn btn-outline-primary w-100 text-start">
+	  Utvalg
+	</a>
+      </div>
+      <div class="col-md-6">
+	<a href="{% url 'lokaladmin:redaktorer' %}" class="btn btn-outline-primary w-100 text-start">
+	  Redaktører
+	</a>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

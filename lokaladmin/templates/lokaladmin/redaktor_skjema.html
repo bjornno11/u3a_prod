@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Legg til redaktør – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:redaktorer' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til redaktører
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">Legg til redaktør</h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+	<div class="mb-3">
+	  <label class="form-label">Velg medlem</label>
+
+	  <select name="medlem" class="form-select" required>
+	    <option value="">Velg medlem</option>
+
+	    {% for medlem in medlemmer %}
+	      <option value="{{ medlem.id }}">
+	        {{ medlem.etternavn }}, {{ medlem.fornavn }}{% if medlem.epost %} – {{ medlem.epost }}{% endif %}
+	      </option>
+	    {% endfor %}
+	  </select>
+
+	  <div class="form-text">
+	  </div>
+	</div>
+      <button type="submit" class="btn btn-primary">
+        Legg til
+      </button>
+
+      <a href="{% url 'lokaladmin:redaktorer' %}" class="btn btn-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -3,72 +3,82 @@
 {% block title %}Oversikt over Lokallag{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <h1>Oversikt over Lokallag</h1>
-        
-        <div class="btn-group mb-4" role="group" aria-label="Filtreringsvalg">
-            <a href="{% url 'lokallag_liste' %}?status=aktive" 
-               class="btn {% if filter_status != 'alle' %}btn-primary{% else %}btn-secondary{% endif %}">
-                Aktive ({{ antall_aktive }})
-            </a>
-            <a href="{% url 'lokallag_liste' %}?status=alle" 
-               class="btn {% if filter_status == 'alle' %}btn-primary{% else %}btn-secondary{% endif %}">
-                Alle
-            </a>
-        </div>
-        
-        <p class="lead">Her er alle aktive lokallag.</p>
+<div class="container mt-4">
+    <h1>Oversikt over Lokallag</h1>
 
-        {% if organisasjoner %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Organisasjon</th>
-                        <th>Kommune</th>
-                        <th>Fylke</th>
-                        <th>Nettside</th>
-<!--                        <th>E-post</th>  -->
-                        <th>Admin</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for org in organisasjoner %}
-                    <tr>
-                        <td>{{ org.organisasjon }}</td>
-                        <td>{{ org.kommune }}</td>
-                        <td>{{ org.fylke }}</td>
-                        
-                        <td>
-                            {% if org.nettside %}
-                                
-                                {% with clean_url=org.nettside|cut:'http://'|cut:'https://'|cut:'http//' %}
-                                    
-                                    <a href="https://{{ clean_url }}" 
-                                       target="_blank" 
-                                       class="{% if org.lenke_status == 'OK' %}text-primary{% else %}text-danger{% endif %}"
-                                       title="Nettside: {{ org.lenke_status }}"> 
-                                        {{ org.nettside }}
-                                    </a>
-                                {% endwith %}
-                            
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        
-<!--                         <td><a href="mailto:{{ org.epost }}">{{ org.epost }}</a></td>   --->
-                        <td><a href="{% url 'admin:lag_organisasjon_change' org.pk %}" target="_blank">Rediger</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            Ingen aktive organisasjoner funnet. Sjekk dataene i <a href="{% url 'admin:index' %}">Admin-panelet</a>.
-        </div>
-        {% endif %}
+    <div class="btn-group mb-4" role="group" aria-label="Filtreringsvalg">
+        <a href="{% url 'lokallag_liste' %}?status=aktive"
+           class="btn {% if filter_status != 'alle' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Aktive ({{ antall_aktive }})
+        </a>
+        <a href="{% url 'lokallag_liste' %}?status=alle"
+           class="btn {% if filter_status == 'alle' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Alle
+        </a>
     </div>
-{% endblock content %}
 
+    <p class="lead">
+      {% if filter_status == "alle" %}
+        Her er alle kjente lokallag.
+      {% else %}
+        Her er alle aktive lokallag.
+      {% endif %}
+    </p>
+
+
+    {% if organisasjoner %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Organisasjon</th>
+                    <th>Fylke</th>
+                    <th>Kommune</th>
+                    <th>Nettside</th>
+<!--                    <th>E-post</th>-->
+                    <th>Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for org in organisasjoner %}
+                <tr>
+                    <td>{{ org.organisasjon }}</td>
+                    <td>{{ org.fylke}}</td>
+                    <td>{{ org.kommune }}</td>
+                    
+                    <td>
+                        {% if org.nettside %}
+                            {% with clean_url=org.nettside|cut:'http://'|cut:'https://'|cut:'http//'|cut:'/' %}
+                                <a href="https://{{ clean_url }}"
+                                   target="_blank"
+                                   class="{% if org.lenke_status == 'active' %}text-primary{% else %}text-danger{% endif %}"
+                                   title="Lenkestatus: {{ org.lenke_status|default:'ukjent' }}">
+                                    {{ org.nettside }}
+                                </a>
+                            {% endwith %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+<!--                    <td><a href="mailto:{{ org.epost }}">{{ org.epost }}</a></td>-->
+                    <td>
+                        <a href="{% url 'admin:lag_organisasjon_change' org.pk %}"
+                           target="_blank">
+                            Rediger
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        Ingen aktive organisasjoner funnet.
+        Sjekk dataene i
+        <a href="{% url 'admin:index' %}">Admin-panelet</a>.
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

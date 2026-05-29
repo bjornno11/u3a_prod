@@ -2,16 +2,23 @@
 {% block title %}Starte U3A lokalt{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <h1>Starte U3A lokalt</h1>
+<div class="container my-5" style="max-width: 720px;">
+
+  <h1 class="mb-3">Starte U3A lokalt</h1>
 
   <p class="fs-5">
     Ønsker du å starte et U3A-tilbud der du bor?
-    Fyll ut skjemaet under, så tar U3A Norge kontakt.
+    Fyll ut skjemaet under, så tar U3A Norge kontakt med deg.
   </p>
 
-  <form method="post">
+  <form method="post" novalidate>
     {% csrf_token %}
+
+    <!-- Honeypot (spam-sikring – skal stå tomt) -->
+    <div style="display:none;">
+      <label>Ikke fyll ut</label>
+      <input type="text" name="hp_fax" value="">
+    </div>
 
     <div class="mb-3">
       <label class="form-label">Navn</label>
@@ -30,12 +37,14 @@
 
     <div class="mb-3">
       <label class="form-label">Kort beskrivelse</label>
-      <textarea name="melding" class="form-control" rows="4"></textarea>
+      <textarea name="melding" class="form-control" rows="4"
+        placeholder="Fortell kort om hvem dere er, og hva dere ser for dere."></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary btn-lg">
       Send forespørsel
     </button>
   </form>
+
 </div>
 {% endblock %}

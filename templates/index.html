@@ -5,12 +5,112 @@
 
 {% block content %}
 
+{% if lokallag and lokallag.hjemmesidetype == 1 %}
+<!-- LOKALLAG-FORSIDE TYPE 1 -->
+<div class="container mb-4">
+  <div class="p-4 p-lg-5 bg-white rounded-3 shadow-sm">
+    <div class="row g-4">
+
+      <!-- Venstre: tekst -->
+      <div class="col-lg-7">
+        <h1 class="display-5 fw-bold mb-3">
+          {{ lokallag.forside_tittel|default:lokallag.organisasjon }}
+        </h1>
+
+        {% if lokallag.forside_ingress %}
+          <p class="fs-5 mb-4">{{ lokallag.forside_ingress }}</p>
+        {% else %}
+          <p class="fs-5 mb-4">
+            Velkommen til {{ lokallag.organisasjon }}.
+          </p>
+        {% endif %}
+
+        {% if lokallag.forside_tekst %}
+          <div class="mb-4">
+            {{ lokallag.forside_tekst|linebreaksbr }}
+          </div>
+{% else %}
+  <div class="mb-4">
+    <p>
+      {{ lokallag.organisasjon }} er et lokalt læringsfellesskap for voksne som ønsker faglig påfyll,
+      gode samtaler og sosialt samvær – i et inkluderende og uformelt miljø.
+    </p>
+
+    <p>
+      Her vil du finne informasjon om møter, foredrag, turer og andre aktiviteter i regi av
+      {{ lokallag.organisasjon }}.
+    </p>
+
+    <p class="mb-0">
+      Programmet oppdateres fortløpende.
+    </p>
+  </div>
+{% endif %}
+
+      </div>
+
+      <!-- Høyre: bilde + kommende arrangementer -->
+      <div class="col-lg-5">
+
+        <div class="u3a-hero-img-wrap u3a-hero-img-wrap--lokallag mb-3">
+          {% if lokallag.forside_bilde %}
+            <img src="{{ lokallag.forside_bilde.url }}" alt="{{ lokallag.organisasjon }}"
+                 class="u3a-hero-img u3a-hero-img--lokallag">
+          {% else %}
+            <img src="{% static 'images/forside-side.jpg' %}" alt="U3A"
+                 class="u3a-hero-img">
+          {% endif %}
+        </div>
+
+        <div class="bg-light rounded-3 p-3">
+          <h2 class="h5 fw-bold mb-3">Kommende arrangementer</h2>
+
+          <div style="max-height: 220px; overflow-y: auto;">
+            {% if aktiviteter %}
+              <ul class="list-unstyled mb-0">
+                {% for a in aktiviteter %}
+                  <li class="mb-2 pb-2 border-bottom">
+                    <div class="small text-muted">
+                      {{ a.dato|date:"d. F Y" }}
+                    </div>
+                    {% if a.organisasjon %}
+                      <div class="small fw-bold">
+                        {{ a.organisasjon.organisasjon }}
+                      </div>
+                    {% endif %}
+                    <div class="fw-bold small">
+                      {% if a.slug %}
+                        <a href="{% url 'aktivitet_detalj' slug=a.slug %}">
+                          {{ a.tittel|default:a.kortinfo }}
+                        </a>
+                      {% else %}
+                        {{ a.tittel|default:a.kortinfo }}
+                      {% endif %}
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted mb-0 small">
+                Det er foreløpig ikke lagt inn kommende arrangementer.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% else %}
+
 <!-- HELTESEKSJON: TEKST VENSTRE + BILDE HØYRE -->
 <div class="container mb-4">
   <div class="p-4 p-lg-5 bg-white rounded-3 shadow-sm">
     <div class="row align-items-center g-4">
 
-      <!-- Venstre: tekst -->
       <div class="col-lg-7">
         <h1 class="display-5 fw-bold mb-3">Universitetet for den tredje alder</h1>
         <p class="fs-5 mb-4">
@@ -23,16 +123,12 @@
         </a>
       </div>
 
-      <!-- Høyre: bilde -->
       <div class="col-lg-5">
         <div class="u3a-hero-img-wrap">
           <img src="{% static 'images/forside-side.jpg' %}" alt="U3A"
                class="u3a-hero-img">
-
         </div>
       </div>
-
-
 
     </div>
   </div>
@@ -64,11 +160,20 @@
               <ul class="list-unstyled mb-0">
                 {% for a in aktiviteter %}
                   <li class="mb-3">
-                    <div class="small text-muted">{{ a.dato }} – {{ a.lag.navn }}</div>
+                    <div class="small fw-bold">{{ a.dato }}</div>
+                    {% if a.organisasjon %}
+                      <div class="small text-muted">
+                        {{ a.organisasjon.organisasjon }}
+                      </div>
+                    {% endif %}
                     <div>
-                      <a href="{% url 'aktivitet_detalj' slug=a.slug %}">
-                        {{ a.kortinfo }}
-                      </a>
+                      {% if a.slug %}
+                        <a href="{% url 'aktivitet_detalj' slug=a.slug %}">
+                          {{ a.tittel|default:a.kortinfo }}
+                        </a>
+                      {% else %}
+                        {{ a.tittel|default:a.kortinfo }}
+                      {% endif %}
                     </div>
                   </li>
                 {% endfor %}
@@ -122,6 +227,8 @@
     </div>
   </div>
 </div>
+
+{% endif %}
 
 {% endblock %}
 

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}
+Forside – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      Rediger forside
+    </h1>
+
+    <form method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">
+          Forsidetittel
+        </label>
+
+        <input
+          type="text"
+          name="forside_tittel"
+          class="form-control"
+          value="{{ organisasjon.forside_tittel|default:'' }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Ingress
+        </label>
+
+        <textarea
+          name="forside_ingress"
+          class="form-control"
+          rows="3">{{ organisasjon.forside_ingress|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Forsidetekst
+        </label>
+
+        <textarea
+          name="forside_tekst"
+          class="form-control"
+          rows="8">{{ organisasjon.forside_tekst|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Footer-tekst
+        </label>
+      <div class="row">
+
+        <div class="col-md-6">
+
+        <div class="mb-3">
+          <label class="form-label">
+            E-post
+          </label>
+
+          <input
+            type="email"
+            name="epost"
+            class="form-control"
+            value="{{ organisasjon.epost|default:'' }}">
+        </div>
+
+      </div>
+
+      <div class="col-md-6">
+
+        <div class="mb-3">
+          <label class="form-label">
+            Telefon
+          </label>
+
+          <input
+            type="text"
+            name="telefon"
+            class="form-control"
+            value="{{ organisasjon.telefon|default:'' }}">
+        </div>
+
+      </div>
+
+    </div>
+
+        <textarea
+          name="footer_tekst"
+          class="form-control"
+          rows="4">{{ organisasjon.footer_tekst|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">
+          Forsidebilde
+        </label>
+
+        {% if organisasjon.forside_bilde %}
+          <div class="mb-2">
+            <img
+              src="{{ organisasjon.forside_bilde.url }}"
+              class="img-fluid rounded"
+              style="max-height: 200px;">
+          </div>
+        {% endif %}
+
+        <input
+          type="file"
+          name="forside_bilde"
+          class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre endringer
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

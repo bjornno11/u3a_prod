@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if aktivitet %}Rediger aktivitet{% else %}Ny aktivitet{% endif %} – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      {% if aktivitet %}Rediger aktivitet{% else %}Ny aktivitet{% endif %}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Tittel</label>
+        <input type="text" name="tittel" class="form-control" required
+               value="{{ aktivitet.tittel|default:'' }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Kort informasjon</label>
+        <input type="text" name="kortinfo" class="form-control"
+               value="{{ aktivitet.kortinfo|default:'' }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Sted</label>
+        <input type="text"
+               name="sted"
+               class="form-control"
+               value="{{ aktivitet.sted|default:'' }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Beskrivelse</label>
+        <textarea name="beskrivelse" class="form-control" rows="6">{{ aktivitet.beskrivelse|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Dato</label>
+        <input type="date" name="dato" class="form-control" required
+               value="{{ aktivitet.dato|date:'Y-m-d' }}">
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Fra klokken</label>
+          <input type="time" name="starttid" class="form-control"
+                 value="{{ aktivitet.starttid|time:'H:i' }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Til klokken</label>
+          <input type="time" name="sluttid" class="form-control"
+                 value="{{ aktivitet.sluttid|time:'H:i' }}">
+        </div>
+      </div>
+
+      <div class="form-check mb-4">
+        <input type="checkbox" name="publisert" class="form-check-input" id="publisert"
+               {% if not aktivitet or aktivitet.publisert %}checked{% endif %}>
+        <label class="form-check-label" for="publisert">
+          Publisert
+        </label>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Bilde</label>
+        {% if aktivitet and aktivitet.bilde %}
+          <p class="small">
+            Nåværende bilde:
+            <a href="{{ aktivitet.bilde.url }}" target="_blank">vis bilde</a>
+          </p>
+        {% endif %}
+        <input type="file" name="bilde" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Vedlegg / dokument</label>
+        {% if aktivitet and aktivitet.vedlegg %}
+          <p class="small">
+            Nåværende vedlegg:
+            <a href="{{ aktivitet.vedlegg.url }}" target="_blank">vis dokument</a>
+          </p>
+        {% endif %}
+        <input type="file" name="vedlegg" class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre aktivitet
+      </button>
+
+      <a href="{% url 'lokaladmin:aktiviteter' %}" class="btn btn-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
+

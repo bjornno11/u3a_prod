@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+Styret – {{ organisasjon.organisasjon }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <div class="bg-white rounded-3 shadow-sm p-4">
+
+        <h1 class="mb-3">
+            Styret i {{ organisasjon.organisasjon }}
+        </h1>
+
+        {% if verv %}
+
+            <table class="table table-striped align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Navn</th>
+                        <th>Rolle</th>
+                        <th>Utvalg</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for v in verv %}
+
+                        <tr>
+
+                            <td>
+                                {{ v.medlem.fornavn }}
+                                {{ v.medlem.etternavn }}
+                            </td>
+
+                            <td>
+                                {{ v.rolle.navn }}
+                            </td>
+
+                            <td>
+                                {% if v.utvalg %}
+                                    {{ v.utvalg.navn }}
+                                {% endif %}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+
+            <p class="text-muted">
+                Ingen styremedlemmer registrert.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+

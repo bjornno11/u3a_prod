@@ -1,26 +1,21 @@
-# Python/Django
+venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.sqlite3
-*.log
-*.pid
 
-# Miljø/hemmeligheter
 .env
 .env.*
-*.pem
-*.key
+*.sqlite3
+db.sqlite3
 
-# Bygg/artefakter
-venv/
-static/
-staticfiles/
 media/
-node_modules/
+staticfiles/
+*.log
 
-# Editor/OS
 .DS_Store
-.idea/
-.vscode/
+test.txt
+*.tar
+*.tar.gz
+*.zip
+backups/

@@ -1,140 +1,659 @@
-# /srv/u3a/lag/models.py - STABIL UTGAVE (uten URL-sjekk)
-
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 class Organisasjon(models.Model):
-    # Statusvalg
     STATUS_VALG = [
-        ('Aktiv', 'Aktiv'),
-        ('Ukjent', 'Ukjent'),
-        ('Passiv', 'Passiv'),
+        ("Aktiv", "Aktiv"),
+        ("Ukjent", "Ukjent"),
+        ("Passiv", "Passiv"),
     ]
 
-    # Kolonnene dine
     fylke = models.CharField(max_length=100, verbose_name="Fylke")
     kommune = models.CharField(max_length=100, verbose_name="Kommune")
-    organisasjon = models.CharField(max_length=200, unique=True, verbose_name="Organisasjonsnavn")
-    adresse = models.CharField(max_length=255, blank=True, null=True, verbose_name="Adresse")
-    nettside = models.URLField(max_length=200, blank=True, null=True, verbose_name="Nettside")
-    epost = models.EmailField(max_length=254, blank=True, null=True, verbose_name="E-post")
-    telefon = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefon")
-    breddegrad = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        blank=True, 
-        null=True, 
-        verbose_name="Breddegrad (Latitude)"
-        )
-    lengdegrad = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        blank=True, 
-        null=True, 
-        verbose_name="Lengdegrad (Longitude)"
-        ) 
+    organisasjon = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name="Organisasjonsnavn",
+    )
+
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    nettside = models.URLField(max_length=200, blank=True, null=True)
+    epost = models.EmailField(max_length=254, blank=True, null=True)
+    telefon = models.CharField(max_length=20, blank=True, null=True)
+
+    breddegrad = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    lengdegrad = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+
     LENKE_VALG = [
-        ('OK', 'OK'),
-        ('FEIL', 'FEIL'),
-        ('UKJENT', 'UKJENT'),
+        ("active", "active"),
+        ("down", "down"),
+        ("unknown", "unknown"),
     ]
     lenke_status = models.CharField(
-        max_length=10, 
-        default='UKJENT', 
+        max_length=10,
+        default="unknown",
         choices=LENKE_VALG,
-        verbose_name="Lenkestatus"
+        verbose_name="Lenkestatus",
     )
-    
-    # Statusfelt med forhåndsdefinerte valg
+
     status = models.CharField(
         max_length=10,
         choices=STATUS_VALG,
-        default='Ukjent',
-        verbose_name="Status"
+        default="Ukjent",
     )
-    
-    kilde = models.CharField(max_length=100, blank=True, null=True, verbose_name="Kilde")
-    
-    # Tidstempler
-    opprettet = models.DateTimeField(default=timezone.now, verbose_name="Opprettet")
-    sist_endret = models.DateTimeField(auto_now=True, verbose_name="Sist endret")
+    orgnummer = models.CharField(
+        "Organisasjonsnummer",
+        max_length=9,
+        blank=True,
+        null=True,
+    )
 
-    # FJERNET: is_website_active-metoden
+    hjemmesidetype = models.PositiveSmallIntegerField(
+        choices=[
+            (1, "1 - Enkel startside"),
+            (2, "2 - Kalender og aktiviteter"),
+            (3, "3 - Full lokallagsside"),
+        ],
+        default=1,
+    )
+
+    kilde = models.CharField(max_length=100, blank=True, null=True)
+
+    subdomene = models.SlugField(
+        max_length=63,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="f.eks. rakkestad (gir rakkestad.u3a.no)",
+    )
+
+    forside_tittel = models.CharField(max_length=200, blank=True, null=True)
+    forside_ingress = models.CharField(max_length=300, blank=True, null=True)
+    forside_tekst = models.TextField(blank=True, null=True)
+    footer_tekst = models.TextField(
+        blank=True,
+        null=True
+)
+
+    forside_bilde = models.ImageField(
+        upload_to="lokallag/forside/",
+        blank=True,
+        null=True,
+        verbose_name="Forsidebilde",
+    )
+
+    redaktorer = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="redaktor_for_organisasjoner",
+        help_text="Brukere som kan redigere denne organisasjonen i admin.",
+    )
+
+    opprettet = models.DateTimeField(default=timezone.now, verbose_name="Registrert dato")
+    sist_endret = models.DateTimeField(auto_now=True)
+    opprettet_av = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name_plural = "Organisasjoner"
-        ordering = ['organisasjon'] 
+        ordering = ["organisasjon"]
 
     def __str__(self):
         return self.organisasjon
 
-# lag/models.py
 
 class Lokallag(models.Model):
+    """
+    DEPRECATED – beholdes midlertidig for bakoverkompatibilitet.
+    Bruk Organisasjon i stedet.
+    """
     navn = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
-    # ... resten av feltene dine
 
     def __str__(self):
         return self.navn
 
 
 class Aktivitet(models.Model):
-    lag = models.ForeignKey(
-        Lokallag,
+    """
+    Aktivitet tilknyttet Organisasjon (lokallag).
+
+    Feltet `lag` beholdes midlertidig for eksisterende data, men er nå valgfritt
+    slik at nye aktiviteter kan opprettes kun med `organisasjon`.
+    """
+
+    organisasjon = models.ForeignKey(
+        Organisasjon,
         on_delete=models.CASCADE,
         related_name="aktiviteter",
-        help_text="Lokallaget som eier denne aktiviteten",
+        null=True,
+        blank=True,
+        help_text="Organisasjonen (lokallaget) som eier aktiviteten",
     )
 
-    # Det som vises som tittel både i kortinfo og på siden
-    tittel = models.CharField(max_length=200)
+    # PATCH: lag er nå valgfritt (DB tillater NULL)
+    lag = models.ForeignKey(
+        Lokallag,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="aktiviteter",
+        help_text="(DEPRECATED) Bruk organisasjon-feltet i stedet",
+    )
 
-    # Dato er påkrevd – brukes både til sortering og visning
+    tittel = models.CharField(max_length=200)
     dato = models.DateField(help_text="Dato for aktiviteten")
 
-    # Kortinfo til «Fra lagene» – 3–5 linjer tekst, vi begrenser i template/CSS
-    kortinfo = models.CharField(
-        max_length=300,
-        help_text="Kort tekst (3–5 linjer) som vises under 'Fra lagene'",
-    )
+    kortinfo = models.CharField(max_length=300)
+    beskrivelse = models.TextField()
 
-    # Full tekst til egen aktivitetsside
-    beskrivelse = models.TextField(
-        help_text="Full beskrivelse av aktiviteten som vises på aktivitetssiden",
-    )
+    sted = models.CharField(max_length=200, blank=True)
+    starttid = models.TimeField(null=True, blank=True)
+    sluttid = models.TimeField(null=True, blank=True)
 
-    sted = models.CharField(
-        max_length=200,
+    foredragsholder = models.CharField(max_length=200, blank=True)
+
+    bilde = models.ImageField(
+        upload_to="aktiviteter/bilder/",
         blank=True,
-        help_text="Valgfritt: Sted for aktiviteten",
+        null=True
     )
 
-    slug = models.SlugField(
-        max_length=220,
-        help_text="Brukes i URL for aktivitetssiden",
+    vedlegg = models.FileField(
+        upload_to="aktiviteter/vedlegg/",
+        blank=True,
+        null=True
     )
 
-    publisert = models.BooleanField(
-        default=True,
-        help_text="Hvis denne er av, vises ikke aktiviteten offentlig",
-    )
+    slug = models.SlugField(max_length=220)
+
+    publisert = models.BooleanField(default=True)
 
     opprettet_av = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Bruker som opprettet aktiviteten",
     )
 
     opprettet = models.DateTimeField(auto_now_add=True)
     oppdatert = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-dato", "-opprettet"]  # nyeste først
+        ordering = ["-dato", "-opprettet"]
 
     def __str__(self):
-        return f"{self.dato} – {self.lag.navn}: {self.tittel}"
+        if self.organisasjon:
+            owner = self.organisasjon.organisasjon
+        elif self.lag:
+            owner = self.lag.navn
+        else:
+            owner = "Ukjent lokallag"
+        return f"{self.dato} – {owner}: {self.tittel}"
+
+
+class SiteConfig(models.Model):
+    hoved_epost = models.EmailField(
+        max_length=254,
+        default="u3a@u3a.no",
+        verbose_name="Hoved e-post (u3a.no)",
+    )
+
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "SiteConfig"
+        verbose_name_plural = "SiteConfig"
+
+    def __str__(self):
+        return "SiteConfig (global)"
+
+class Medlemsgruppe(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="medlemsgrupper"
+    )
+    navn = models.CharField(max_length=100)
+    aktiv = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("organisasjon", "navn")
+        ordering = ["navn"]
+
+    def __str__(self):
+        return self.navn
+
+class LagMedlem(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="medlemmer",
+        help_text="Lokallaget som eier medlemmet",
+    )
+
+    fornavn = models.CharField(max_length=100)
+    etternavn = models.CharField(max_length=100)
+
+    epost = models.EmailField(max_length=254, blank=True, null=True)
+    telefon = models.CharField(max_length=20, blank=True, null=True)
+
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    postnummer = models.CharField(max_length=10, blank=True, null=True)
+    poststed = models.CharField(max_length=100, blank=True, null=True)
+
+    fodselsdato = models.DateField(blank=True, null=True)
+    gruppe = models.ForeignKey(
+        Medlemsgruppe,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="medlemmer",
+    )
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="lagmedlem",
+    )
+
+    STATUS_REGISTRERT = 1
+    STATUS_GODKJENT = 2
+    STATUS_UTMELDT = 6
+    STATUS_SUSPENDERT = 7
+    STATUS_PERMANENT_SUSPENDERT = 8
+
+    STATUS_CHOICES = [
+        (STATUS_REGISTRERT, "Registrert - ikke godkjent"),
+        (STATUS_GODKJENT, "Godkjent"),
+        (STATUS_UTMELDT, "Utmeldt"),
+        (STATUS_SUSPENDERT, "Suspendert"),
+        (STATUS_PERMANENT_SUSPENDERT, "Permanent suspendert"),
+    ]
+
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_CHOICES,
+        default=STATUS_REGISTRERT,
+    )
+    aktiv = models.BooleanField(default=True)
+
+    opprettet = models.DateTimeField(default=timezone.now)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Lagmedlem"
+        verbose_name_plural = "Lagmedlemmer"
+        ordering = ["etternavn", "fornavn"]
+
+    def __str__(self):
+        return f"{self.etternavn}, {self.fornavn}"
+
+
+class LagRolle(models.Model):
+    navn = models.CharField(max_length=100, unique=True)
+    beskrivelse = models.CharField(max_length=255, blank=True, null=True)
+    opprettet = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = "Lagrolle"
+        verbose_name_plural = "Lagroller"
+        ordering = ["navn"]
+
+    def __str__(self):
+        return self.navn
+
+
+class LagUtvalg(models.Model):
+    navn = models.CharField(max_length=100, unique=True)
+    beskrivelse = models.CharField(max_length=255, blank=True, null=True)
+    opprettet = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = "Lagutvalg"
+        verbose_name_plural = "Lagutvalg"
+        ordering = ["navn"]
+
+    def __str__(self):
+        return self.navn
+
+
+class LagMedlemVerv(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="verv",
+        help_text="Lokallaget som eier vervet",
+    )
+
+    medlem = models.ForeignKey(
+        LagMedlem,
+        on_delete=models.CASCADE,
+        related_name="verv",
+    )
+
+    rolle = models.ForeignKey(
+        LagRolle,
+        on_delete=models.PROTECT,
+        related_name="verv",
+    )
+
+    utvalg = models.ForeignKey(
+        LagUtvalg,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="verv",
+    )
+
+    fra_dato = models.DateField(blank=True, null=True)
+    til_dato = models.DateField(blank=True, null=True)
+
+    valgt_dato = models.DateField(blank=True, null=True)
+    valgt_av = models.CharField(max_length=100, blank=True, null=True)
+
+    merknad = models.CharField(max_length=255, blank=True, null=True)
+
+    aktiv = models.BooleanField(default=True)
+
+    opprettet = models.DateTimeField(default=timezone.now)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Lagverv"
+        verbose_name_plural = "Lagverv"
+        ordering = ["-aktiv", "rolle__navn", "medlem__etternavn"]
+
+    def __str__(self):
+        return f"{self.medlem} - {self.rolle}"
+
+    def clean(self):
+        if self.medlem and self.organisasjon and self.medlem.organisasjon_id != self.organisasjon_id:
+            raise ValidationError("Medlemmet tilhører ikke valgt organisasjon.")
+
+class Postnummer(models.Model):
+    postnummer = models.CharField(max_length=4, unique=True)
+    poststed = models.CharField(max_length=100)
+    kommune = models.CharField(max_length=100, blank=True, null=True)
+    fylke = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Postnummer"
+        verbose_name_plural = "Postnummer"
+        ordering = ["postnummer"]
+
+    def __str__(self):
+        return f"{self.postnummer} {self.poststed}"
+
+class Arrangement(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="arrangementer"
+    )
+
+    tittel = models.CharField(max_length=200)
+    dato = models.DateField()
+    starttid = models.TimeField()
+    sluttid = models.TimeField(null=True, blank=True)
+
+    sted = models.CharField(max_length=200)
+    foredragsholder = models.CharField(max_length=200, blank=True)
+
+    ingress = models.TextField(blank=True)
+    beskrivelse = models.TextField(blank=True)
+
+    publisert = models.BooleanField(default=True)
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["dato", "starttid"]
+        verbose_name = "Arrangement"
+        verbose_name_plural = "Arrangementer"
+
+    def __str__(self):
+        return f"{self.dato} - {self.tittel}"
+
+class Nyhet(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="nyheter"
+    )
+
+    tittel = models.CharField(max_length=200)
+    ingress = models.TextField(blank=True)
+    tekst = models.TextField(blank=True)
+
+    bilde = models.ImageField(
+        upload_to="nyheter/",
+        blank=True,
+        null=True
+    )
+
+    publisert = models.BooleanField(default=True)
+    publisert_dato = models.DateField(null=True, blank=True)
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-publisert_dato", "-opprettet"]
+        verbose_name = "Nyhet"
+        verbose_name_plural = "Nyheter"
+
+    def __str__(self):
+        return self.tittel
+
+class Dokument(models.Model):
+
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE
+    )
+
+    tittel = models.CharField(
+        max_length=200
+    )
+
+    KATEGORIER = [
+        ("referat", "Referater"),
+        ("innkalling", "Innkallinger"),
+        ("arsmote", "Årsmøte"),
+        ("strategi", "Strategi"),
+        ("regnskap", "Regnskap"),
+        ("budsjett", "Budsjett"),
+        ("vedtekter", "Vedtekter"),
+        ("kontrakt", "Kontrakter"),
+        ("soknad", "Søknader"),
+        ("program", "Program"),
+        ("presentasjon", "Presentasjoner"),
+        ("bilder", "Bilder"),
+        ("annet", "Annet"),
+    ]
+    kategori = models.CharField(
+        max_length=50,
+        choices=KATEGORIER,
+        default="annet"
+    )
+    er_styredokument = models.BooleanField(
+        default=False
+    )
+
+    fil = models.FileField(
+        upload_to="dokumenter/"
+    )
+
+    beskrivelse = models.TextField(
+        blank=True
+    )
+
+    opprettet = models.DateTimeField(
+        auto_now_add=True
+    )
+    sist_endret = models.DateTimeField(
+        auto_now=True
+    )
+
+    opprettet_av = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    publisert = models.BooleanField(
+        default=True
+    )
+
+    def __str__(self):
+        return self.tittel
+
+class Bilde(models.Model):
+
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE
+    )
+
+    tittel = models.CharField(
+        max_length=200
+    )
+
+    bilde = models.ImageField(
+        upload_to="bilder/"
+    )
+
+    beskrivelse = models.TextField(
+        blank=True
+    )
+
+    opprettet = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    publisert = models.BooleanField(
+        default=True
+    )
+
+    def __str__(self):
+        return self.tittel
+
+class SmsLeverandor(models.Model):
+    organisasjon = models.OneToOneField(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="sms_leverandor"
+    )
+
+    navn = models.CharField(max_length=100, blank=True)
+    api_url = models.CharField(max_length=255, blank=True)
+    api_key = models.CharField(max_length=255, blank=True)
+    api_secret = models.CharField(max_length=255, blank=True)
+    avsender = models.CharField(max_length=50, blank=True)
+
+    aktiv = models.BooleanField(default=False)
+    testmodus = models.BooleanField(
+        default=True,
+        help_text="Når aktivert sendes ingen ekte SMS."
+    )
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SMS – {self.organisasjon}"
+
+
+class SmsUtsending(models.Model):
+    STATUS_KLADD = 1
+    STATUS_KLAR = 2
+    STATUS_SENDT = 3
+    STATUS_FEIL = 4
+    STATUS_TEST = 5
+
+    STATUS_CHOICES = [
+        (STATUS_KLADD, "Kladd - ikke sendt"),
+        (STATUS_KLAR, "Klar til sending"),
+        (STATUS_SENDT, "Sendt"),
+        (STATUS_FEIL, "Feil"),
+        (STATUS_TEST, "Test - ikke sendt eksternt"),
+    ]
+
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="sms_utsendinger"
+    )
+
+    melding = models.TextField()
+    mottakertekst = models.CharField(max_length=255, blank=True)
+
+    status = models.IntegerField(
+        choices=STATUS_CHOICES,
+        default=STATUS_KLADD
+    )
+
+    antall_mottakere = models.IntegerField(default=0)
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+    sist_endret = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SMS-utsending {self.organisasjon} – {self.opprettet}"
+
+class SmsLogg(models.Model):
+    STATUS_KLADD = 1
+    STATUS_TEST = 2
+    STATUS_SENDT = 3
+    STATUS_FEIL = 4
+
+    STATUS_CHOICES = [
+        (STATUS_KLADD, "Kladd"),
+        (STATUS_TEST, "Test"),
+        (STATUS_SENDT, "Sendt"),
+        (STATUS_FEIL, "Feil"),
+    ]
+    utsending = models.ForeignKey(
+        SmsUtsending,
+        on_delete=models.CASCADE,
+        related_name="mottakere",
+        null=True,
+        blank=True
+    )
+
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="sms_logger"
+    )
+
+    medlem = models.ForeignKey(
+        LagMedlem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sms_logger"
+    )
+
+    telefon = models.CharField(max_length=30, blank=True)
+    melding = models.TextField()
+    status = models.IntegerField(choices=STATUS_CHOICES, default=STATUS_KLADD)
+
+    leverandor_svar = models.TextField(blank=True)
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+    sendt_tid = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"SMS {self.organisasjon} – {self.opprettet}"
+

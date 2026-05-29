@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+  <div class="container">
+
+    <!-- Logo + Lokallagsnavn -->
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
+       href="{% url 'lag:lokallag_forside' slug=lokallag.slug %}">
+      <img src="{% static 'lag/img/u3a-logo.png' %}"
+           alt="U3A-logo"
+           style="height:32px;width:auto;">
+      <span>U3A {{ lokallag.navn }}</span>
+    </a>
+
+    <!-- Mobil-meny-knapp -->
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarLokallag"
+            aria-controls="navbarLokallag"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Meny -->
+    <div class="collapse navbar-collapse" id="navbarLokallag">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'lag:lokallag_forside' slug=lokallag.slug %}">
+            Hjem
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'lag:lokallag_forside' slug=lokallag.slug %}">
+            Om oss
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'lag:lokallag_forside' slug=lokallag.slug %}">
+            Aktiviteter
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'lag:lokallag_forside' slug=lokallag.slug %}">
+            Nyheter
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="btn btn-primary ms-lg-3"
+             href="{% url 'info:bli_med' %}">
+            Bli med
+          </a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+{% endblock %}

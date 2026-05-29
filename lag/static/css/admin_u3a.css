@@ -1,0 +1,26 @@
+/* U3A admin – farger */
+:root{
+  --u3a-blue: #0d6efd; /* samme som Bootstrap bg-primary */
+}
+
+/* Header */
+#header {
+  background: var(--u3a-blue) !important;
+}
+#header a:link, #header a:visited {
+  color: #fff !important;
+}
+
+/* Primærknapper */
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: var(--u3a-blue) !important;
+  border-color: var(--u3a-blue) !important;
+}
+.button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+  filter: brightness(0.95);
+}
+
+/* Lenker/aksenter */
+a:link, a:visited {
+  color: #0b5ed7;
+}

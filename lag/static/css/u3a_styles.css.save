@@ -1,0 +1,157 @@
+/* u3a_styles.css - FULL VERSJON MED NEDTREKK OG RESPONSIVITET */
+
+/* Generelle stiler */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* Header og Logo */
+.header-container {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center; 
+}
+
+.u3a-logo {
+    width: 100px; /* Ønsket størrelse */
+    height: 100px;
+    margin-right: 20px;
+    border-radius: 5px;
+}
+
+.main-heading {
+    margin: 0;
+    font-size: 2em;
+}
+
+/* Navigasjonsmeny */
+.menu-bar {
+    background-color: #555;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-bar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.menu-bar li {
+    position: relative; /* Viktig for nedtrekket */
+}
+
+.menu-bar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    transition: background-color 0.3s;
+}
+
+.menu-bar a:hover {
+    background-color: #777;
+}
+
+/* ==================================== */
+/* NEDTREKKSMENY STILER */
+/* ==================================== */
+
+/* Skjul undermenyen som standard */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%; 
+    background-color: #444; 
+    list-style: none;
+    padding: 0;
+    min-width: 200px;
+    z-index: 10; 
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    border-top: 2px solid #aaa;
+}
+
+/* Vis undermenyen når musen er over hovedmenypunktet (.dropdown) */
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    border-bottom: 1px solid #555;
+    padding: 0;
+}
+
+.dropdown-menu a {
+    padding: 10px 15px;
+}
+
+/* ==================================== */
+/* RESPONSIVT DESIGN */
+/* ==================================== */
+
+@media (max-width: 600px) {
+
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .u3a-logo {
+        width: 70px; 
+        height: 70px;
+        margin-right: 0; 
+        margin-bottom: 10px; 
+    }
+
+    .main-heading {
+        font-size: 1.5em;
+    }
+
+    .menu-bar ul {
+        flex-direction: column;
+    }
+
+    .menu-bar li {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .dropdown-menu {
+        /* Viser undermenyen permanent i mobilvisning */
+        display: block !important; /* MÅ VÆRE SYNLIG PÅ MOBIL */
+        position: static;  
+        box-shadow: none;
+        background-color: #666;
+        width: 100%;
+    }
+
+    .menu-bar li {
+         /* Sikrer at Lokallag også er full bredde og vises */
+        width: 100%; 
+    }
+
+    .dropdown:hover .dropdown-menu {
+        /* Denne regelen blir ignorert på touch-enheter, men kan beholdes */
+        display: block;
+    }
+}
+/* ==================================== */
+/* NEDTREKKSMENY STILER */
+/* ==================================== */
+
+/* Gjøres mer spesifikt for å unngå overstyring */
+.dropdown .dropdown-menu { 
+    display: none; /* Skal skjule undermenyen */
+    position: absolute;
+    /* ... resten av reglene dine ... */
+}
+
+/* Vis undermenyen når musen er over hovedmenypunktet (.dropdown) */
+.dropdown:hover .dropdown-menu {
+    display: block;
+}

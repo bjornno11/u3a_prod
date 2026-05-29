@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Administratorer for {{ org.organisasjon }}</h1>
+
+<p>
+  Subdomene:
+  {% if org.subdomene %}
+    {{ org.subdomene }}.u3a.no
+  {% else %}
+    Ikke satt
+  {% endif %}
+</p>
+
+<h2>Registrerte administratorer</h2>
+
+<ul>
+  {% for u in redaktorer %}
+    <li>
+      {{ u.username }}
+      {% if u.first_name or u.last_name %}
+        – {{ u.first_name }} {{ u.last_name }}
+      {% endif %}
+
+      {% if u.is_active %}
+        <form method="post" style="display:inline; margin-left:10px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="deactivate">
+          <input type="hidden" name="user_id" value="{{ u.id }}">
+          <button type="submit" class="button">Deaktiver</button>
+        </form>
+      {% else %}
+        <strong>(deaktivert)</strong>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>Ingen administratorer registrert.</li>
+  {% endfor %}
+</ul>
+<h2>Opprett ny administrator</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  <p>
+    <label>Brukernavn:</label><br>
+    <input type="text" name="username" required>
+  </p>
+
+  <p>
+    <label>Passord:</label><br>
+    <input type="password" name="password" required>
+  </p>
+
+  <p>
+    <label>Fornavn:</label><br>
+    <input type="text" name="first_name">
+  </p>
+
+  <p>
+    <label>Etternavn:</label><br>
+    <input type="text" name="last_name">
+  </p>
+
+  <p>
+    <label>E-post:</label><br>
+    <input type="email" name="email">
+  </p>
+
+  <button type="submit" class="button default">
+    Opprett administrator
+  </button>
+</form>
+
+<p>
+  <a href="/admin/lag/subadmin/">
+    ← Tilbake
+  </a>
+</p>
+
+{% endblock %}

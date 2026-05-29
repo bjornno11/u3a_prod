@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nyheter – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:dashboard' %}"
+     class="btn btn-outline-secondary mb-3">
+    ← Tilbake til dashboard
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <div>
+        <h1 class="mb-1">Nyheter</h1>
+
+        <p class="text-muted mb-0">
+          Administrasjon av nyheter for {{ organisasjon.organisasjon }}
+        </p>
+      </div>
+  
+      <a href="{% url 'lokaladmin:nyhet_ny' %}"
+         class="btn btn-primary">
+        Ny nyhet
+      </a>
+    </div>
+
+    {% if nyheter %}
+
+      <table class="table table-striped align-middle">
+
+        <thead>
+          <tr>
+            <th>Tittel</th>
+            <th>Publisert</th>
+            <th>Dato</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for nyhet in nyheter %}
+
+            <tr>
+ 
+              <td>
+                <a href="{% url 'nyhet_detalj' nyhet.id %}"
+                   >
+                  {{ nyhet.tittel }}
+                </a>
+              </td>
+              <td>
+                {% if nyhet.publisert %}
+                  Ja
+                {% else %}
+                  Nei
+                {% endif %}
+              </td>
+
+              <td>
+                {% if nyhet.publisert_dato %}
+                  {{ nyhet.publisert_dato|date:"d.m.Y" }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+
+                <a href="{% url 'lokaladmin:nyhet_rediger' nyhet.id %}"
+                   class="btn btn-sm btn-outline-primary">
+                  Rediger
+                </a>
+
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    {% else %}
+
+      <p class="text-muted">
+        Ingen nyheter registrert.
+      </p>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}
+

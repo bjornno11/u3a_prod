@@ -1,0 +1,304 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Vedlikehold subdomene</h1>
+
+{% if feil %}
+
+    <div style="
+        background:#f8d7da;
+        border:1px solid #dc3545;
+        padding:15px;
+        color:#721c24;
+        border-radius:5px;
+    ">
+        {{ feil }}
+    </div>
+
+{% else %}
+
+<form method="post">
+
+    {% csrf_token %}
+    <input type="hidden" name="lagre_organisasjon" value="1">
+
+    <table>
+
+        <tr>
+            <th>Organisasjon</th>
+            <td>
+                <input type="text"
+                       name="organisasjon"
+                       value="{{ organisasjon.organisasjon }}"
+                       style="width: 400px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>Subdomene</th>
+            <td>
+                {{ organisasjon.subdomene }}.u3a.no
+            </td>
+        </tr>
+
+        <tr>
+            <th>Status</th>
+            <td>
+                <select name="status">
+                    <option value="Aktiv"
+                        {% if organisasjon.status == "Aktiv" %}selected{% endif %}>
+                        Aktiv
+                    </option>
+
+                    <option value="Passiv"
+                        {% if organisasjon.status == "Passiv" %}selected{% endif %}>
+                        Passiv
+                    </option>
+                </select>
+            </td>
+        </tr>
+
+    <tr>
+        <th>Kommune</th>
+        <td>
+            <input type="text"
+                   name="kommune"
+                   value="{{ organisasjon.kommune }}"
+                   style="width: 300px;">
+        </td>
+    </tr>
+
+    <tr>
+        <th>Organisasjonsnummer</th>
+        <td>
+            <input type="text"
+                   name="orgnummer"
+                   value="{{ organisasjon.orgnummer }}"
+                   maxlength="9"
+                   style="width: 150px;">
+        </td>
+    </tr>
+
+    <tr>
+        <th>Hjemmesidetype</th>
+        <td>
+            <select name="hjemmesidetype">
+                <option value="1" {% if organisasjon.hjemmesidetype|stringformat:"s" == "1" %}selected{% endif %}>
+                    1 - Enkel startside
+                </option>
+                <option value="2" {% if organisasjon.hjemmesidetype|stringformat:"s" == "2" %}selected{% endif %}>
+                    2 - Kalender og aktiviteter
+                </option>
+                <option value="3" {% if organisasjon.hjemmesidetype|stringformat:"s" == "3" %}selected{% endif %}>
+                    3 - Full lokallagsside
+                </option>
+            </select>
+        </td>
+    </tr>
+        <tr>
+            <th>E-post</th>
+            <td>
+                <input type="email"
+                       name="epost"
+                       value="{{ organisasjon.epost }}"
+                       style="width: 300px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>Telefon</th>
+            <td>
+                <input type="text"
+                       name="telefon"
+                       value="{{ organisasjon.telefon }}"
+                       style="width: 300px;">
+            </td>
+        </tr>
+
+    </table>
+
+    <br>
+
+    <button type="submit" class="default">
+        Lagre endringer
+    </button>
+
+</form>
+    <br>
+
+{% if https_ok %}
+
+    <div style="
+        background:#d4edda;
+        border:1px solid #28a745;
+        padding:15px;
+        color:#155724;
+        border-radius:5px;
+    ">
+        <strong>HTTPS OK</strong><br>
+        {{ https_melding }}
+    </div>
+
+{% else %}
+
+    <div style="
+        background:#f8d7da;
+        border:1px solid #dc3545;
+        padding:15px;
+        color:#721c24;
+        border-radius:5px;
+    ">
+        <strong>HTTPS FEIL</strong><br>
+        {{ https_melding }}
+    <br><br>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="aktiver_https"
+               value="1">
+
+        <button type="submit"
+                class="default">
+
+            Aktiver HTTPS
+
+        </button>
+
+    </form>
+
+    </div>
+
+{% endif %}
+<br><br>
+
+<h2>Lokal administrator</h2>
+
+{% if organisasjon.redaktorer.all %}
+
+    <div style="
+        background:#d4edda;
+        border:1px solid #28a745;
+        padding:15px;
+        color:#155724;
+        border-radius:5px;
+        margin-bottom:20px;
+    ">
+
+        <strong>Eksisterende administratorer:</strong>
+
+        <ul>
+            {% for bruker in organisasjon.redaktorer.all %}
+
+                <li>
+                    {{ bruker.username }}
+
+                    {% if bruker.email %}
+                        ({{ bruker.email }})
+                    {% endif %}
+
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+
+                        <input type="hidden" name="fjern_admin" value="1">
+                        <input type="hidden" name="bruker_id" value="{{ bruker.id }}">
+
+                        <button type="submit"
+                                style="
+                                    background:#dc3545;
+                                    color:white;
+                                    border:0;
+                                    border-radius:4px;
+                                    padding:3px 8px;
+                                    margin-left:10px;
+                                ">
+                            Fjern
+                        </button>
+                    </form>
+                </li>
+
+            {% endfor %}
+        </ul>
+
+    </div>
+
+{% endif %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <input type="hidden" name="opprett_admin" value="1">
+
+    <table>
+
+        <tr>
+            <th>Brukernavn</th>
+            <td>
+                <input type="text"
+                       name="brukernavn"
+                       style="width: 250px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>E-post</th>
+            <td>
+                <input type="email"
+                       name="admin_epost"
+                       style="width: 300px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>Midlertidig passord</th>
+            <td>
+                <input type="text"
+                       name="passord"
+                       style="width: 250px;">
+            </td>
+        </tr>
+
+    </table>
+
+    <br>
+
+    <button type="submit"
+            style="
+                background:#417690;
+                color:white;
+                padding:10px 14px;
+                border:0;
+                border-radius:4px;
+                font-weight:bold;
+            ">
+        Opprett lokal administrator
+    </button>
+
+</form>
+{% endif %}
+
+
+<br>
+
+
+<hr>
+
+<p>
+    <a href="/admin/subdomene/"
+       style="
+          background:#417690;
+          color:white;
+          padding:10px 14px;
+          text-decoration:none;
+          border-radius:4px;
+          font-weight:bold;
+       ">
+        Tilbake til subdomener
+    </a>
+</p>
+{% endblock %}
+

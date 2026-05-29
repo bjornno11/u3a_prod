@@ -1,0 +1,25 @@
+{% extends "school/base.html" %}
+
+{% block title %}u3a skole{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>u3a skole</h1>
+  <p class="lead">Korte, trygge nettkurs for voksne deltakere.</p>
+</section>
+
+<section class="course-grid">
+  {% for course in courses %}
+    <article class="course-card">
+      <h2>{{ course.title }}</h2>
+      <p>{{ course.description }}</p>
+      <a class="button" href="{% url 'school:course_detail' course.slug %}">
+        Start kurset
+      </a>
+    </article>
+  {% empty %}
+    <p>Det er ingen publiserte kurs ennå.</p>
+  {% endfor %}
+</section>
+{% endblock %}
+

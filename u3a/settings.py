@@ -34,9 +34,11 @@ SESSION_COOKIE_SECURE = True
 ALLOWED_HOSTS = [
     "u3a.no",
     "www.u3a.no",
+    ".u3a.no",
     "localhost",
     "127.0.0.1",
     "46.62.205.45",
+    "skole.u3a.no",
 ]
 
 
@@ -53,9 +55,15 @@ INSTALLED_APPS = [
     "lag",
     "forside",
     "info",
+    "lokaladmin",
+    "school",
 ]
 STATIC_URL = "static/"
 STATIC_ROOT = "/srv/u3a/staticfiles"
+CONTACT_EMAIL = "u3a@u3a.no"
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/lokaladmin/"
+LOGOUT_REDIRECT_URL = "/"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'lag.middleware.SubdomeneAdminAccessMiddleware',
 ]
 
 ROOT_URLCONF = 'u3a.urls'
@@ -79,6 +88,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'lag.context_processors.lokallag_from_host',
+                "u3a.context_processors.site_contact",
             ],
         },
     },
@@ -143,14 +154,45 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Legg til dette hvis du også har statiske filer i dine app-mapper (anbefales)
 STATICFILES_DIRS = [
-    BASE_DIR / "lag", 
     BASE_DIR / "static",
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+ADMIN_CSS = "css/admin_u3a.css"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- E-post (ProISP) ---
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.proisp.no"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "u3a@u3a.no"
+EMAIL_HOST_PASSWORD = "Klara.1919?!"
+
+DEFAULT_FROM_EMAIL = "U3A Norge <u3a@u3a.no>"
+SERVER_EMAIL = "u3a@u3a.no"
+
+# Midlertidig: vis e-post-sending i logger
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}

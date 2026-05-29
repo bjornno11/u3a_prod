@@ -5,92 +5,247 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %}U3A Norge{% endblock %}</title>
+    <title>
+        {% if lokallag %}
+            {{ lokallag.organisasjon }} – U3A
+        {% else %}
+            {% block title %}U3A Norge{% endblock %}
+        {% endif %}
+    </title>
 
     <!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="{% static 'lag/favicon.ico' %}">
-<link rel="shortcut icon" type="image/x-icon" href="{% static 'lag/favicon.ico' %}">
-
-<!-- Moderne favicon-formater -->
-<link rel="icon" type="image/png" sizes="32x32" href="{% static 'lag/favicon.png' %}">
-<link rel="icon" type="image/png" sizes="16x16" href="{% static 'lag/favicon.png' %}">
-
+    <link rel="icon" type="image/png" href="{% static 'lag/favicon.png' %}">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Egen CSS (valgfritt) -->
-    <link rel="stylesheet" href="{% static 'css/u3a_styles.css' %}?v=20251220-2">
-{% if not debug %}
-<script defer data-domain="u3a.no" src="https://plausible.io/js/script.js"></script>
-{% endif %}
-
+    <!-- U3A styles -->
+    <link rel="stylesheet" href="{% static 'css/u3a_styles.css' %}">
 </head>
 
 <body class="bg-light">
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
-        <div class="container">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+    <div class="container">
 
-            <!-- Logo / Tittel -->
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
-                <img src="{% static 'lag/img/u3a-logo.png' %}" alt="U3A-logo">
-                <span class="u3a-brand-text">U3A Norgee</span>
-            </a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <img src="{% static 'lag/img/u3a-logo.png' %}"
+                 alt="U3A-logo"
+                 class="navbar-logo">
+            <span class="navbar-title">
+                {% if lokallag %}
+                    {{ lokallag.organisasjon }}
+                {% else %}
+                    U3A Norge
+                {% endif %}
+            </span>
+        </a>
 
-            <!-- Mobil-knapp -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Meny -->
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav ms-auto">
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
+                {% if lokallag %}
+                    <!-- LOKALLAG-MENY -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/lokallag/liste/">Lokallag</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+                           href="/">Hjem</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/lokallag/kart/">Kart</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'om_u3a_no' %}active{% endif %}"
+                           href="{% url 'om_u3a_no' %}">Om oss</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/regnskap/">Regnskap</a>
+                        <a class="nav-link {% if request.resolver_match.url_name in 'aktivitet_liste aktivitet_detalj' %}active{% endif %}"
+                           href="{% url 'aktivitet_liste' %}">Aktiviteter</a>
+                    </li>
+
+		    <li class="nav-item">
+		        <a class="nav-link {% if request.resolver_match.url_name == 'styre_side' %}active{% endif %}"
+		           href="{% url 'styre_side' %}">
+		            Styret
+		        </a>
+		    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#kontakt">Kontakt</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'om_u3a_norge' %}">Om U3A Norge</a>
+                       {% if user.is_authenticated %}
+                         {% if user.is_superuser %}
+                           <a class="nav-link" href="/admin/">U3A Admin</a>
+                         {% else %}
+                           <a class="nav-link" href="/lokaladmin/">Lokallag admin</a>
+                         {% endif %}
+                       {% else %}
+                         <a class="nav-link" href="/lokaladmin/">Lokallag admin</a>
+                       {% endif %}
+ 
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'for_pressen' %}">For pressen</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Admin</a>
-                    </li>
-                </ul>
-            </div>
 
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registrer-medlem/">Bli medlem</a>
+                    </li>
+
+                {% else %}
+                    <!-- HOVEDMENY -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name in 'lag_liste lokallag_liste' %}active{% endif %}"
+                           href="{% url 'lag_liste' %}">Lokallag</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'lokallag_kart' %}active{% endif %}"
+                           href="{% url 'lokallag_kart' %}">Kart</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'regnskap' %}active{% endif %}"
+                           href="{% url 'regnskap' %}">Regnskap</a>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="https://webmail.proisp.no/"
+                           target="_blank">
+                            E-post
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle
+                           {% if request.resolver_match.url_name in 'u3a_norge om_u3a_no for_pressen bli_med starte_u3a' %}active{% endif %}"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            Om u3a.no
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'u3a_norge' %}">
+                                    U3A Norge
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'om_u3a_no' %}">
+                                    Om u3a.no
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'for_pressen' %}">
+                                    For pressen
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'starte_u3a' %}">
+                                    Starte U3A lokalt
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                          {% if user.is_superuser %}
+                            <a class="nav-link" href="/admin/">U3A Admin</a>
+                          {% else %}
+                            <a class="nav-link" href="/lokaladmin/">Lokallag admin</a>
+                          {% endif %}
+                        {% endif %}
+ 
+                    </li>
+                {% endif %}
+
+            </ul>
         </div>
-    </nav>
 
-    <!-- HOVEDINNHOLD -->
-    <main class="container my-4">
-        {% block content %}
-        <!-- Sideinnhold kommer her -->
-        {% endblock %}
-    </main>
+    </div>
+</nav>
 
-    <!-- FOOTER -->
-    <footer class="bg-dark text-light py-3 mt-4">
-        <div class="container text-center">
-            <small>© 2025 U3A Norge – Universitetet for den tredje alder</small>
+<!-- MAIN CONTENT -->
+<main class="container my-4">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="bg-white border-top mt-5">
+    <div id="kontakt"></div>
+    <div class="container py-4">
+    <div class="row g-4">
+
+      <div class="col-md-6">
+        <div class="fw-bold">
+          {% if lokallag %}
+            {{ lokallag.organisasjon }}
+          {% else %}
+            U3A Norge
+          {% endif %}
         </div>
-    </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <div class="text-muted">
+          {% if lokallag %}
+            {{ lokallag.footer_tekst|default:lokallag.forside_ingress|default:"Lokallag i U3A Norge – læring, fellesskap og livsglede." }}
+          {% else %}
+            Universitetet for den tredje alder – læring, fellesskap og livsglede.
+          {% endif %}
+        </div>
+
+        {% if lokallag and lokallag.adresse %}
+          <div class="text-muted mt-1">{{ lokallag.adresse }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        <div class="fw-bold">Kontakt</div>
+
+        {% if lokallag %}
+          <div class="text-muted">
+            {% if lokallag.epost %}
+              E-post: <a href="mailto:{{ lokallag.epost }}">{{ lokallag.epost }}</a>
+            {% else %}
+              E-post: <a href="mailto:{{ siteconfig.hoved_epost }}">{{ siteconfig.hoved_epost }}</a>
+            {% endif %}
+          </div>
+
+          {% if lokallag.telefon %}
+            <div class="text-muted">Telefon: {{ lokallag.telefon }}</div>
+          {% endif %}
+        {% else %}
+          <div class="text-muted">E-post: <a href="mailto:u3a@u3a.no">u3a@u3a.no</a></div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        <div class="fw-bold">Snarveier</div>
+        <ul class="list-unstyled mb-0">
+          <li><a href="/lag/">Finn lokallag</a></li>
+          <li><a href="/starte-u3a/">Starte U3A lokalt</a></li>
+          <li><a href="/for-pressen/">For pressen</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="text-muted small mt-3">
+      © {% now "Y" %} {% if lokallag %}{{ lokallag.organisasjon }}{% else %}U3A Norge{% endif %}
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
+

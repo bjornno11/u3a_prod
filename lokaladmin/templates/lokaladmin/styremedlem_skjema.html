@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if verv %}Rediger styremedlem{% else %}Nytt styremedlem{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:styremedlemmer' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til styremedlemmer
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      {% if verv %}Rediger styremedlem{% else %}Nytt styremedlem{% endif %}
+    </h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Medlem</label>
+        <select name="medlem" class="form-select" required>
+          <option value="">Velg medlem</option>
+          {% for medlem in medlemmer %}
+            <option value="{{ medlem.id }}"
+              {% if verv and verv.medlem.id == medlem.id %}selected{% endif %}>
+              {{ medlem.etternavn }}, {{ medlem.fornavn }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Rolle</label>
+        <select name="rolle" class="form-select" required>
+          <option value="">Velg rolle</option>
+          {% for rolle in roller %}
+            <option value="{{ rolle.id }}"
+              {% if verv and verv.rolle.id == rolle.id %}selected{% endif %}>
+              {{ rolle.navn }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Utvalg</label>
+        <select name="utvalg" class="form-select">
+          <option value="">Ingen / ikke aktuelt</option>
+          {% for u in utvalg %}
+            <option value="{{ u.id }}"
+              {% if verv and verv.utvalg and verv.utvalg.id == u.id %}selected{% endif %}>
+              {{ u.navn }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Fra dato</label>
+          <input type="date" name="fra_dato" class="form-control"
+                 value="{{ verv.fra_dato|date:'Y-m-d' }}">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Til dato</label>
+          <input type="date" name="til_dato" class="form-control"
+                 value="{{ verv.til_dato|date:'Y-m-d' }}">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Valgt dato</label>
+          <input type="date" name="valgt_dato" class="form-control"
+                 value="{{ verv.valgt_dato|date:'Y-m-d' }}">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Valgt av</label>
+        <input type="text" name="valgt_av" class="form-control"
+               value="{{ verv.valgt_av|default:'' }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Merknad</label>
+        <input type="text" name="merknad" class="form-control"
+               value="{{ verv.merknad|default:'' }}">
+      </div>
+
+      <div class="form-check mb-4">
+        <input type="checkbox" name="aktiv" class="form-check-input" id="aktiv"
+               {% if not verv or verv.aktiv %}checked{% endif %}>
+        <label class="form-check-label" for="aktiv">
+          Aktiv
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre styremedlem
+      </button>
+
+      <a href="{% url 'lokaladmin:styremedlemmer' %}" class="btn btn-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

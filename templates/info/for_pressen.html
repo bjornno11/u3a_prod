@@ -1,17 +1,103 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}For pressen{% endblock %}
 {% block content %}
+            <section class="mb-5 py-4">
+                <div class="row align-items-center g-4">
 
-<h2>For pressen</h2>
+                    <div class="col-lg-7">
 
-<p>
-Denne siden er ment som en ressurs for journalister og redaksjoner som ønsker
-informasjon om <strong>U3A Norge</strong> og virksomheten til lokale
-U3A-/senioruniversiteter i Norge.
-</p>
+                        <h1 class="display-4 fw-bold mb-4">
+                            For pressen
+                        </h1>
+
+                        <p class="lead">
+                            Denne siden er ment som en ressurs for journalister og redaksjoner som ønsker
+                            informasjon om <strong>U3A Norge</strong> og virksomheten til lokale
+                            U3A-/senioruniversiteter i Norge.
+
+                        </p>
+
+
+                        <p class="mt-4">
+                            U3A Norge ønsker samarbeid med kommuner,
+                            kulturaktører, utdanningsmiljøer og offentlige initiativer
+                            som Den kulturelle spaserstokken.
+                        </p>
+
+                    </div>
+
+                    <div class="col-lg-5 text-center">
+
+                        <img src="{% static 'lag/img/u3aUK.webp' %}"
+                             class="img-fluid rounded shadow"
+                             alt="U3A Norge">
+
+                    </div>
+
+                </div>
+            </section>
+<section class="mt-5">
+
+    <h2>U3A – en internasjonal bevegelse</h2>
+
+    <p>
+        U3A-bevegelsen oppstod i Frankrike tidlig på 1970-tallet som et svar på
+        store samfunnsendringer knyttet til økt levealder, bedre helse og en ny
+        generasjon aktive seniorer.
+    </p>
+
+    <p>
+        Initiativet ble tatt av professor Pierre Vellas ved universitetet i Toulouse.
+        I 1972 startet han et program for pensjonister med forelesninger,
+        kulturaktiviteter og sosialt fellesskap. Interessen ble langt større enn
+        forventet, og initiativet utviklet seg raskt til en internasjonal bevegelse.
+    </p>
+
+    <p>
+        Navnet U3A står for «Universitetet for den tredje alder».
+        Den tredje alder beskriver livsfasen etter arbeidslivet – en periode hvor
+        mennesker fortsatt har store ressurser, erfaringer og muligheter til aktiv
+        deltakelse i samfunnet.
+    </p>
+
+    <p>
+        U3A bygger på tanken om at læring, nysgjerrighet, kultur og sosialt
+        fellesskap bidrar til bedre livskvalitet og aktiv aldring.
+    </p>
+
+    <p>
+        I dag finnes U3A-organisasjoner og lignende senioruniversiteter i store deler
+        av verden, med millioner av deltakere.
+    </p>
+
+    <div class="bg-light border rounded p-4 mt-4">
+
+        <h3 class="h5">U3A-bevegelsens grunnidé</h3>
+
+        <ul class="mb-0">
+            <li>formidle kunnskap og livslang læring</li>
+            <li>stimulere til aktiv deltakelse og egeninnsats</li>
+            <li>skape sosiale møteplasser og fellesskap</li>
+        </ul>
+
+    </div>
+
+    <p class="mt-4">
+        U3A er ikke et universitet i tradisjonell forstand med eksamener og formelle krav.
+        Tanken er snarere et åpent kunnskapsfellesskap hvor mennesker møtes for å lære,
+        dele erfaringer og holde seg aktive – sosialt, kulturelt og intellektuelt.
+    </p>
+
+</section>
 
 <h3>Kort om U3A Norge</h3>
 
+<p>Norsk introduksjon: 
+Folkeuniversitetet tok konseptet til Norge i 1982 for å tilby læring, engasjement og sosialt fellesskap for seniorer.
+Videre vekst: 
+Etter etableringen av Follo U3A i juni 1984, skjøt dannelsen av tilsvarende foreninger fart over hele landet.
+</p>
 <p>
 U3A Norge er en nasjonal paraply og felles digital inngang for lokale
 U3A- og senioruniversitetsmiljøer i Norge. U3A bygger på prinsippet om
@@ -21,15 +107,6 @@ formell kompetanse eller eksamen.
 
 <p>
 Virksomheten er ideell og basert på frivillig innsats.
-</p>
-
-<h3>Hva er U3A?</h3>
-
-<p>
-U3A (University of the Third Age) er en internasjonal bevegelse som retter seg
-mot mennesker i den såkalte «tredje alder» – ofte pensjonister eller personer
-som ikke lenger er i fulltids arbeidsliv. Aktivitetene organiseres lokalt og
-tilpasses medlemmenes interesser.
 </p>
 
 <h3>Lokallag og organisering</h3>
@@ -58,7 +135,7 @@ For generelle henvendelser:
 
 <p>
 <strong>U3A Norge</strong><br>
-E-post: <a href="mailto:post@u3a.no">post@u3a.no</a>
+E-post: <a href="mailto:u3a@u3a.no">u3a@u3a.no</a>
 </p>
 
 <p>
@@ -83,6 +160,6 @@ Sist oppdatert: desember 2025
 </p>
 
 
-<p>Kontakt: post@u3a.no</p>
+<p>Kontakt: u3a@u3a.no</p>
 
 {% endblock %}

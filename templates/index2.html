@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{{ lokallag.organisasjon }} – U3A Norge
+{% endblock %}
+
+{% block content %}
+
+<div class="container mb-4">
+
+  <!-- TOPP: LOKAL PROFIL -->
+  <div class="p-4 p-lg-5 bg-white rounded-3 shadow-sm mb-4">
+    <div class="row g-4 align-items-center">
+
+      <div class="col-lg-7">
+        <h1 class="display-4 fw-bold mb-3">
+          {{ lokallag.forside_tittel|default:lokallag.organisasjon }}
+        </h1>
+
+        {% if lokallag.forside_ingress %}
+          <p class="fs-5 mb-4">{{ lokallag.forside_ingress }}</p>
+        {% else %}
+          <p class="fs-5 mb-4">
+            Velkommen til {{ lokallag.organisasjon }}.
+          </p>
+        {% endif %}
+
+        {% if lokallag.forside_tekst %}
+          <div class="mb-4">
+            {{ lokallag.forside_tekst|linebreaksbr }}
+          </div>
+        {% else %}
+          <div class="mb-4">
+            <p>
+              {{ lokallag.organisasjon }} er et aktivt lokalt læringsfellesskap for voksne som ønsker
+              faglig påfyll, sosialt fellesskap og meningsfulle aktiviteter.
+            </p>
+            <p class="mb-0">
+              Her finner du program, nyheter, dokumenter og informasjon om medlemskap.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-5">
+        {% if lokallag.forside_bilde %}
+          <img src="{{ lokallag.forside_bilde.url }}"
+               class="img-fluid rounded shadow-sm"
+               alt="{{ lokallag.organisasjon }}">
+        {% else %}
+          <img src="{% static 'images/forside-side.jpg' %}"
+               class="img-fluid rounded shadow-sm"
+               alt="U3A">
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MIDTEN: PROGRAM + NYHETER -->
+  <div class="row g-4 mb-4">
+
+    <div class="col-lg-4">
+      <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+        <h2 class="h4 fw-bold mb-3">Program og aktiviteter</h2>
+
+        <div style="max-height: 360px; overflow-y: auto;">
+          {% if aktiviteter %}
+            <ul class="list-unstyled mb-0">
+              {% for a in aktiviteter %}
+                <li class="mb-3 pb-3 border-bottom">
+                  <div class="small text-muted">
+                    {{ a.dato|date:"d. F Y" }}
+                  </div>
+
+                  <div class="fw-bold">
+                    {% if a.slug %}
+                      <a href="{% url 'aktivitet_detalj' slug=a.slug %}">
+                        {{ a.tittel|default:a.kortinfo }}
+                      </a>
+                    {% else %}
+                      {{ a.tittel|default:a.kortinfo }}
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">
+              Ingen kommende aktiviteter er registrert ennå.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+        <h2 class="h4 fw-bold mb-3">Nyheter</h2>
+
+        {% if nyheter %}
+
+          {% for nyhet in nyheter %}
+
+            <div class="mb-4">
+
+              <h3 class="h5 mb-2">
+                {{ nyhet.tittel }}
+              </h3>
+
+              <p class="mb-2">
+                {{ nyhet.ingress|truncatewords:20 }}
+              </p>
+
+              <a href="{% url 'nyhet_detalj' nyhet.id %}"
+                 class="btn btn-sm btn-outline-primary">
+                Les mer
+              </a>
+
+            </div>
+
+          {% endfor %}
+
+        {% else %}
+
+          <p class="text-muted mb-0">
+            Ingen nyheter publisert ennå.
+          </p>
+
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NEDERST: DOKUMENTER, MEDLEM, KONTAKT -->
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+        <h2 class="h5 fw-bold mb-3">Dokumentarkiv</h2>
+        <p>
+          Her kan lokallaget legge ut vedtekter, årsmøtedokumenter, referater og annen
+          praktisk informasjon.
+        </p>
+        <p class="text-muted mb-0">
+          Dokumentarkiv kommer som egen modul.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+        <h2 class="h5 fw-bold mb-3">Medlemsinformasjon</h2>
+        <p>
+          Som medlem får du informasjon om møter, foredrag og aktiviteter i lokallaget.
+        </p>
+        <a href="/registrer-medlem/" class="btn btn-primary">
+          Bli medlem
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+        <h2 class="h5 fw-bold mb-3">Kontakt</h2>
+
+        {% if lokallag.epost %}
+          <p class="mb-2">
+            <strong>E-post:</strong><br>
+            <a href="mailto:{{ lokallag.epost }}">{{ lokallag.epost }}</a>
+          </p>
+        {% endif %}
+
+        {% if lokallag.telefon %}
+          <p class="mb-2">
+            <strong>Telefon:</strong><br>
+            {{ lokallag.telefon }}
+          </p>
+        {% endif %}
+
+        {% if not lokallag.epost and not lokallag.telefon %}
+          <p class="text-muted mb-0">
+            Kontaktinformasjon er ikke registrert ennå.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

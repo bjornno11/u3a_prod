@@ -1,0 +1,22 @@
+<h1>Fullført kurs</h1>
+
+<p>Du har kommet til slutten av kurset:</p>
+
+<h2>{{ course.title }}</h2>
+
+<p>
+  Denne siden kan skrives ut som en enkel bekreftelse på at du har gått gjennom kurset.
+</p>
+
+<p>
+  <strong>Dato:</strong> {% now "d.m.Y" %}
+</p>
+
+<button onclick="window.print()">Skriv ut</button>
+
+<p>
+  <a href="{% url 'school:course_detail' course.slug %}">
+    Tilbake til kurset
+  </a>
+</p>
+

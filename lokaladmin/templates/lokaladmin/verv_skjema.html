@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nytt verv
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      Nytt verv
+    </h1>
+
+    <form method="post">
+
+      {% csrf_token %}
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Medlem
+        </label>
+
+        <select
+          name="medlem"
+          class="form-select">
+
+          {% for m in medlemmer %}
+
+            <option value="{{ m.id }}">
+              {{ m.etternavn }}, {{ m.fornavn }}
+            </option>
+
+          {% endfor %}
+
+        </select>
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Rolle
+        </label>
+
+        <select
+          name="rolle"
+          class="form-select">
+
+          {% for r in roller %}
+
+            <option value="{{ r.id }}">
+              {{ r.navn }}
+            </option>
+
+          {% endfor %}
+
+        </select>
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Utvalg
+        </label>
+
+        <select
+          name="utvalg"
+          class="form-select">
+
+          <option value="">
+            ---
+          </option>
+
+          {% for u in utvalg %}
+
+            <option value="{{ u.id }}">
+              {{ u.navn }}
+            </option>
+
+          {% endfor %}
+
+        </select>
+     </div>
+
+     <div class="mb-3">
+        <label class="form-label">
+          Fra dato
+        </label>
+
+        <input
+          type="date"
+          name="fra_dato"
+          class="form-control">
+      </div>
+
+
+      <button type="submit"
+              class="btn btn-primary">
+        Lagre verv
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

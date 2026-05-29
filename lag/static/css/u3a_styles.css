@@ -1,0 +1,148 @@
+/* u3a_styles.css – RYDDIG OG KORREKT VERSJON */
+
+/* =============================== */
+/* Generelle stiler */
+/* =============================== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* =============================== */
+/* Header og logo */
+/* =============================== */
+.header-container {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.u3a-logo {
+    width: 100px;
+    height: 100px;
+    margin-right: 20px;
+    border-radius: 5px;
+}
+
+.main-heading {
+    margin: 0;
+    font-size: 2em;
+}
+
+/* =============================== */
+/* RESPONSIVT DESIGN – kun header */
+/* =============================== */
+@media (max-width: 600px) {
+
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .u3a-logo {
+        width: 70px;
+        height: 70px;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .main-heading {
+        font-size: 1.5em;
+    }
+}
+.u3a-brand-text {
+    font-size: 1.6rem;   /* prøv 1.5–1.8 */
+    line-height: 1.2;
+}
+
+/* =============================== */
+/* FORSIDE – bilde til høyre for tekst */
+/* =============================== */
+.u3a-hero-img-wrap {
+    height: 220px;          /* Juster: 200–240 etter smak */
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.u3a-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top; /* Naturlig utsnitt */
+    display: block;
+}
+
+/* NAVBAR */
+.navbar-logo{
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.navbar-title{
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #fff;   /* ← viktig */
+}
+
+/* NAVBAR – tving blå bakgrunn + hvite lenker */
+.navbar{
+  background-color: #0d6efd !important;  /* Bootstrap primary */
+}
+
+.navbar .nav-link{
+  color: rgba(255,255,255,.9) !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus{
+  color: #fff !important;
+}
+
+.navbar .navbar-brand{
+  color: #fff !important;
+}
+/* Plass under fast navbar */
+body {
+  padding-top: 72px;   /* juster 64–80px etter smak */
+}
+/* Kun for lokallag-forsider: vis hele bildet (ikke crop) */
+.u3a-hero-img--lokallag {
+  object-fit: contain !important;
+  height: auto !important;
+}
+
+/* Lokallag: ikke fast høyde, og vis hele bildet (bra for portrait) */
+.u3a-hero-img-wrap--lokallag {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.u3a-hero-img--lokallag {
+  height: auto !important;
+  object-fit: contain !important;
+}
+.u3a-norge-hero {
+    min-height: 420px;
+    background-image: linear-gradient(
+        rgba(0, 45, 85, 0.70),
+        rgba(0, 45, 85, 0.45)
+    ), url("/static/lag/img/u3a-LLL.jpg");
+    background-size: cover;
+    background-position: center;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.u3a-norge-hero-overlay {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    color: white;
+}

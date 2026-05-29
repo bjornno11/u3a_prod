@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if rolle %}Rediger rolle{% else %}Ny rolle{% endif %} – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:roller' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til roller
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      {% if rolle %}Rediger rolle{% else %}Ny rolle{% endif %}
+    </h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Navn</label>
+
+	<input
+	  type="text"
+	  name="navn"
+	  class="form-control"
+	  required
+	  value="{{ rolle.navn|default:'' }}">
+
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Beskrivelse</label>
+
+	<textarea
+	  name="beskrivelse"
+	  class="form-control"
+	  rows="4">{{ rolle.beskrivelse|default:'' }}</textarea>
+
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre rolle
+      </button>
+
+      <a href="{% url 'lokaladmin:roller' %}" class="btn btn-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>TEST NY SUBADMIN SIDE</h1>
+
+<p>Velg lokallag for å opprette eller vedlikeholde administratorer.</p>
+
+<ul>
+  {% for org in organisasjoner %}
+    <li>
+      <a href="/admin/lag/subadmin/{{ org.id }}/">
+        {{ org.organisasjon }}
+      </a>
+
+      {% if org.subdomene %}
+        – {{ org.subdomene }}.u3a.no
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

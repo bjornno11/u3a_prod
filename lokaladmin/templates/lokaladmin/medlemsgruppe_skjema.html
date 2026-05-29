@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}
+Medlemsgruppe – Lokaladmin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-3">
+      {% if gruppe %}
+        Rediger medlemsgruppe
+      {% else %}
+        Ny medlemsgruppe
+      {% endif %}
+    </h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="navn" class="form-label">Navn</label>
+        <input
+          type="text"
+          name="navn"
+          id="navn"
+          class="form-control"
+          value="{% if gruppe %}{{ gruppe.navn }}{% endif %}"
+          required>
+      </div>
+
+      <div class="form-check mb-3">
+        <input
+          type="checkbox"
+          name="aktiv"
+          id="aktiv"
+          class="form-check-input"
+          {% if not gruppe or gruppe.aktiv %}checked{% endif %}>
+        <label for="aktiv" class="form-check-label">
+          Aktiv
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre
+      </button>
+
+      <a href="{% url 'lokaladmin:medlemsgrupper' %}" class="btn btn-outline-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

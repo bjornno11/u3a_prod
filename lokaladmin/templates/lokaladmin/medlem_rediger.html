@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}
+Rediger medlem
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">Rediger medlem</h1>
+
+    <p class="text-muted">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="row">
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Fornavn</label>
+          <input type="text" name="fornavn" class="form-control" value="{{ medlem.fornavn }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Etternavn</label>
+          <input type="text" name="etternavn" class="form-control" value="{{ medlem.etternavn }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">E-post</label>
+          <input type="email" name="epost" class="form-control" value="{{ medlem.epost }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Telefon</label>
+          <input type="text" name="telefon" class="form-control" value="{{ medlem.telefon }}">
+        </div>
+
+        <div class="col-md-8 mb-3">
+          <label class="form-label">Adresse</label>
+          <input type="text" name="adresse" class="form-control" value="{{ medlem.adresse }}">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Postnummer</label>
+          <input type="text" name="postnummer" class="form-control" value="{{ medlem.postnummer }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Poststed</label>
+          <input type="text" name="poststed" class="form-control" value="{{ medlem.poststed }}">
+        </div>
+
+<div class="col-md-6 mb-3">
+  <label class="form-label">Gruppe</label>
+
+  <select name="gruppe" class="form-select">
+    <option value="">Ingen gruppe</option>
+
+    {% for gruppe in grupper %}
+      <option value="{{ gruppe.id }}"
+        {% if medlem.gruppe_id == gruppe.id %}selected{% endif %}>
+        {{ gruppe.navn }}
+      </option>
+    {% endfor %}
+
+  </select>
+</div>
+
+<div class="col-md-6 mb-3">
+  <label class="form-label">Status</label>
+
+  <select name="status" class="form-select">
+
+    {% for value, label in status_choices %}
+
+      <option value="{{ value }}"
+        {% if medlem.status == value %}selected{% endif %}>
+
+        {{ label }}
+
+      </option>
+
+    {% endfor %}
+
+  </select>
+</div>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre
+      </button>
+
+      <a href="{% url 'lokaladmin:medlemsliste' %}" class="btn btn-outline-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+Last opp bilde
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      Last opp bilde
+    </h1>
+
+    <form method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">
+          Tittel
+        </label>
+
+        <input
+          type="text"
+          name="tittel"
+          class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Beskrivelse
+        </label>
+
+        <textarea
+          name="beskrivelse"
+          class="form-control"
+          rows="5"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Bilde
+        </label>
+
+        <input
+          type="file"
+          name="bilde"
+          class="form-control">
+      </div>
+
+      <div class="form-check mb-4">
+
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="publisert"
+          checked>
+
+        <label class="form-check-label">
+          Publisert
+        </label>
+
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary">
+        Last opp bilde
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

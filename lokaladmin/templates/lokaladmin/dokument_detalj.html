@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ dokument.tittel }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+
+      <div>
+
+        <h1 class="mb-2">
+          {{ dokument.tittel }}
+        </h1>
+
+        <div class="text-muted">
+          {{ dokument.get_kategori_display }}
+        </div>
+
+      </div>
+
+      <div>
+
+        {% if dokument.er_styredokument %}
+            <a href="{% url 'lokaladmin:styredokument_last_ned' dokument.id %}">
+                Åpne styredokument
+            </a>
+        {% else %}
+            <a href="{{ dokument.fil.url }}">
+                Åpne dokument
+            </a>
+        {% endif %}
+
+	<p class="mt-3">
+	    <a href="{% url 'lokaladmin:dokument_rediger' dokument.id %}"
+	       class="btn btn-warning">
+	        Rediger dokument
+	    </a>
+	</p>
+
+        <p class="mt-3">
+            <a href="{% url 'lokaladmin:dokument_slett' dokument.id %}"
+               class="btn btn-danger">
+                Slett dokument
+            </a>
+        </p>
+
+      </div>
+
+    </div>
+
+    <table class="table">
+
+      <tr>
+        <th style="width:200px;">Kategori</th>
+        <td>{{ dokument.get_kategori_display }}</td>
+      </tr>
+
+        <tr>
+            <th>Opprettet</th>
+            <td>{{ dokument.opprettet|date:"d.m.Y H:i" }}</td>
+        </tr>
+
+        <tr>
+            <th>Sist endret</th>
+            <td>{{ dokument.sist_endret|date:"d.m.Y H:i" }}</td>
+        </tr>
+
+        <tr>
+            <th>Opprettet av</th>
+            <td>
+                {% if dokument.opprettet_av %}
+                    {{ dokument.opprettet_av.username }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+      <tr>
+        <th>Styredokument</th>
+        <td>
+          {% if dokument.er_styredokument %}
+            Ja
+          {% else %}
+            Nei
+          {% endif %}
+        </td>
+      </tr>
+
+      <tr>
+        <th>Beskrivelse</th>
+        <td>
+          {{ dokument.beskrivelse|linebreaks }}
+        </td>
+      </tr>
+
+      <tr>
+        <th>Fil</th>
+        <td>
+          {{ dokument.fil.name }}
+        </td>
+      </tr>
+
+    </table>
+
+    <div class="mt-4">
+
+      <a href="javascript:history.back()"
+         class="btn btn-outline-secondary">
+        Tilbake
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

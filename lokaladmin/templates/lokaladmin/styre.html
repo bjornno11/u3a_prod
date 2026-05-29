@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}
+Styre – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <div>
+        <h1 class="mb-1">
+          Styre og verv
+        </h1>
+
+        <p class="text-muted mb-0">
+          {{ organisasjon.organisasjon }}
+        </p>
+      </div>
+
+      <div>
+        <a href="{% url 'lokaladmin:verv_nytt' %}"
+           class="btn btn-primary">
+          Nytt verv
+        </a>
+      </div>
+
+    </div>
+
+<div class="table-responsive">
+
+  <table class="table table-hover align-middle">
+
+    <thead>
+      <tr>
+        <th>Rolle</th>
+        <th>Navn</th>
+        <th>Utvalg</th>
+        <th>Fra dato</th>
+        <th>Til dato</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {% for v in verv %}
+
+        <tr>
+
+          <td>{{ v.rolle.navn }}</td>
+
+          <td>
+            {{ v.medlem.fornavn }}
+            {{ v.medlem.etternavn }}
+          </td>
+
+          <td>
+            {% if v.utvalg %}
+              {{ v.utvalg.navn }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          <td>{{ v.fra_dato|date:"d.m.Y" }}</td>
+
+          <td>{{ v.til_dato|date:"d.m.Y" }}</td>
+
+          <td>
+            {% if v.aktiv %}
+              <span class="badge bg-success">Aktiv</span>
+            {% else %}
+              <span class="badge bg-secondary">Avsluttet</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <a href="{% url 'lokaladmin:verv_rediger' v.id %}"
+               class="btn btn-sm btn-outline-primary">
+              Rediger
+            </a>
+          </td>
+
+        </tr>
+
+      {% empty %}
+
+        <tr>
+          <td colspan="7" class="text-muted">
+            Ingen verv registrert.
+          </td>
+        </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+  </table>
+
+</div>
+  </div>
+
+</div>
+
+{% endblock %}

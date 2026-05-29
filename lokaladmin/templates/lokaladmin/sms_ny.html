@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ny tekstmelding
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">Ny tekstmelding</h1>
+
+    <p class="text-muted">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+
+      {% csrf_token %}
+
+      <div class="row">
+
+        <div class="col-md-6 mb-3">
+
+          <label class="form-label">
+            Alle medlemmer med status
+          </label>
+
+          <select name="status" class="form-select">
+
+            <option value="">
+              Alle statuser
+            </option>
+
+            {% for value, label in status_choices %}
+
+              <option value="{{ value }}">
+                {{ label }}
+              </option>
+
+            {% endfor %}
+
+          </select>
+
+        </div>
+
+        <div class="col-md-6 mb-3">
+
+          <label class="form-label">
+            Gruppe
+          </label>
+
+          <select name="gruppe" class="form-select">
+
+            <option value="">
+              Alle grupper
+            </option>
+
+            {% for gruppe in grupper %}
+
+              <option value="{{ gruppe.id }}">
+                {{ gruppe.navn }}
+              </option>
+
+            {% endfor %}
+
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Tekstmelding
+        </label>
+
+        <textarea
+          name="melding"
+          class="form-control"
+          rows="6"
+          maxlength="160"
+          required></textarea>
+
+        <div class="form-text">
+          Maks 160 tegn i første versjon.
+        </div>
+
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary">
+
+        Lagre tekstmelding
+
+      </button>
+
+      <a href="{% url 'lokaladmin:tekstmeldinger' %}"
+         class="btn btn-outline-secondary">
+
+        Avbryt
+
+      </a>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

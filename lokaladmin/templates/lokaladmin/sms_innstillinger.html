@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}
+SMS-innstillinger
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">SMS-innstillinger</h1>
+
+    <p class="text-muted">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Leverandørnavn</label>
+        <input type="text" name="navn" class="form-control" value="{{ leverandor.navn }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">API URL</label>
+        <input type="text" name="api_url" class="form-control" value="{{ leverandor.api_url }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">API-nøkkel / brukernavn</label>
+        <input type="text" name="api_key" class="form-control" value="{{ leverandor.api_key }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">API-secret / passord</label>
+        <input type="password" name="api_secret" class="form-control" value="{{ leverandor.api_secret }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Avsendernavn</label>
+        <input type="text" name="avsender" class="form-control" value="{{ leverandor.avsender }}">
+      </div>
+
+      <div class="form-check mb-3">
+        <input type="checkbox" name="aktiv" id="aktiv" class="form-check-input"
+          {% if leverandor.aktiv %}checked{% endif %}>
+        <label for="aktiv" class="form-check-label">
+          SMS aktivert
+        </label>
+      </div>
+
+	<div class="form-check mb-3">
+	  <input type="checkbox" name="testmodus" id="testmodus" class="form-check-input"
+	    {% if leverandor.testmodus %}checked{% endif %}>
+	  <label for="testmodus" class="form-check-label">
+	    Testmodus – ikke send ekte SMS
+	  </label>
+	</div>
+
+      <button type="submit" class="btn btn-primary">
+        Lagre
+      </button>
+
+      <a href="{% url 'lokaladmin:tekstmeldinger' %}" class="btn btn-outline-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
+

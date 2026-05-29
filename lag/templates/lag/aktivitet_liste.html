@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if lokallag %}
+    Aktiviteter – {{ lokallag.organisasjon }}
+  {% else %}
+    Aktiviteter – U3A Norge
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-3">
+    {% if lokallag %}
+      Aktiviteter i {{ lokallag.organisasjon }}
+    {% else %}
+      Aktiviteter fra lagene
+    {% endif %}
+  </h1>
+
+  {% if aktiviteter %}
+    <div class="list-group">
+      {% for a in aktiviteter %}
+        <a class="list-group-item list-group-item-action"
+           href="{% url 'aktivitet_detalj' slug=a.slug %}">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ a.tittel }}</h5>
+            <small class="text-muted">{{ a.dato }}</small>
+          </div>
+          <p class="mb-1">{{ a.kortinfo }}</p>
+
+          {% if not lokallag and a.organisasjon %}
+            <small class="text-muted">{{ a.organisasjon.organisasjon }}</small>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">Ingen aktiviteter ennå.</div>
+  {% endif %}
+
+  {% if lokallag %}
+    <div class="mt-4">
+      <a href="https://u3a.no/aktivitet/" class="btn btn-outline-primary btn-sm">
+        Se nasjonale aktiviteter
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

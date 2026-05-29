@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+Medlemmer – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">
+      Medlemmer
+    </h1>
+
+    <p class="text-muted mb-4">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="row g-4">
+
+	<div class="col-md-6 col-lg-3">
+
+	    <a href="{% url 'lokaladmin:medlemsliste' %}"
+	       class="text-decoration-none">
+
+	      <div class="card shadow-sm border-0 h-100 text-center p-4">
+
+	        <div style="font-size:48px;">👥</div>
+
+	        <h5 class="mt-3 mb-0">
+	          Medlemsliste
+	        </h5>
+
+	      </div>
+
+	    </a>
+
+	</div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="/godkjenn-medlemmer/"
+           class="text-decoration-none">
+          <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">✅</div>
+            <h5 class="mt-3 mb-0">
+              Godkjenning
+            </h5>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="/registrer-medlem/"
+           class="text-decoration-none">
+          <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">➕</div>
+            <h5 class="mt-3 mb-0">
+              Nytt medlem
+            </h5>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="{% url 'lokaladmin:styre' %}"
+           class="text-decoration-none">
+          <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">🎖️</div>
+            <h5 class="mt-3 mb-0">
+              Verv
+            </h5>
+          </div>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

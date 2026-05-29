@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+Tekstmelding
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">Tekstmelding</h1>
+
+    <p class="text-muted">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+    <p>
+	<a href="{% url 'lokaladmin:sms_utsending_send' utsending.id %}"
+	   class="btn btn-success btn-sm"
+	   onclick="return confirm('Send SMS nå?');">
+	  Send SMS
+	</a>
+
+	{% if utsending.status == 5 %}
+	  <a href="{% url 'lokaladmin:sms_utsending_tilbakestill' utsending.id %}"
+	     class="btn btn-warning btn-sm"
+	     onclick="return confirm('Tilbakestille testutsending til kladd?');">
+	    Tilbakestill til kladd
+	  </a>
+	{% endif %}
+
+      <a href="{% url 'lokaladmin:tekstmeldinger' %}" class="btn btn-outline-secondary btn-sm">
+        Tilbake
+      </a>
+    </p>
+
+    <div class="alert alert-light border">
+      <strong>Status:</strong> {{ utsending.get_status_display }}<br>
+      <strong>Mottakere:</strong> {{ utsending.mottakertekst }}<br>
+      <strong>Antall:</strong> {{ utsending.antall_mottakere }}
+    </div>
+
+    <h5>Melding</h5>
+
+    <p class="border rounded p-3">
+      {{ utsending.melding }}
+    </p>
+
+    <h5 class="mt-4">Mottakere</h5>
+
+    {% if mottakere %}
+      <table class="table table-striped align-middle">
+	<thead>
+	  <tr>
+	    <th>Navn</th>
+	    <th>Telefon</th>
+	    <th>Status</th>
+	    <th></th>
+	  </tr>
+	</thead>
+        <tbody>
+          {% for sms in mottakere %}
+            <tr>
+              <td>
+                {% if sms.medlem %}
+                  {{ sms.medlem.etternavn }}, {{ sms.medlem.fornavn }}
+                {% else %}
+                  Ukjent medlem
+                {% endif %}
+              </td>
+              <td>{{ sms.telefon }}</td>
+              <td>{{ sms.get_status_display }}</td>
+		<td class="text-end">
+		  {% if sms.status == 1 %}
+		    <a href="{% url 'lokaladmin:sms_mottaker_slett' utsending.id sms.id %}"
+		       class="btn btn-outline-danger btn-sm"
+		       onclick="return confirm('Slette denne mottakeren fra utsendingen?');">
+		      Slett
+		    </a>
+		  {% endif %}
+		</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Ingen mottakere registrert.</p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

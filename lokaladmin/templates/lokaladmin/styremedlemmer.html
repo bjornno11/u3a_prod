@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+Styremedlemmer – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:styre_organisasjon' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til Styre / organisasjon
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="mb-1">Styremedlemmer</h1>
+        <p class="text-muted mb-0">
+          Her vedlikeholdes styret og andre verv i lokallaget.
+        </p>
+      </div>
+
+      <a href="{% url 'lokaladmin:styremedlem_ny' %}" class="btn btn-primary">
+        Nytt styremedlem
+      </a>
+    </div>
+
+    {% if verv %}
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Medlem</th>
+            <th>Rolle</th>
+            <th>Utvalg</th>
+            <th>Fra</th>
+            <th>Til</th>
+            <th>Aktiv</th>
+            <th style="width: 180px;">Handling</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in verv %}
+            <tr>
+              <td>{{ v.medlem.fornavn }} {{ v.medlem.etternavn }}</td>
+              <td>{{ v.rolle.navn }}</td>
+              <td>{% if v.utvalg %}{{ v.utvalg.navn }}{% endif %}</td>
+              <td>{{ v.fra_dato|date:"d.m.Y" }}</td>
+              <td>{{ v.til_dato|date:"d.m.Y" }}</td>
+              <td>
+                {% if v.aktiv %}
+                  Ja
+                {% else %}
+                  Nei
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'lokaladmin:styremedlem_rediger' v.id %}" class="btn btn-sm btn-outline-primary">
+                  Rediger
+                </a>
+
+                <a href="{% url 'lokaladmin:styremedlem_slett' v.id %}"
+                   class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Vil du slette dette vervet?');">
+                  Slett
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">
+        Ingen styremedlemmer eller verv er registrert ennå.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

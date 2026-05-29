@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}
+Medlemsgrupper – Lokaladmin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">Medlemsgrupper</h1>
+
+    <p class="text-muted">
+      Grupper for {{ organisasjon.organisasjon }}.
+    </p>
+
+    <p>
+      <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+        Tilbake
+      </a>
+      <a href="{% url 'lokaladmin:medlemsgruppe_ny' %}" class="btn btn-primary btn-sm">
+        Ny gruppe
+      </a>
+    </p>
+
+    {% if grupper %}
+      <table class="table table-striped align-middle">
+        <thead>
+	<tr>
+	  <th>Navn</th>
+	  <th>Aktiv</th>
+	  <th></th>
+	</tr>
+        </thead>
+        <tbody>
+          {% for gruppe in grupper %}
+
+	<tr>
+	  <td>{{ gruppe.navn }}</td>
+	  <td>
+	    {% if gruppe.aktiv %}
+	      Ja
+	    {% else %}
+	      Nei
+	    {% endif %}
+	  </td>
+	  <td class="text-end">
+	    <a href="{% url 'lokaladmin:medlemsgruppe_rediger' gruppe.id %}" class="btn btn-outline-primary btn-sm">
+	      Rediger
+	    </a>
+	  </td>
+	</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Det er ikke registrert noen medlemsgrupper ennå.</p>
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}
+Medlemsliste
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+    <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+        ← Tilbake til lokaladmin
+    </a>
+    <div class="bg-white rounded-3 shadow-sm p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h1 class="mb-1">
+                    Medlemsliste
+                </h1>
+
+                <p class="text-muted mb-0">
+                    {{ organisasjon.organisasjon }}
+                </p>
+            </div>
+
+            <div>
+		<a href="{% url 'lokaladmin:medlemsliste_csv' %}"
+		   class="btn btn-outline-success me-2">
+		    Eksporter CSV
+		</a>
+
+		<a href="/registrer-medlem/"
+		   class="btn btn-primary">
+		    Nytt medlem
+		</a>
+            </div>
+
+        </div>
+	<form method="get" class="row g-2 mb-4">
+
+	  <div class="col-md-4">
+	    <input
+	      type="text"
+	      name="q"
+	      class="form-control"
+	      placeholder="Søk navn, e-post eller telefon"
+	      value="{{ q }}">
+	  </div>
+
+	  <div class="col-md-3">
+	    <select name="gruppe" class="form-select">
+	      <option value="">Alle grupper</option>
+	      {% for gruppe in grupper %}
+	        <option value="{{ gruppe.id }}"
+	          {% if valgt_gruppe == gruppe.id|stringformat:"s" %}selected{% endif %}>
+	          {{ gruppe.navn }}
+	        </option>
+	      {% endfor %}
+	    </select>
+	  </div>
+
+	<div class="col-md-3">
+	  <select name="status" class="form-select">
+	    <option value="">Alle statuser</option>
+	    <option value="1" {% if valgt_status == "1" %}selected{% endif %}>Ny</option>
+	    <option value="2" {% if valgt_status == "2" %}selected{% endif %}>Registrert</option>
+	    <option value="3" {% if valgt_status == "3" %}selected{% endif %}>Godkjent</option>
+	    <option value="4" {% if valgt_status == "4" %}selected{% endif %}>Avvist</option>
+	  </select>
+	</div>
+	  <div class="col-md-2">
+	    <button type="submit" class="btn btn-primary w-100">
+	      Filtrer
+	    </button>
+	  </div>
+
+	</form>
+
+	<p class="text-muted">
+	  Viser {{ medlemmer|length }} medlem(mer).
+	</p>
+        {% if medlemmer %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+				<th>Navn</th>
+				<th>Gruppe</th>
+				<th>E-post</th>
+				<th>Telefon</th>
+				<th>Status</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for m in medlemmer %}
+
+                            <tr>
+
+				<td>
+				    <a href="{% url 'lokaladmin:medlem_rediger' m.id %}">
+				        {{ m.etternavn }}, {{ m.fornavn }}
+				<td>
+				    {% if m.gruppe %}
+				        {{ m.gruppe.navn }}
+				    {% endif %}
+				</td>
+				    </a>
+				</td>
+                                <td>
+                                    {{ m.epost }}
+                                </td>
+
+                                <td>
+                                    {{ m.telefon }}
+                                </td>
+
+                                <td>
+                                    {{ m.get_status_display }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p>Ingen medlemmer registrert.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

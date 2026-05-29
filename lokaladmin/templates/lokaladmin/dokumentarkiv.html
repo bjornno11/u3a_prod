@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dokumentarkiv – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h1 class="mb-1">
+            Dokumentarkiv
+        </h1>
+
+        <p class="text-muted mb-0">
+            {{ organisasjon.organisasjon }}
+        </p>
+
+        <form method="get" class="mb-3 mt-3">
+
+            <label for="kategori">Filtrer på kategori:</label>
+
+            <select name="kategori" id="kategori">
+                <option value="">Alle kategorier</option>
+
+                {% for verdi, navn in kategorier %}
+                    <option value="{{ verdi }}"
+                        {% if valgt_kategori == verdi %}selected{% endif %}>
+                        {{ navn }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            <button type="submit" class="btn btn-primary">
+                Filtrer
+            </button>
+
+            <a href="{% url 'lokaladmin:dokumentarkiv' %}"
+               class="btn btn-secondary">
+                Nullstill
+            </a>
+
+        </form>
+
+    </div>
+
+    <div>
+        <a href="{% url 'lokaladmin:dokument_nytt' %}"
+           class="btn btn-primary">
+            Last opp dokument
+        </a>
+    </div>
+
+</div>
+
+    <div class="row g-4">
+
+      <div class="col-md-6 col-lg-3">
+      </div>
+<h3 class="mb-4">
+  Dokumenter
+</h3>
+
+{% if dokumenter %}
+
+  <div class="table-responsive">
+
+    <table class="table table-hover align-middle">
+
+      <thead>
+        <tr>
+          <th>Tittel</th>
+          <th>Kategori</th>
+          <th>Opprettet</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for d in dokumenter %}
+
+          <tr>
+
+            <td>
+	<a href="{% url 'lokaladmin:dokument_detalj' d.id %}">
+	    {{ d.tittel|default:"Uten tittel" }}
+	</a>
+
+            </td>
+
+            <td>
+              {{ d.get_kategori_display }}
+            </td>
+
+            <td>
+              {{ d.opprettet|date:"d.m.Y" }}
+            </td>
+
+            <td style="width:140px;">
+
+              <a href="{{ d.fil.url }}"
+                 target="_blank"
+                 class="btn btn-sm btn-outline-primary">
+                Åpne
+              </a>
+
+            </td>
+
+          </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+{% else %}
+
+  <p class="text-muted">
+    Ingen dokumenter registrert.
+  </p>
+
+{% endif %}
+
+      <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 text-center p-4">
+          <div style="font-size:48px;">📘</div>
+          <h5 class="mt-3 mb-0">
+            Årsmøter
+          </h5>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 text-center p-4">
+          <div style="font-size:48px;">📊</div>
+          <h5 class="mt-3 mb-0">
+            Regnskap
+          </h5>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 text-center p-4">
+          <div style="font-size:48px;">📜</div>
+          <h5 class="mt-3 mb-0">
+            Vedtekter
+          </h5>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

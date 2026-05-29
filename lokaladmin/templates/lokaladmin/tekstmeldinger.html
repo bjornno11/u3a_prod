@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+Tekstmeldinger – Lokaladmin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-2">Tekstmeldinger</h1>
+
+    <p class="text-muted">
+      {{ organisasjon.organisasjon }}
+    </p>
+
+	<p class="mb-3">
+
+	  <a href="{% url 'lokaladmin:dashboard' %}"
+	     class="btn btn-outline-secondary btn-sm">
+	    Tilbake
+	  </a>
+
+	  <a href="{% url 'lokaladmin:sms_innstillinger' %}"
+	     class="btn btn-outline-primary btn-sm">
+	    SMS-innstillinger
+	  </a>
+	  <a href="{% url 'lokaladmin:sms_ny' %}"
+	     class="btn btn-primary btn-sm">
+	    Ny tekstmelding
+	  </a>  
+
+	</p>
+
+    {% if leverandor and leverandor.aktiv %}
+      <p class="alert alert-success">
+        SMS er aktivert. Leverandør: {{ leverandor.navn }}
+      </p>
+    {% else %}
+      <p class="alert alert-warning">
+        SMS er ikke aktivert for dette lokallaget.
+      </p>
+    {% endif %}
+
+    <p>
+      <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+        Tilbake
+      </a>
+    </p>
+
+	<h3 class="mt-4">Siste tekstmeldinger</h3>
+
+	{% if utsendinger %}
+	  <table class="table table-striped align-middle">
+	    <thead>
+	      <tr>
+	        <th>Dato</th>
+	        <th>Mottakere</th>
+	        <th>Antall</th>
+	        <th>Status</th>
+	        <th>Melding</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      {% for utsending in utsendinger %}
+	        <tr>
+	          <td>{{ utsending.opprettet|date:"d.m.Y H:i" }}</td>
+	          <td>{{ utsending.mottakertekst }}</td>
+	          <td>{{ utsending.antall_mottakere }}</td>
+	          <td>{{ utsending.get_status_display }}</td>
+     		  <td>
+		    <a href="{% url 'lokaladmin:sms_utsending_detalj' utsending.id %}">
+		      {{ utsending.melding|truncatechars:60 }}
+		    </a>
+		  </td>	          
+
+	        </tr>
+	      {% endfor %}
+	    </tbody>
+	  </table>
+	{% else %}
+	  <p>Ingen tekstmeldinger er registrert ennå.</p>
+	{% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
+

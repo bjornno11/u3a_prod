@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}
+Redaktører – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:styre_organisasjon' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til Styre / organisasjon
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="mb-1">Redaktører</h1>
+        <p class="text-muted mb-0">
+          Her administreres hvem som har tilgang til lokaladmin for lokallaget.
+        </p>
+      </div>
+
+      <a href="{% url 'lokaladmin:redaktor_legg_til' %}" class="btn btn-primary">
+        Legg til redaktør
+      </a>
+    </div>
+
+    {% if redaktorer %}
+      <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+              <th>Navn</th>
+              <th>E-post</th>
+              <th>Brukernavn</th>
+              <th>Sist innlogget</th>
+              <th></th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for redaktor in redaktorer %}
+            <tr>
+              <td>{{ redaktor.first_name }} {{ redaktor.last_name }}</td>
+              <td>{{ redaktor.email }}</td>
+              <td>{{ redaktor.username }}</td>
+              <td>
+                {% if redaktor.last_login %}
+                  {{ redaktor.last_login|date:"d.m.Y H:i" }}
+                {% else %}
+                  Aldri
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'lokaladmin:redaktor_fjern' redaktor.id %}"
+                   class="btn btn-sm btn-outline-danger">
+                  Fjern
+                </a>
+              </td>
+            </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">
+        Ingen redaktører registrert.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

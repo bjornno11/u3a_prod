@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nyhet – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:nyheter' %}"
+     class="btn btn-outline-secondary mb-3">
+    ← Tilbake til nyheter
+  </a>
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      {% if nyhet %}
+        Rediger nyhet
+      {% else %}
+        Ny nyhet
+      {% endif %}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Tittel</label>
+
+        <input type="text"
+               name="tittel"
+               class="form-control"
+               value="{{ nyhet.tittel|default:'' }}"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Ingress</label>
+
+        <textarea name="ingress"
+                  class="form-control"
+                  rows="3">{{ nyhet.ingress|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Tekst</label>
+
+        <textarea name="tekst"
+                  class="form-control"
+                  rows="10">{{ nyhet.tekst|default:'' }}</textarea>
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">Bilde</label>
+
+        {% if nyhet and nyhet.bilde %}
+          <div class="mb-2">
+            <img src="{{ nyhet.bilde.url }}"
+                 class="img-fluid rounded"
+                 style="max-width: 250px;">
+          </div>
+        {% endif %}
+
+        <input type="file"
+               name="bilde"
+               class="form-control">
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">Publiseringsdato</label>
+
+        <input type="date"
+               name="publisert_dato"
+               class="form-control"
+               value="{{ nyhet.publisert_dato|date:'Y-m-d' }}">
+
+      </div>
+
+      <div class="form-check mb-4">
+
+        <input type="checkbox"
+               name="publisert"
+               class="form-check-input"
+               id="publisert"
+               {% if not nyhet or nyhet.publisert %}checked{% endif %}>
+
+        <label class="form-check-label" for="publisert">
+          Publisert
+        </label>
+
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary">
+
+        {% if nyhet %}
+          Oppdater nyhet
+        {% else %}
+          Lagre nyhet
+        {% endif %}
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

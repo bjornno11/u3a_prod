@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+Rediger dokument
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-4">
+      Rediger dokument
+    </h1>
+
+    <form method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Tittel
+        </label>
+
+        <input
+          type="text"
+          name="tittel"
+          value="{{ dokument.tittel }}"
+          class="form-control">
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Kategori
+        </label>
+
+        <select
+          name="kategori"
+          class="form-select">
+
+          {% for verdi, navn in kategorier %}
+
+            <option
+              value="{{ verdi }}"
+              {% if dokument.kategori == verdi %}selected{% endif %}>
+
+              {{ navn }}
+
+            </option>
+
+          {% endfor %}
+
+        </select>
+
+      </div>
+
+      <div class="mb-3">
+
+        <label class="form-label">
+          Beskrivelse
+        </label>
+
+        <textarea
+          name="beskrivelse"
+          class="form-control"
+          rows="5">{{ dokument.beskrivelse }}</textarea>
+
+      </div>
+
+	<div class="mb-3">
+
+	    <label class="form-label">
+	        Ny fil (valgfritt)
+	    </label>
+
+	    {% if dokument.fil %}
+	        <p class="text-muted">
+	            Nåværende fil: {{ dokument.fil.name }}
+	        </p>
+	    {% endif %}
+
+	    <input
+	      type="file"
+	      name="fil"
+	      class="form-control">
+
+	</div>
+
+      <div class="form-check mb-3">
+
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="er_styredokument"
+          {% if dokument.er_styredokument %}checked{% endif %}>
+
+        <label class="form-check-label">
+          Styredokument
+        </label>
+
+      </div>
+
+      <div class="form-check mb-4">
+
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="publisert"
+          {% if dokument.publisert %}checked{% endif %}>
+
+        <label class="form-check-label">
+          Publisert
+        </label>
+
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary">
+        Lagre endringer
+      </button>
+
+      <a href="{% url 'lokaladmin:dokument_detalj' dokument.id %}"
+         class="btn btn-secondary">
+        Avbryt
+      </a>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

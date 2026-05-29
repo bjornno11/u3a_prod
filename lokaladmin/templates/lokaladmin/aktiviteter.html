@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}
+Aktiviteter – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+	<a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+	    ← Tilbake til lokaladmin
+	</a>
+        <div class="bg-white rounded-3 shadow-sm p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <div>
+                                <h1 class="mb-1">Aktiviteter</h1>
+
+                                <p class="text-muted mb-0">
+                                        {{ organisasjon.organisasjon }}
+                                </p>
+                        </div>
+
+                        <div>
+                                <a href="{% url 'lokaladmin:aktivitet_ny' %}"
+                                   class="btn btn-primary">
+                                        Ny aktivitet
+                                </a>
+                        </div>
+
+                </div>
+
+                {% if aktiviteter %}
+
+                        <div class="row g-4 mb-4">
+
+                                <!-- Kalender -->
+                                <div class="col-lg-5">
+
+                                        <div class="card shadow-sm border-0">
+
+                                                <div class="card-body">
+
+                                                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                                                <a href="?year={{ prev_month.0 }}&month={{ prev_month.1 }}"
+                                                                   class="btn btn-sm btn-outline-secondary">
+                                                                        ←
+                                                                </a>
+
+                                                                <h5 class="mb-0">
+                                                                        {{ current_month|date:"F Y" }}
+                                                                </h5>
+
+                                                                <a href="?year={{ next_month.0 }}&month={{ next_month.1 }}"
+                                                                   class="btn btn-sm btn-outline-secondary">
+                                                                        →
+                                                                </a>
+
+                                                        </div>
+
+                                                        <table class="table table-bordered text-center align-middle mb-0">
+
+                                                                <thead>
+                                                                        <tr>
+                                                                                <th>Ma</th>
+                                                                                <th>Ti</th>
+                                                                                <th>On</th>
+                                                                                <th>To</th>
+                                                                                <th>Fr</th>
+                                                                                <th>Lø</th>
+                                                                                <th>Sø</th>
+                                                                        </tr>
+                                                                </thead>
+
+                                                                <tbody>
+
+                                                                        {% for week in calendar_weeks %}
+
+                                                                                <tr>
+
+                                                                                        {% for day in week %}
+
+                                                                                                <td
+                                                                                                        {% if day in aktivitet_datoer %}
+                                                                                                                style="background:#d1e7dd; font-weight:bold;"
+                                                                                                        {% endif %}
+                                                                                                >
+                                                                                                        {{ day.day }}
+                                                                                                </td>
+
+                                                                                        {% endfor %}
+
+                                                                                </tr>
+
+                                                                        {% endfor %}
+
+                                                                </tbody>
+
+                                                        </table>
+
+                                                </div>
+
+                                        </div>
+
+                                </div>
+
+                                <!-- Aktivitetsliste -->
+                                <div class="col-lg-7">
+
+                                        <div class="card shadow-sm border-0">
+
+                                                <div class="card-body">
+
+                                                        <h5 class="mb-3">
+                                                                Kommende aktiviteter
+                                                        </h5>
+
+                                                        <div class="table-responsive">
+
+                                                                <table class="table table-hover align-middle">
+
+                                                                        <thead>
+                                                                                <tr>
+                                                                                        <th>Dato</th>
+                                                                                        <th>Tittel</th>
+                                                                                        <th>Publisert</th>
+                                                                                        <th></th>
+                                                                                </tr>
+                                                                        </thead>
+
+                                                                        <tbody>
+
+                                                                                {% for a in aktiviteter %}
+
+                                                                                        <tr>
+
+                                                                                                <td style="width: 160px;">
+                                                                                                        {{ a.dato|date:"d.m.Y" }}
+                                                                                                </td>
+
+                                                                                                <td>
+                                                                                                        <strong>
+                                                                                                                {{ a.tittel|default:a.kortinfo }}
+                                                                                                        </strong>
+                                                                                                </td>
+
+                                                                                                <td style="width: 120px;">
+
+                                                                                                        {% if a.publisert %}
+                                                                                                                <span class="badge bg-success">
+                                                                                                                        Ja
+                                                                                                                </span>
+                                                                                                        {% else %}
+                                                                                                                <span class="badge bg-secondary">
+                                                                                                                        Nei
+                                                                                                                </span>
+                                                                                                        {% endif %}
+
+                                                                                                </td>
+
+                                                                                                <td style="width: 120px;">
+
+                                                                                                        <a href="{% url 'lokaladmin:aktivitet_rediger' a.id %}"
+                                                                                                           class="btn btn-sm btn-outline-primary">
+                                                                                                                Rediger
+                                                                                                        </a>
+
+                                                                                                </td>
+
+                                                                                        </tr>
+
+                                                                                {% endfor %}
+
+                                                                        </tbody>
+
+                                                                </table>
+
+                                                        </div>
+
+                                                </div>
+
+                                        </div>
+
+                                </div>
+
+                        </div>
+
+                {% else %}
+
+                        <p class="text-muted mb-0">
+                                Ingen aktiviteter registrert.
+                        </p>
+
+                {% endif %}
+
+        </div>
+
+</div>
+
+{% endblock %}

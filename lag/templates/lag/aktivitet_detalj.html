@@ -15,8 +15,31 @@
             <br>
             {{ aktivitet.lag.navn }}
         </p>
+	{% if aktivitet.kortinfo %}
+	    <p class="lead">
+	        {{ aktivitet.kortinfo }}
+	    </p>
+	{% endif %}
 
         <hr>
+		{% if aktivitet.bilde %}
+		    <div class="mb-4">
+		        <img src="{{ aktivitet.bilde.url }}"
+		             class="img-fluid rounded shadow-sm d-block mx-auto"
+                             style="max-height: 500px; width: auto;"
+		             alt="{{ aktivitet.tittel }}">
+		    </div>
+		{% endif %}
+
+		{% if aktivitet.vedlegg %}
+		    <div class="mb-4">
+		        <a href="{{ aktivitet.vedlegg.url }}"
+		           target="_blank"
+		           class="btn btn-outline-primary">
+		            Åpne dokument
+		        </a>
+		    </div>
+		{% endif %}
 
         <div class="mt-3">
             {{ aktivitet.beskrivelse|linebreaks }}

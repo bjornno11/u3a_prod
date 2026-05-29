@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+Bilder – Lokallag admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <div>
+        <h1 class="mb-1">
+          Bilder
+        </h1>
+
+        <p class="text-muted mb-0">
+          {{ organisasjon.organisasjon }}
+        </p>
+      </div>
+
+      <div>
+        <a href="{% url 'lokaladmin:bilde_nytt' %}"
+           class="btn btn-primary">
+          Last opp bilde
+        </a>
+      </div>
+
+    </div>
+
+<div class="row g-4">
+
+  {% for b in bilder %}
+
+    <div class="col-md-4">
+
+      <div class="card shadow-sm border-0 h-100">
+
+        <img src="{{ b.bilde.url }}"
+             class="card-img-top"
+             alt="{{ b.tittel }}"
+             style="height:240px; object-fit:cover;">
+
+        <div class="card-body">
+
+          <h5 class="card-title">
+            {{ b.tittel }}
+          </h5>
+
+          <p class="card-text text-muted small">
+            {{ b.beskrivelse }}
+          </p>
+            <a href="{{ b.bilde.url }}"
+               target="_blank"
+               class="btn btn-sm btn-outline-primary">
+               Åpne bilde
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  {% empty %}
+
+    <p class="text-muted">
+      Ingen bilder registrert.
+    </p>
+
+  {% endfor %}
+
+</div>
+{% endblock %}
+

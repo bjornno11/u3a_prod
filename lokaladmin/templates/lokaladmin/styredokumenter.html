@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}
+Styredokumenter
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+      ← Tilbake til lokaladmin
+  </a>
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <div>
+        <h1 class="mb-1">
+          Styredokumenter
+        </h1>
+
+        <p class="text-muted mb-0">
+          {{ organisasjon.organisasjon }}
+        </p>
+      </div>
+
+      <div>
+        <a href="{% url 'lokaladmin:dokument_nytt' %}?retur=styredokumenter"
+           class="btn btn-primary">
+          Last opp dokument
+        </a>
+      </div>
+
+    </div>
+
+    <div class="table-responsive">
+
+      <table class="table table-hover align-middle">
+
+        <thead>
+          <tr>
+            <th>Tittel</th>
+            <th>Kategori</th>
+            <th>Opprettet</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for d in dokumenter %}
+
+            <tr>
+
+              <td>
+                <a href="{% url 'lokaladmin:dokument_detalj' d.id %}">
+                  {{ d.tittel }}
+                </a>
+              </td>
+
+              <td>
+                {{ d.get_kategori_display }}
+              </td>
+
+              <td>
+                {{ d.opprettet|date:"d.m.Y" }}
+              </td>
+
+              <td>
+
+                <a href="{{ d.fil.url }}"
+                   target="_blank"
+                   class="btn btn-sm btn-outline-primary">
+                  Åpne
+                </a>
+
+              </td>
+
+            </tr>
+
+          {% empty %}
+
+            <tr>
+              <td colspan="4" class="text-muted">
+                Ingen styredokumenter registrert.
+              </td>
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

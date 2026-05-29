@@ -1,0 +1,29 @@
+<p><a href="{% url 'school:course_catalog' %}">Tilbake til kursoversikt</a></p>
+
+<h1>{{ course.title }}</h1>
+
+<p>{{ course.description }}</p>
+
+{% if course.audience %}
+  <p><strong>Målgruppe:</strong> {{ course.audience }}</p>
+{% endif %}
+
+{% if course.duration %}
+  <p><strong>Varighet:</strong> {{ course.duration }}</p>
+{% endif %}
+
+<h2>Moduler</h2>
+
+{% for module in modules %}
+  <article>
+    <h3>
+      <a href="{% url 'school:module_detail' course.slug module.slug %}">
+        {{ module.title }}
+      </a>
+    </h3>
+    <p>{{ module.intro }}</p>
+  </article>
+{% empty %}
+  <p>Det er ingen publiserte moduler ennå.</p>
+{% endfor %}
+

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ nyhet.tittel }} – {{ organisasjon.organisasjon }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+  <a href="/"
+     class="btn btn-outline-secondary mb-3">
+    ← Tilbake til forsiden
+  </a>
+
+  <article class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-3">{{ nyhet.tittel }}</h1>
+
+    {% if nyhet.publisert_dato %}
+      <p class="text-muted">
+        Publisert {{ nyhet.publisert_dato|date:"d.m.Y" }}
+      </p>
+    {% endif %}
+
+    {% if nyhet.bilde %}
+      <img src="{{ nyhet.bilde.url }}"
+           class="img-fluid rounded float-start me-4 mb-3"
+           style="max-width: 350px;"
+           alt="{{ nyhet.tittel }}">
+    {% endif %}
+
+    {% if nyhet.ingress %}
+      <p class="lead fw-bold">
+        {{ nyhet.ingress }}
+      </p>
+    {% endif %}
+
+    <div class="mt-4">
+      {{ nyhet.tekst|linebreaks }}
+    </div>
+
+  </article>
+
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,238 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Aktiver / vedlikehold subdomene</h1>
+
+<p>
+Skriv inn ønsket subdomene for å kontrollere om det allerede finnes i systemet.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    <table>
+        <tr>
+            <th>Subdomene</th>
+            <td>
+                <input type="text"
+                       name="subdomene"
+                       value="{{ subdomene }}"
+                       style="width: 300px;"
+                       placeholder="f.eks. frogn">
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <button type="submit" class="default">
+        Søk / fortsett
+    </button>
+</form>
+
+{% if resultat %}
+
+    <hr>
+
+    <h2>Resultat</h2>
+
+{% if resultat.modus == "opprettet" %}
+
+    <div style="
+        background: #d4edda;
+        border: 1px solid #28a745;
+        padding: 15px;
+        margin-top: 15px;
+        color: #155724;
+        border-radius: 5px;
+    ">
+        <strong>LOKALLAG OPPRETTET</strong><br>
+        {{ resultat.melding }}
+        <br><br>
+
+        <a href="{% url 'subdomene_detalj' subdomene %}"
+           style="
+               background:#417690;
+               color:white;
+               padding:10px 14px;
+               text-decoration:none;
+               border-radius:4px;
+               font-weight:bold;
+               display:inline-block;
+           ">
+            Videre behandling / vedlikehold
+        </a>
+    </div>
+
+{% elif resultat.modus == "endre" %}
+
+    <div style="
+        background: #d1ecf1;
+        border: 1px solid #17a2b8;
+        padding: 15px;
+        margin-top: 15px;
+        color: #0c5460;
+        border-radius: 5px;
+    ">
+        <strong>SUBDOMENE FINNES</strong><br>
+        {{ resultat.melding }}
+    <br><br>
+
+    <a href="{% url 'subdomene_detalj' subdomene %}"
+       style="
+          background:#417690;
+          color:white;
+          padding:10px 14px;
+          text-decoration:none;
+          border-radius:4px;
+          font-weight:bold;
+       ">
+        Vedlikehold subdomene
+    </a>
+    </div>
+
+{% elif resultat.dns_ok and resultat.modus == "opprett" %}
+    <div style="
+        background: #d4edda;
+        border: 1px solid #28a745;
+        padding: 15px;
+        margin-top: 15px;
+        color: #155724;
+        border-radius: 5px;
+    ">
+        <strong>DNS OK</strong><br>
+        {{ resultat.melding }}
+    </div>
+<br>
+
+<h2>Opprett nytt lokallag</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <input type="hidden" name="subdomene" value="{{ subdomene }}">
+    <input type="hidden" name="opprett_lokallag" value="1">
+
+    <table>
+        <tr>
+            <th>Organisasjonsnavn</th>
+            <td>
+                <input type="text"
+                       name="organisasjon"
+                       style="width: 400px;"
+                       placeholder="f.eks. Spydeberg U3A">
+            </td>
+        </tr>
+
+        <tr>
+            <th>Kommune</th>
+            <td>
+                <input type="text"
+                       name="kommune"
+                       style="width: 300px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>E-post</th>
+            <td>
+                <input type="email"
+                       name="epost"
+                       style="width: 300px;">
+            </td>
+        </tr>
+
+        <tr>
+            <th>Hjemmesidetype</th>
+            <td>
+                <select name="hjemmesidetype">
+                    <option value="1">1 - Enkel startside</option>
+                    <option value="2">2 - Kalender og aktiviteter</option>
+                    <option value="3">3 - Full lokallagsside</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <button type="submit" class="default">
+        Opprett lokallag
+    </button>
+
+</form>
+
+{% else %}
+
+    <div style="
+        background: #f8d7da;
+        border: 1px solid #dc3545;
+        padding: 15px;
+        margin-top: 15px;
+        color: #721c24;
+        border-radius: 5px;
+    ">
+        <strong>DNS FEIL</strong><br>
+        {{ resultat.melding }}
+    </div>
+
+{% endif %}
+    
+
+    {% if resultat.organisasjon %}
+
+        <table>
+            <tr>
+                <th>Organisasjon</th>
+                <td>{{ resultat.organisasjon.organisasjon }}</td>
+            </tr>
+
+            <tr>
+                <th>Status</th>
+                <td>{{ resultat.organisasjon.status }}</td>
+            </tr>
+
+            <tr>
+                <th>E-post</th>
+                <td>{{ resultat.organisasjon.epost }}</td>
+            </tr>
+        </table>
+<br>
+
+<form method="post" onsubmit="return confirm('Er du sikker på at du vil slette dette test-subdomenet?');">
+    {% csrf_token %}
+    <input type="hidden" name="subdomene" value="{{ subdomene }}">
+    <input type="hidden" name="slett_subdomene" value="1">
+
+    <button type="submit" style="background:#ba2121; color:white; padding:8px 12px; border:0; border-radius:4px;">
+        Slett test-subdomene
+    </button>
+</form>
+
+    {% endif %}
+
+{% endif %}
+
+<hr>
+
+<br>
+<br>
+<br>
+<p>
+    <a href="/admin/lag/organisasjon/"
+       style="
+          background:#417690;
+          color:white;
+          padding:10px 14px;
+          text-decoration:none;
+          border-radius:4px;
+          font-weight:bold;
+       ">
+        Tilbake til organisasjoner
+    </a>
+</p>
+{% endblock %}
+
+

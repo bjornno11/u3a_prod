@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{{ lokallag.organisasjon }} – U3A Norge
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+
+  <!-- Hero -->
+  <div class="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+
+    <div class="row g-4 align-items-center">
+
+      <div class="col-lg-8">
+
+        <h1 class="display-3 fw-bold mb-3">
+          {{ lokallag.organisasjon }}
+        </h1>
+
+        {% if lokallag.forside_ingress %}
+          <p class="fs-4">
+            {{ lokallag.forside_ingress }}
+          </p>
+        {% endif %}
+
+        {% if lokallag.forside_tekst %}
+          <div class="mt-4 fs-5">
+            {{ lokallag.forside_tekst|linebreaksbr }}
+          </div>
+        {% endif %}
+
+      </div>
+
+      <div class="col-lg-4">
+
+        {% if lokallag.forside_bilde %}
+          <img src="{{ lokallag.forside_bilde.url }}"
+               class="img-fluid rounded shadow"
+               alt="{{ lokallag.organisasjon }}">
+        {% else %}
+          <img src="{% static 'images/forside-side.jpg' %}"
+               class="img-fluid rounded shadow"
+               alt="U3A">
+        {% endif %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Dashboard -->
+  <div class="row g-4">
+
+    <!-- Arrangementer -->
+    <div class="col-xl-4">
+
+      <div class="bg-white rounded-4 shadow-sm p-4 h-100">
+
+        <h2 class="h3 fw-bold mb-4">
+          Arrangementer
+        </h2>
+
+        <div style="max-height: 500px; overflow-y: auto;">
+
+          {% if aktiviteter %}
+
+            <ul class="list-unstyled">
+
+              {% for a in aktiviteter %}
+
+                <li class="mb-4 pb-3 border-bottom">
+
+                  <div class="small text-muted mb-1">
+                    {{ a.dato|date:"d. F Y" }}
+                  </div>
+
+                  <div class="fw-bold fs-5">
+                    {% if a.slug %}
+                      <a href="{% url 'aktivitet_detalj' slug=a.slug %}">
+                        {{ a.tittel|default:a.kortinfo }}
+                      </a>
+                    {% else %}
+                      {{ a.tittel|default:a.kortinfo }}
+                    {% endif %}
+                  </div>
+
+                </li>
+
+              {% endfor %}
+
+            </ul>
+
+          {% else %}
+
+            <p class="text-muted">
+              Ingen arrangementer registrert.
+            </p>
+
+          {% endif %}
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Informasjon -->
+    <div class="col-xl-4">
+
+<div class="bg-white rounded-4 shadow-sm p-4 h-100">
+
+  <h2 class="h3 fw-bold mb-4">
+    Nyheter
+  </h2>
+
+  {% if nyheter %}
+
+    {% for nyhet in nyheter %}
+
+      <div class="mb-4">
+
+        <h3 class="h5 mb-2">
+          {{ nyhet.tittel }}
+        </h3>
+
+        <p class="mb-2">
+          {{ nyhet.ingress|truncatewords:20 }}
+        </p>
+
+        <a href="{% url 'nyhet_detalj' nyhet.id %}"
+           class="btn btn-sm btn-outline-primary">
+          Les mer
+        </a>
+
+      </div>
+
+    {% endfor %}
+
+  {% else %}
+
+    <p class="text-muted mb-0">
+      Ingen nyheter publisert ennå.
+    </p>
+
+  {% endif %}
+
+</div>
+    </div>
+
+    <!-- Hurtigvalg -->
+    <div class="col-xl-4">
+
+      <div class="bg-white rounded-4 shadow-sm p-4 h-100">
+
+        <h2 class="h3 fw-bold mb-4">
+          Hurtigvalg
+        </h2>
+
+        <div class="d-grid gap-3">
+
+          <a href="{% url 'program' %}" class="btn btn-primary btn-lg">
+            Program
+          </a>
+
+          <a href="{% url 'registrer_medlem' %}" class="btn btn-outline-primary btn-lg">
+            Bli medlem
+          </a>
+
+          <a href="#kontakt" class="btn btn-outline-secondary btn-lg">
+            Kontakt
+          </a>
+
+        </div>
+
+      </div>
+
+        </div>
+        <!-- Kontakt -->
+        <div class="row g-4 mt-4" id="kontakt">
+
+          <div class="col-12">
+
+            <div class="bg-white rounded-4 shadow-sm p-4">
+
+              <h2 class="h3 fw-bold mb-4">
+                Kontakt
+              </h2>
+
+              <p>
+                <strong>{{ lokallag.organisasjon }}</strong>
+              </p>
+
+              {% if lokallag.adresse %}
+                <p>{{ lokallag.adresse }}</p>
+              {% endif %}
+
+              {% if lokallag.telefon %}
+                <p>
+                  Telefon: {{ lokallag.telefon }}
+                </p>
+              {% endif %}
+
+              {% if lokallag.epost %}
+                <p>
+                  E-post:
+                  <a href="mailto:{{ lokallag.epost }}">
+                    {{ lokallag.epost }}
+                  </a>
+                </p>
+              {% endif %}
+
+              {% if lokallag.nettside %}
+                <p>
+                  Nettside:
+                  <a href="{{ lokallag.nettside }}">
+                    {{ lokallag.nettside }}
+                  </a>
+                </p>
+              {% endif %}
+
+            </div>
+
+          </div>
+
+        </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

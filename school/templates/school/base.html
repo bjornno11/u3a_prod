@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}u3a skole{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'school/school.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'school:course_catalog' %}">
+      <span class="brand-mark">u3a</span>
+      <span>skole</span>
+    </a>
+  </header>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>u3a skole - korte, trygge nettkurs for voksne deltakere</p>
+  </footer>
+</body>
+</html>
+

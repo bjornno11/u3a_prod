@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Slett dokument</h1>
+<a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til lokaladmin
+</a>
+
+<p>Er du sikker på at du vil slette dette dokumentet?</p>
+
+<table class="table">
+    <tr>
+        <th>Tittel</th>
+        <td>{{ dokument.tittel }}</td>
+    </tr>
+    <tr>
+        <th>Fil</th>
+        <td>{{ dokument.fil.name }}</td>
+    </tr>
+</table>
+
+<form method="post">
+    {% csrf_token %}
+
+    <button type="submit" class="btn btn-danger">
+        Ja, slett dokument
+    </button>
+
+    <a href="{% url 'lokaladmin:dokument_detalj' dokument.id %}"
+       class="btn btn-secondary">
+        Avbryt
+    </a>
+</form>
+
+{% endblock %}

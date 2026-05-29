@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Om u3a.no{% endblock %}
+
+{% block content %}
+            <section class="mb-5 py-4">
+                <div class="row align-items-center g-4">
+
+                    <div class="col-lg-7">
+
+                        <h1 class="display-4 fw-bold mb-4">
+                            Om u3a.no
+                        </h1>
+
+                        <p class="lead">
+                            u3a.no er en nasjonal plattform for senioruniversiteter,
+                            eldreuniversiteter, seniorakademier og U3A-miljøer i Norge.
+                        </p>
+
+                        <p class="fs-5">
+                            Målet er å gjøre det enklere å drive lokale kunnskaps-
+                            og aktivitetsmiljøer for seniorer.
+                        </p>
+
+                        <p class="mt-4">
+                            Plattformen skal bidra med synlighet, digitale løsninger,
+                            samarbeid og støtte – slik at lokallag kan bruke mer tid
+                            på aktivitet og mindre tid på administrasjon og teknikk.
+                        </p>
+
+                    </div>
+
+                    <div class="col-lg-5 text-center">
+
+                        <img src="{% static 'lag/img/u3a-produkter.png' %}"
+                             class="img-fluid rounded shadow"
+                             alt="U3A Norge">
+
+                    </div>
+
+                </div>
+            </section>
+
+            <section class="mt-5">
+
+                <h2>Hvorfor et nasjonalt samarbeid?</h2>
+
+                <p>
+                    Over hele Norge finnes det senioruniversiteter,
+                    eldreuniversiteter, seniorakademier og U3A-miljøer som gjør
+                    en viktig innsats for kunnskap, kultur og fellesskap.
+                </p>
+
+                <p>
+                    Mange drives av små frivillige miljøer med begrensede ressurser,
+                    samtidig som behovene til administrasjon, kommunikasjon og
+                    digitale løsninger stadig øker.
+                </p>
+
+                <p>
+                    u3a.no er etablert for å gjøre dette enklere.
+                </p>
+
+                <p>
+                    Målet er ikke å sentralisere eller overstyre lokallagene,
+                    men å tilby felles løsninger, støtte og synlighet – samtidig
+                    som hvert lokallag beholder sin egen identitet og frihet.
+                </p>
+
+                <div class="bg-light border rounded p-4 mt-4">
+
+                    <h3 class="h5">u3a.no skal bidra til:</h3>
+
+                    <ul class="mb-0">
+                        <li>enklere drift av lokallag</li>
+                        <li>bedre synlighet og rekruttering</li>
+                        <li>digitale verktøy tilpasset seniororganisasjoner</li>
+                        <li>deling av erfaringer og aktiviteter</li>
+                        <li>nasjonalt og internasjonalt samarbeid</li>
+                    </ul>
+
+                </div>
+
+            </section>
+
+            <section class="mt-5">
+
+                <h2>Hva kan u3a.no tilby lokallagene?</h2>
+
+                <p>
+                    u3a.no skal være en praktisk støtteplattform for lokallag som
+                    ønsker en enklere og mer profesjonell digital hverdag.
+                </p>
+
+                <div class="row g-4 mt-2">
+
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h3 class="h5">Nettsider for lokallag</h3>
+                                <p>
+                                    Lokallag kan få egen nettside under u3a.no,
+                                    for eksempel <strong>rakkestad.u3a.no</strong>.
+                                </p>
+                                <p class="mb-0">
+                                    Løsningen kan tilpasses lagets behov og kompetanse.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h3 class="h5">Medlemsregister</h3>
+                                <p>
+                                    Et enkelt medlemsregister kan gjøre det lettere
+                                    å holde oversikt over medlemmer, kontaktinformasjon,
+                                    verv og aktivitet.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h3 class="h5">Regnskap</h3>
+                                <p>
+                                    Mange lokallag har behov for enkel og trygg
+                                    økonomistyring. u3a.no planlegger løsninger
+                                    som kan støtte kassererarbeid, rapportering
+                                    og oversikt.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h3 class="h5">U3A-skolen</h3>
+                                <p>
+                                    U3A-skolen kan bli en digital læringsarena for
+                                    foredrag, kurs, opplæring og deling av kunnskap
+                                    mellom lokallag.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="mt-5">
+
+                <h2>Nettsider i tre nivåer</h2>
+
+                <p>
+                    Lokallag har ulike behov og ulik tilgang på IT-kompetanse.
+                    Derfor utvikles u3a.no med løsninger på flere nivåer.
+                </p>
+
+                <div class="row g-4 mt-2">
+
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-primary shadow-sm">
+                            <div class="card-body">
+
+                                <h3 class="h5">Type 1 – Enkel startside</h3>
+
+                                <p>
+                                    For lokallag som ønsker en enkel og trygg løsning
+                                    uten behov for teknisk kompetanse.
+                                </p>
+
+                                <ul>
+                                    <li>kontaktinformasjon</li>
+                                    <li>program og kalender</li>
+                                    <li>nyheter</li>
+                                    <li>innmeldingsside</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-primary shadow-sm">
+                            <div class="card-body">
+
+                                <h3 class="h5">Type 2 – Aktivt lokallag</h3>
+
+                                <p>
+                                    For lag som ønsker mer aktivitet og digitalt innhold.
+                                </p>
+
+                                <ul>
+                                    <li>Type 1 pluss:</li>
+                                    <li>dokumentarkiv</li>
+                                    <li>aktivitetsoversikt</li>
+                                    <li>flere redaktører</li>
+                                    <li>utvidet medlemsinformasjon</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-primary shadow-sm">
+                            <div class="card-body">
+
+                                <h3 class="h5">Type 3 – Utvidet løsning</h3>
+
+                                <p>
+                                    For større eller mer teknisk aktive miljøer med
+                                    behov for avanserte funksjoner.
+                                </p>
+
+                                <ul>
+                                    <li>Type 2 pluss:</li>
+                                    <li>egne tilpasninger</li>
+                                    <li>lokale administratorer</li>
+                                    <li>utvidede integrasjoner</li>
+                                    <li>avansert publisering</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <section class="mt-5">
+
+                <h2>U3A-skolen og digital læring</h2>
+
+                <p>
+                    u3a.no ønsker også å utvikle en felles læringsplattform –
+                    U3A-skolen.
+                </p>
+
+                <p>
+                    Målet er å gjøre foredrag, kurs og kunnskap tilgjengelig
+                    for flere, uavhengig av bosted og fysisk mobilitet.
+                </p>
+
+                <p>
+                    Gjennom digitale løsninger kan lokallag dele erfaringer,
+                    foredrag og aktiviteter med hverandre.
+                </p>
+
+                <div class="bg-light border rounded p-4 mt-4">
+
+                    <h3 class="h5">Mulige tilbud i U3A-skolen</h3>
+
+                    <ul class="mb-0">
+                        <li>digitale foredrag og seminarer</li>
+                        <li>opplæring i digitale verktøy</li>
+                        <li>deling av lokale foredrag og arrangementer</li>
+                        <li>kurs og kunnskapsressurser</li>
+                        <li>internasjonale møter og samarbeid</li>
+                    </ul>
+
+                </div>
+
+                <p class="mt-4">
+                    u3a.no ønsker også samarbeid med kulturinstitusjoner,
+                    utdanningsmiljøer og offentlige initiativer som
+                    Den kulturelle spaserstokken.
+                </p>
+
+                <p>
+                    På sikt kan plattformen bidra til å styrke både lokal aktivitet,
+                    digital deltakelse og kontakt mellom senioruniversiteter i Norge
+                    og resten av Europa.
+                </p>
+
+            </section>
+            <section class="mt-5">
+
+                <h2>Ideell drift og samarbeid</h2>
+
+                <p>
+                    u3a.no utvikles som en ideell plattform for senioruniversiteter,
+                    eldreuniversiteter og U3A-miljøer i Norge.
+                </p>
+
+                <p>
+                    Målet er å tilby praktiske og digitale løsninger etter
+                    selvkostprinsippet, slik at også små lokallag kan ta del
+                    i fellesskapet uten store økonomiske barrierer.
+                </p>
+
+                <p>
+                    Utviklingsarbeidet er så langt finansiert av initiativtakerne
+                    selv og bygger i stor grad på frivillig innsats og engasjement.
+                </p>
+
+                <p>
+                    På sikt ønsker u3a.no samarbeid med offentlige aktører,
+                    kulturinstitusjoner og støtteordninger som kan bidra til å
+                    styrke livslang læring, aktivitet og sosial deltakelse blant seniorer.
+                </p>
+
+            </section>
+{% endblock %}

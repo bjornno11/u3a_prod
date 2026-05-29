@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Lokallag admin{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h1 class="mb-3">Lokallag admin</h1>
+      <div class="mb-4">
+        <a href="{% url 'lokaladmin:logg_ut' %}" class="btn btn-outline-secondary btn-sm">
+          Logg ut
+        </a>
+      </div>
+
+    {% if organisasjon %}
+      <p class="lead">
+        Du administrerer:
+        <strong>{{ organisasjon.organisasjon }}</strong>
+      </p>
+
+      <<div class<div class="row g-3 mt-4"><div class="row g-3 mt-4"><div class="row g-3 mt-4"><div class="row g-3 mt-4">="row g-3 mt-4">div class="row g-3 mt-4">
+
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'lokaladmin:forside' %}"
+             class="btn btn-outline-primary w-100 p-3">
+            Forside
+          </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'lokaladmin:aktiviteter' %}"
+             class="btn btn-outline-primary w-100 p-3">
+            Aktiviteter
+          </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <a href="#" class="btn btn-outline-primary w-100 p-3">
+            Nyheter
+          </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <a href="#" class="btn btn-outline-primary w-100 p-3">
+            Redaktører
+          </a>
+        </div>
+
+      </div>
+
+    {% else %}
+      <p class="text-danger">
+        Din bruker er ikke koblet til et lokallag.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
