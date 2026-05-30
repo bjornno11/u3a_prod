@@ -1,33 +1,111 @@
+{% extends "school/base.html" %}
+
+{% block title %}{{ module.title }} | {{ course.title }}{% endblock %}
+
+{% block content %}
 <p>
   <a href="{% url 'school:course_detail' course.slug %}">
-    Tilbake til {{ course.title }}
+    Tilbake til kurset
   </a>
 </p>
 
-<h1>{{ module.title }}</h1>
+<section class="hero">
+  <h1>{{ module.title }}</h1>
 
-{% if module.intro %}
-  <p>{{ module.intro }}</p>
-{% endif %}
+  {% if module.intro %}
+    <p class="lead">{{ module.intro }}</p>
+  {% endif %}
+</section>
 
-<div>
-  {{ module.body|linebreaks }}
-</div>
+<section class="content-panel">
+  <div>
+    {{ module.body|linebreaks }}
+  </div>
 
-{% if module.video_url %}
-  <p>
-    <a href="{{ module.video_url }}">Se video</a>
-  </p>
-{% endif %}
+  {% if module.reflection_prompt %}
+    <section>
+      <h2>Refleksjon</h2>
+      <p>{{ module.reflection_prompt }}</p>
+      <textarea rows="7"></textarea>
+    </section>
+  {% endif %}
+</section>
 
-{% if module.reflection_prompt %}
-  <section>
-    <h2>Refleksjon</h2>
-    <p>{{ module.reflection_prompt }}</p>
-    <textarea rows="6" style="width: 100%; max-width: 720px;"></textarea>
+{% if quiz_questions %}
+  <section class="content-panel">
+    <h2>Mini-quiz</h2>
+
+    {% for question in quiz_questions %}
+      <div class="quiz-question" data-question-id="{{ question.id }}">
+        <h3>{{ question.question }}</h3>
+
+        {% for choice in question.choices.all %}
+          <label>
+            <input
+              type="radio"
+              name="question-{{ question.id }}"
+              value="{{ choice.id }}"
+              data-correct="{{ choice.is_correct|yesno:'true,false' }}"
+            >
+            {{ choice.text }}
+          </label>
+        {% endfor %}
+
+        <button type="button" onclick="checkQuizQuestion({{ question.id }})">
+          Sjekk svar
+        </button>
+
+        <p id="feedback-{{ question.id }}"></p>
+
+        {% if question.explanation %}
+          <p id="explanation-{{ question.id }}" style="display:none;">
+            {{ question.explanation }}
+          </p>
+        {% endif %}
+      </div>
+    {% endfor %}
   </section>
+
+  <script>
+    function checkQuizQuestion(questionId) {
+      const selected = document.querySelector(`input[name="question-${questionId}"]:checked`);
+      const feedback = document.getElementById(`feedback-${questionId}`);
+      const explanation = document.getElementById(`explanation-${questionId}`);
+
+      if (!selected) {
+        feedback.textContent = "Velg et svar først.";
+        return;
+      }
+
+      feedback.textContent = selected.dataset.correct === "true"
+        ? "Riktig."
+        : "Ikke helt riktig.";
+
+      if (explanation) {
+        explanation.style.display = "block";
+      }
+    }
+  </script>
 {% endif %}
 
+<nav class="nav-actions">
+  {% if previous_module %}
+    <a class="button" href="{% url 'school:module_detail' course.slug previous_module.slug %}">
+      Forrige modul
+    </a>
+  {% endif %}
+
+  {% if next_module %}
+    <a class="button" href="{% url 'school:module_detail' course.slug next_module.slug %}">
+      Neste modul
+    </a>
+  {% else %}
+    <a class="button" href="{% url 'school:completion_page' course.slug %}">
+      Fullfør kurset
+    </a>
+  {% endif %}
+</nav>
+{% endblock %}
 {% if quiz_questions %}
   <section>
     <h2>Mini-quiz</h2>

@@ -68,12 +68,16 @@
                            href="{% url 'aktivitet_liste' %}">Aktiviteter</a>
                     </li>
 
-		    <li class="nav-item">
-		        <a class="nav-link {% if request.resolver_match.url_name == 'styre_side' %}active{% endif %}"
-		           href="{% url 'styre_side' %}">
-		            Styret
-		        </a>
-		    </li>
+        		    <li class="nav-item">
+        		        <a class="nav-link {% if request.resolver_match.url_name == 'styre_side' %}active{% endif %}"
+        		           href="{% url 'styre_side' %}">
+        		            Styret
+        		        </a>
+        		    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://skole.u3a.no/">Skole</a>
+                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="#kontakt">Kontakt</a>

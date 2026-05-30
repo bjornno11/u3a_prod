@@ -1,22 +1,30 @@
-<h1>Fullført kurs</h1>
+{% extends "school/base.html" %}
 
-<p>Du har kommet til slutten av kurset:</p>
+{% block title %}Fullført kurs | {{ course.title }}{% endblock %}
 
-<h2>{{ course.title }}</h2>
+{% block content %}
+<section class="hero">
+  <h1>Fullført kurs</h1>
+  <p class="lead">Du har kommet til slutten av kurset.</p>
+</section>
 
-<p>
-  Denne siden kan skrives ut som en enkel bekreftelse på at du har gått gjennom kurset.
-</p>
+<section class="content-panel">
+  <h2>{{ course.title }}</h2>
 
-<p>
-  <strong>Dato:</strong> {% now "d.m.Y" %}
-</p>
+  <p>
+    Denne siden kan skrives ut som en enkel bekreftelse på at du har gått gjennom kurset.
+  </p>
 
-<button onclick="window.print()">Skriv ut</button>
+  <p>
+    <strong>Dato:</strong> {% now "d.m.Y" %}
+  </p>
 
-<p>
-  <a href="{% url 'school:course_detail' course.slug %}">
-    Tilbake til kurset
-  </a>
-</p>
+  <div class="nav-actions">
+    <button type="button" onclick="window.print()">Skriv ut</button>
 
+    <a class="button" href="{% url 'school:course_detail' course.slug %}">
+      Tilbake til kurset
+    </a>
+  </div>
+</section>
+{% endblock %}
