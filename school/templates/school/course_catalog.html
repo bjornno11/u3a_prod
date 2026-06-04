@@ -1,25 +1,86 @@
 {% extends "school/base.html" %}
 
-{% block title %}u3a skole{% endblock %}
+{% block title %}U3A-skolen{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <h1>u3a skole</h1>
-  <p class="lead">Korte, trygge nettkurs for voksne deltakere.</p>
+
+<section class="school-hero">
+  <div>
+    <p class="eyebrow">U3A Norge</p>
+
+    <h1>U3A-skolen</h1>
+
+    <p class="lead">
+      Korte, trygge nettkurs for voksne deltakere – uten eksamen,
+      uten karakterer og i ditt eget tempo.
+    </p>
+
+    <div class="hero-actions">
+      <a class="button" href="#kurs">Se kursene</a>
+      <a class="button button-secondary" href="https://u3a.no">Til u3a.no</a>
+    </div>
+  </div>
+
+  <div class="hero-panel">
+    <h2>Læring hele livet</h2>
+    <p>
+      Her finner du praktiske kurs om kunstig intelligens, digitale penger,
+      internett og andre temaer som er nyttige i hverdagen.
+    </p>
+  </div>
 </section>
 
-<section class="course-grid">
-  {% for course in courses %}
-    <article class="course-card">
-      <h2>{{ course.title }}</h2>
-      <p>{{ course.description }}</p>
-      <a class="button" href="{% url 'school:course_detail' course.slug %}">
-        Start kurset
-      </a>
-    </article>
-  {% empty %}
-    <p>Det er ingen publiserte kurs ennå.</p>
-  {% endfor %}
+<section class="intro-strip">
+  <div>
+    <strong>Trygt</strong>
+    <span>Rolig tempo og tydelige forklaringer.</span>
+  </div>
+  <div>
+    <strong>Praktisk</strong>
+    <span>Eksempler fra dagliglivet.</span>
+  </div>
+  <div>
+    <strong>Tilgjengelig</strong>
+    <span>Følg kursene når det passer deg.</span>
+  </div>
 </section>
+
+<section id="kurs" class="course-section">
+  <div class="section-heading">
+    <h2>Tilgjengelige kurs</h2>
+    <p>Velg et kurs og start når du er klar.</p>
+  </div>
+  <div class="course-grid">
+    {% for course in courses %}
+
+      <article class="course-card">
+
+        {% if course.image %}
+          <img src="{{ course.image.url }}"
+               alt="{{ course.title }}"
+               class="course-card-image">
+        {% else %}
+          <div class="course-icon">🎓</div>
+        {% endif %}
+
+        <h3>{{ course.title }}</h3>
+
+        <p>{{ course.description }}</p>
+
+        <a class="button" href="{% url 'school:course_detail' course.slug %}">
+          Start kurset
+        </a>
+
+      </article>
+
+    {% empty %}
+      <div class="content-panel">
+        <p>Det er ingen publiserte kurs ennå.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</section>
+
 {% endblock %}
 

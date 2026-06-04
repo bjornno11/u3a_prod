@@ -15,6 +15,7 @@ from .models import (
     Medlemsgruppe,
     SmsLeverandor,
     SmsLogg,
+    Sidevisning,
 )
 from django.urls import path
 from django.shortcuts import redirect, render
@@ -438,32 +439,34 @@ class NyhetAdmin(admin.ModelAdmin):
         "publisert_dato",
     )
 
-def get_queryset(self, request):
-    qs = super().get_queryset(request)
-    if request.user.is_superuser:
-        return qs
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
 
-    org_ids = Organisasjon.objects.filter(
-        redaktorer=request.user
-    ).values_list("id", flat=True)
+        if request.user.is_superuser:
+            return qs
 
-    return qs.filter(organisasjon_id__in=org_ids)
-
-def get_readonly_fields(self, request, obj=None):
-    if request.user.is_superuser:
-        return ()
-    return ("organisasjon",)
-
-def save_model(self, request, obj, form, change):
-    if not request.user.is_superuser and obj.organisasjon_id is None:
-        org = Organisasjon.objects.filter(
+        org_ids = Organisasjon.objects.filter(
             redaktorer=request.user
-        ).first()
+        ).values_list("id", flat=True)
 
-        if org:
-            obj.organisasjon = org
+        return qs.filter(organisasjon_id__in=org_ids)
 
-    super().save_model(request, obj, form, change)
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return ()
+
+        return ("organisasjon",)
+
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser and obj.organisasjon_id is None:
+            org = Organisasjon.objects.filter(
+                redaktorer=request.user
+            ).first()
+
+            if org:
+                obj.organisasjon = org
+
+        super().save_model(request, obj, form, change)
 
 @staff_member_required
 def subadmin_start(request, org_id=None):
@@ -610,5 +613,38 @@ class SmsLoggAdmin(admin.ModelAdmin):
 
     ordering = (
         "-opprettet",
+    )
+
+@admin.register(Sidevisning)
+class SidevisningAdmin(admin.ModelAdmin):
+    list_display = (
+        "dato",
+        "host",
+        "sti",
+        "antall",
+        "sist_besokt",
+    )
+
+    list_filter = (
+        "dato",
+        "host",
+    )
+
+    search_fields = (
+        "host",
+        "sti",
+    )
+
+    ordering = (
+        "-dato",
+        "-antall",
+    )
+
+    readonly_fields = (
+        "dato",
+        "host",
+        "sti",
+        "antall",
+        "sist_besokt",
     )
 

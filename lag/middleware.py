@@ -34,3 +34,42 @@ class SubdomeneAdminAccessMiddleware:
                 )
 
         return self.get_response(request)
+
+from django.utils import timezone
+from .models import Sidevisning
+
+
+class SidevisningMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        sti = request.path or "/"
+
+        ignorer = (
+            "/admin/",
+            "/static/",
+            "/media/",
+            "/favicon.ico",
+            "/robots.txt",
+            "/postnummer-lookup/",
+        )
+
+        if not sti.startswith(ignorer):
+            host = request.get_host().split(":")[0].lower()
+            dato = timezone.localdate()
+
+            obj, created = Sidevisning.objects.get_or_create(
+                dato=dato,
+                host=host,
+                sti=sti,
+                defaults={"antall": 0},
+            )
+
+            obj.antall += 1
+            obj.save(update_fields=["antall", "sist_besokt"])
+
+        return response
+

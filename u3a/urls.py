@@ -35,7 +35,6 @@ def root_view(request):
 urlpatterns = [
     # Forside
     path("", root_view, name="home"),
-    path("", forside_view, name="home"),
     path("", include("forside.urls")),
     path("", include("info.urls")),   # ← denne linjen
 

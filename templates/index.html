@@ -134,6 +134,77 @@
   </div>
 </div>
 
+<!-- NYHET FRA U3A NORGE -->
+<div class="container mb-4">
+  <div class="alert alert-primary shadow-sm p-4">
+
+    <h2 class="h4 fw-bold mb-3">
+      🎓 U3A-skolen er åpnet
+    </h2>
+
+    <p class="mb-3">
+      U3A Norge har åpnet sin egen digitale skole.
+      Her finner du kurs innen kunstig intelligens (AI),
+      Bitcoin, internett og andre emner som er tilpasset
+      voksne som ønsker å lære mer i eget tempo.
+    </p>
+
+    <a href="https://skole.u3a.no"
+       class="btn btn-primary">
+       Besøk U3A-skolen
+    </a>
+
+  </div>
+</div>
+
+<!-- SISTE NYTT FRA U3A NORGE -->
+{% if nyheter %}
+<div class="container mb-4">
+  <div class="bg-white rounded-3 shadow-sm p-4">
+
+    <h2 class="h4 fw-bold mb-4">
+      Siste nytt fra U3A Norge
+    </h2>
+
+    <div class="row g-4">
+
+      {% for nyhet in nyheter %}
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+
+            {% if nyhet.bilde %}
+              <img src="{{ nyhet.bilde.url }}"
+                   class="card-img-top"
+                   alt="{{ nyhet.tittel }}">
+            {% endif %}
+
+            <div class="card-body">
+              <h3 class="h5 card-title">
+                {{ nyhet.tittel }}
+              </h3>
+
+              {% if nyhet.ingress %}
+                <p class="card-text">
+                  {{ nyhet.ingress|truncatewords:25 }}
+                </p>
+              {% endif %}
+
+              <a href="{% url 'nyhet_detalj' nyhet.id %}"
+                 class="btn btn-sm btn-outline-primary">
+                Les mer
+              </a>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
 <!-- TRE KORT -->
 <div class="container mb-4">
   <div class="row g-4">

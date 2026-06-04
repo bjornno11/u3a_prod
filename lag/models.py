@@ -657,3 +657,19 @@ class SmsLogg(models.Model):
     def __str__(self):
         return f"SMS {self.organisasjon} – {self.opprettet}"
 
+class Sidevisning(models.Model):
+    dato = models.DateField()
+    host = models.CharField(max_length=255)
+    sti = models.CharField(max_length=500)
+    antall = models.PositiveIntegerField(default=0)
+    sist_besokt = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Sidevisning"
+        verbose_name_plural = "Sidevisninger"
+        unique_together = ("dato", "host", "sti")
+        ordering = ["-dato", "-antall"]
+
+    def __str__(self):
+        return f"{self.dato} {self.host}{self.sti} ({self.antall})"
+
