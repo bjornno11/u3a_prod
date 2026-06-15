@@ -3,6 +3,7 @@ from .models import (
     Organisasjon,
     Lokallag,
     Aktivitet,
+    AktivitetPamelding,
     SiteConfig,
     LagMedlem,
     LagRolle,
@@ -243,8 +244,8 @@ class OrganisasjonAdmin(admin.ModelAdmin):
 
 @admin.register(Aktivitet)
 class AktivitetAdmin(admin.ModelAdmin):
-    list_display = ("dato", "tittel", "owner_name", "publisert")
-    list_filter = ("publisert", "dato")
+    list_display = ("dato", "tittel", "owner_name", "publisert", "pamelding_aktiv")
+    list_filter = ("publisert", "pamelding_aktiv", "dato")
     search_fields = ("tittel", "kortinfo", "beskrivelse")
     prepopulated_fields = {"slug": ("tittel",)}
 
@@ -281,6 +282,12 @@ class AktivitetAdmin(admin.ModelAdmin):
             return True
         return True
 
+@admin.register(AktivitetPamelding)
+class AktivitetPameldingAdmin(admin.ModelAdmin):
+    list_display = ("opprettet", "navn", "epost", "telefon", "aktivitet")
+    list_filter = ("aktivitet", "opprettet")
+    search_fields = ("navn", "epost", "telefon", "aktivitet__tittel")
+    readonly_fields = ("opprettet",)
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):

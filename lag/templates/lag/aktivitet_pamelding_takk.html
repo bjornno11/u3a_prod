@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+Påmelding mottatt
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="alert alert-success">
+
+        <h2>Takk for påmeldingen!</h2>
+
+        <p>
+            Din påmelding til
+            <strong>{{ aktivitet.tittel }}</strong>
+            er registrert.
+        </p>
+
+    </div>
+
+    <a href="{% url 'aktivitet_detalj' slug=aktivitet.slug %}"
+       class="btn btn-primary">
+        Tilbake til aktiviteten
+    </a>
+
+</div>
+
+{% endblock %}
+

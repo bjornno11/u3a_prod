@@ -679,6 +679,7 @@ def aktivitet_ny(request):
             beskrivelse=request.POST.get("beskrivelse", ""),
             dato=request.POST.get("dato") or timezone.localdate(),
             publisert=bool(request.POST.get("publisert")),
+            pamelding_aktiv=bool(request.POST.get("pamelding_aktiv")),
             starttid=request.POST.get("starttid") or None,
             sluttid=request.POST.get("sluttid") or None,
         )
@@ -728,6 +729,7 @@ def aktivitet_rediger(request, aktivitet_id):
         aktivitet.beskrivelse = request.POST.get("beskrivelse", "")
         aktivitet.dato = request.POST.get("dato") or timezone.localdate()
         aktivitet.publisert = bool(request.POST.get("publisert"))
+        aktivitet.pamelding_aktiv = bool(request.POST.get("pamelding_aktiv"))
         aktivitet.starttid = request.POST.get("starttid") or None
         aktivitet.sluttid = request.POST.get("sluttid") or None
 

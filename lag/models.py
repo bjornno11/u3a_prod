@@ -176,6 +176,11 @@ class Aktivitet(models.Model):
 
     publisert = models.BooleanField(default=True)
 
+    pamelding_aktiv = models.BooleanField(
+        default=False,
+        verbose_name="Påmelding aktiv"
+    )
+
     opprettet_av = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -198,6 +203,24 @@ class Aktivitet(models.Model):
             owner = "Ukjent lokallag"
         return f"{self.dato} – {owner}: {self.tittel}"
 
+class AktivitetPamelding(models.Model):
+    aktivitet = models.ForeignKey(
+        Aktivitet,
+        on_delete=models.CASCADE,
+        related_name="pameldinger"
+    )
+
+    navn = models.CharField(max_length=100)
+    epost = models.EmailField()
+    telefon = models.CharField(max_length=20, blank=True)
+
+    opprettet = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["opprettet"]
+
+    def __str__(self):
+        return f"{self.navn} – {self.aktivitet.tittel}"
 
 class SiteConfig(models.Model):
     hoved_epost = models.EmailField(

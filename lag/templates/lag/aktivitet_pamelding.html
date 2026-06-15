@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}
+Påmelding – {{ aktivitet.tittel }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <h1 class="mb-4">
+        Påmelding
+    </h1>
+
+    <h3>{{ aktivitet.tittel }}</h3>
+
+    <p>
+        {{ aktivitet.dato }}
+        {% if aktivitet.sted %}
+            – {{ aktivitet.sted }}
+        {% endif %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">E-post</label>
+            <input type="email"
+                   name="epost"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Telefon</label>
+            <input type="text"
+                   name="telefon"
+                   class="form-control">
+        </div>
+
+        <button type="submit"
+                class="btn btn-success">
+            Send påmelding
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -18,6 +18,7 @@ from lag.views import (
     lokallag_kart,
     regnskap_side,
     aktivitet_detalj,
+    aktivitet_pamelding,
     styre_side,
 )
 from lag.views_aktivitet import aktivitet_liste
@@ -47,6 +48,11 @@ urlpatterns = [
     # Aktiviteter  ✅ (rekkefølge er viktig)
     path("aktivitet/", aktivitet_liste, name="aktivitet_liste"),
     path("aktivitet/<slug:slug>/", aktivitet_detalj, name="aktivitet_detalj"),
+    path(
+        "aktivitet/<slug:slug>/pamelding/",
+        aktivitet_pamelding,
+        name="aktivitet_pamelding"
+    ),
     path("styre/", styre_side, name="styre_side"),
     # Regnskap
     path("regnskap/", regnskap_side, name="regnskap"),

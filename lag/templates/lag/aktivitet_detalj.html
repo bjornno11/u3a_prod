@@ -45,6 +45,15 @@
             {{ aktivitet.beskrivelse|linebreaks }}
         </div>
 
+        {% if aktivitet.pamelding_aktiv %}
+        <div class="mt-4">
+            <a href="{% url 'aktivitet_pamelding' slug=aktivitet.slug %}"
+               class="btn btn-success">
+                Meld meg på
+            </a>
+        </div>
+        {% endif %}
+
         <a href="/" class="btn btn-outline-secondary mt-4">Tilbake til forsiden</a>
     </div>
 </div>

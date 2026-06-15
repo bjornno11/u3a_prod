@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Organisasjon, LagMedlem, Aktivitet, LagMedlemVerv 
+from .models import Organisasjon, LagMedlem, Aktivitet, AktivitetPamelding, LagMedlemVerv 
 from .forms import LagMedlemRegistreringForm
 from .models import Organisasjon
 from django.http import JsonResponse
@@ -228,5 +228,37 @@ def program(request):
             "lokallag": lokallag,
             "aktiviteter": aktiviteter,
         }
+    )
+
+def aktivitet_pamelding(request, slug):
+    aktivitet = get_object_or_404(
+        Aktivitet,
+        slug=slug,
+        publisert=True,
+        pamelding_aktiv=True,
+    )
+
+    if request.method == "POST":
+        navn = request.POST.get("navn", "").strip()
+        epost = request.POST.get("epost", "").strip()
+        telefon = request.POST.get("telefon", "").strip()
+
+        if navn and epost:
+            AktivitetPamelding.objects.create(
+                aktivitet=aktivitet,
+                navn=navn,
+                epost=epost,
+                telefon=telefon,
+            )
+            return render(
+                request,
+                "lag/aktivitet_pamelding_takk.html",
+                {"aktivitet": aktivitet},
+            )
+
+    return render(
+        request,
+        "lag/aktivitet_pamelding.html",
+        {"aktivitet": aktivitet},
     )
 

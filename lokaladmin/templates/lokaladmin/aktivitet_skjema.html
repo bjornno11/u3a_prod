@@ -67,6 +67,18 @@
           Publisert
         </label>
       </div>
+ 
+      <div class="form-check mb-4">
+        <input type="checkbox"
+               name="pamelding_aktiv"
+               class="form-check-input"
+               id="pamelding_aktiv"
+               {% if aktivitet and aktivitet.pamelding_aktiv %}checked{% endif %}>
+
+        <label class="form-check-label" for="pamelding_aktiv">
+          Påmelding aktiv
+        </label>
+      </div>
 
       <div class="mb-3">
         <label class="form-label">Bilde</label>
