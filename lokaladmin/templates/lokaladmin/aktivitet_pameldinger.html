@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Påmeldinger{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+  <a href="{% url 'lokaladmin:aktiviteter' %}" class="btn btn-outline-secondary mb-3">
+    ← Tilbake til aktiviteter
+  </a>
+
+  <h1>Påmeldinger</h1>
+  <h3>{{ aktivitet.tittel }}</h3>
+
+  <p class="text-muted">
+    {{ aktivitet.dato }}{% if aktivitet.sted %} – {{ aktivitet.sted }}{% endif %}
+  </p>
+
+  <p><strong>Antall påmeldte:</strong> {{ pameldinger|length }}</p>
+
+  <a href="{% url 'lokaladmin:aktivitet_pameldinger_csv' aktivitet.id %}"
+     class="btn btn-outline-success mb-3">
+      Last ned CSV
+  </a>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Navn</th>
+        <th>E-post</th>
+        <th>Telefon</th>
+        <th>Påmeldt</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pameldinger %}
+      <tr>
+        <td>{{ p.navn }}</td>
+        <td>{{ p.epost }}</td>
+        <td>{{ p.telefon }}</td>
+        <td>{{ p.opprettet|date:"d.m.Y H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">Ingen påmeldinger ennå.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}
+

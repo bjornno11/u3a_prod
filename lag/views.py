@@ -238,18 +238,43 @@ def aktivitet_pamelding(request, slug):
         pamelding_aktiv=True,
     )
 
-    if request.method == "POST":
+    antall_pameldte = aktivitet.pameldinger.count()
+    er_fullt = (
+        aktivitet.maks_antall
+        and antall_pameldte >= aktivitet.maks_antall
+    )
+
+    if request.method == "POST" and not er_fullt:
+
         navn = request.POST.get("navn", "").strip()
         epost = request.POST.get("epost", "").strip()
         telefon = request.POST.get("telefon", "").strip()
 
         if navn and epost:
+
+            if AktivitetPamelding.objects.filter(
+                aktivitet=aktivitet,
+                epost__iexact=epost
+            ).exists():
+
+                return render(
+                    request,
+                    "lag/aktivitet_pamelding.html",
+                    {
+                        "aktivitet": aktivitet,
+                        "er_fullt": er_fullt,
+                        "antall_pameldte": antall_pameldte,
+                        "feilmelding": "Denne e-postadressen er allerede påmeldt.",
+                    },
+                )
+
             AktivitetPamelding.objects.create(
                 aktivitet=aktivitet,
                 navn=navn,
                 epost=epost,
                 telefon=telefon,
             )
+
             return render(
                 request,
                 "lag/aktivitet_pamelding_takk.html",
@@ -259,6 +284,9 @@ def aktivitet_pamelding(request, slug):
     return render(
         request,
         "lag/aktivitet_pamelding.html",
-        {"aktivitet": aktivitet},
+        {
+            "aktivitet": aktivitet,
+            "antall_pameldte": antall_pameldte,
+            "er_fullt": er_fullt,
+        },
     )
-

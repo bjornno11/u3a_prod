@@ -181,6 +181,12 @@ class Aktivitet(models.Model):
         verbose_name="Påmelding aktiv"
     )
 
+    maks_antall = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Maks antall deltakere"
+    )
+
     opprettet_av = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

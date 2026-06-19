@@ -80,6 +80,18 @@
         </label>
       </div>
 
+      <div class="mb-4">
+        <label class="form-label">Maks antall deltakere</label>
+        <input type="number"
+               name="maks_antall"
+               class="form-control"
+               min="1"
+               value="{{ aktivitet.maks_antall|default_if_none:'' }}">
+        <div class="form-text">
+          La feltet stå tomt dersom det ikke er noen maksgrense.
+        </div>
+      </div>
+
       <div class="mb-3">
         <label class="form-label">Bilde</label>
         {% if aktivitet and aktivitet.bilde %}

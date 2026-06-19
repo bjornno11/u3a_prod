@@ -160,12 +160,19 @@ Aktiviteter – Lokallag admin
 
                                                                                                 </td>
 
-                                                                                                <td style="width: 120px;">
+                                                                                                <td style="width: 260px;">
 
-                                                                                                        <a href="{% url 'lokaladmin:aktivitet_rediger' a.id %}"
-                                                                                                           class="btn btn-sm btn-outline-primary">
-                                                                                                                Rediger
+                                                                                                    <a href="{% url 'lokaladmin:aktivitet_rediger' a.id %}"
+                                                                                                       class="btn btn-sm btn-outline-primary">
+                                                                                                        Rediger
+                                                                                                    </a>
+
+                                                                                                    {% if a.pamelding_aktiv %}
+                                                                                                        <a href="{% url 'lokaladmin:aktivitet_pameldinger' a.id %}"
+                                                                                                           class="btn btn-sm btn-outline-success">
+                                                                                                            Påmeldinger ({{ a.pameldinger.count }})
                                                                                                         </a>
+                                                                                                    {% endif %}
 
                                                                                                 </td>
 

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from lag.models import Organisasjon, Aktivitet, Dokument, Bilde, LagMedlemVerv, LagMedlem, LagRolle, LagUtvalg, Medlemsgruppe, SmsLeverandor, SmsLogg, SmsUtsending
+from lag.models import Organisasjon, Aktivitet, AktivitetPamelding, Dokument, Bilde, LagMedlemVerv, LagMedlem, LagRolle, LagUtvalg, Medlemsgruppe, SmsLeverandor, SmsLogg, SmsUtsending, Nyhet
 from django.utils.text import slugify
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -12,7 +12,7 @@ from datetime import date
 from django.http import FileResponse, Http404, HttpResponse
 from django.db.models import Q
 from lokaladmin.sms_service import send_sms_logg
-from lag.models import Nyhet
+
 
 @login_required
 def dashboard(request):
@@ -661,6 +661,39 @@ def aktiviteter(request):
     )
 
 @login_required
+def aktivitet_pameldinger(request, aktivitet_id):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    if not organisasjon:
+        messages.error(request, "Ingen organisasjon koblet til brukeren.")
+        return redirect("lokaladmin:dashboard")
+
+    aktivitet = Aktivitet.objects.filter(
+        id=aktivitet_id,
+        organisasjon=organisasjon,
+    ).first()
+
+    if not aktivitet:
+        messages.error(request, "Fant ikke aktiviteten.")
+        return redirect("lokaladmin:aktiviteter")
+
+    pameldinger = AktivitetPamelding.objects.filter(
+        aktivitet=aktivitet
+    ).order_by("opprettet")
+
+    return render(
+        request,
+        "lokaladmin/aktivitet_pameldinger.html",
+        {
+            "organisasjon": organisasjon,
+            "aktivitet": aktivitet,
+            "pameldinger": pameldinger,
+        }
+    )
+
+@login_required
 def aktivitet_ny(request):
     organisasjon = Organisasjon.objects.filter(
         redaktorer=request.user
@@ -680,6 +713,7 @@ def aktivitet_ny(request):
             dato=request.POST.get("dato") or timezone.localdate(),
             publisert=bool(request.POST.get("publisert")),
             pamelding_aktiv=bool(request.POST.get("pamelding_aktiv")),
+            maks_antall=request.POST.get("maks_antall") or None,
             starttid=request.POST.get("starttid") or None,
             sluttid=request.POST.get("sluttid") or None,
         )
@@ -730,6 +764,7 @@ def aktivitet_rediger(request, aktivitet_id):
         aktivitet.dato = request.POST.get("dato") or timezone.localdate()
         aktivitet.publisert = bool(request.POST.get("publisert"))
         aktivitet.pamelding_aktiv = bool(request.POST.get("pamelding_aktiv"))
+        aktivitet.maks_antall = request.POST.get("maks_antall") or None
         aktivitet.starttid = request.POST.get("starttid") or None
         aktivitet.sluttid = request.POST.get("sluttid") or None
 
@@ -1893,4 +1928,38 @@ def nyhet_rediger(request, nyhet_id):
             "nyhet": nyhet,
         }
     )
+
+@login_required
+def aktivitet_pameldinger_csv(request, aktivitet_id):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    if not organisasjon:
+        messages.error(request, "Ingen organisasjon koblet til brukeren.")
+        return redirect("lokaladmin:dashboard")
+
+    aktivitet = Aktivitet.objects.filter(
+        id=aktivitet_id,
+        organisasjon=organisasjon,
+    ).first()
+
+    if not aktivitet:
+        messages.error(request, "Fant ikke aktiviteten.")
+        return redirect("lokaladmin:aktiviteter")
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = (
+        f'attachment; filename="pameldinger-{aktivitet.id}.csv"'
+    )
+
+    response.write("Navn;E-post;Telefon;Påmeldt\n")
+
+    for p in AktivitetPamelding.objects.filter(aktivitet=aktivitet).order_by("opprettet"):
+        response.write(
+            f"{p.navn};{p.epost};{p.telefon};{p.opprettet.strftime('%d.%m.%Y %H:%M')}\n"
+        )
+
+    return response
+
 

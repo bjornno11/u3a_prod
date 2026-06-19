@@ -21,39 +21,58 @@ Påmelding – {{ aktivitet.tittel }}
         {% endif %}
     </p>
 
-    <form method="post">
-        {% csrf_token %}
+    <p>
+        Påmeldte: {{ antall_pameldte }}
 
-        <div class="mb-3">
-            <label class="form-label">Navn</label>
-            <input type="text"
-                   name="navn"
-                   class="form-control"
-                   required>
+        {% if aktivitet.maks_antall %}
+            av {{ aktivitet.maks_antall }}
+        {% endif %}
+    </p>
+
+    {% if er_fullt %}
+
+        <div class="alert alert-warning">
+            Dette arrangementet er fulltegnet.
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">E-post</label>
-            <input type="email"
-                   name="epost"
-                   class="form-control"
-                   required>
-        </div>
+    {% else %}
 
-        <div class="mb-3">
-            <label class="form-label">Telefon</label>
-            <input type="text"
-                   name="telefon"
-                   class="form-control">
-        </div>
+        <form method="post">
+            {% csrf_token %}
 
-        <button type="submit"
-                class="btn btn-success">
-            Send påmelding
-        </button>
+            <div class="mb-3">
+                <label class="form-label">Navn</label>
+                <input type="text"
+                       name="navn"
+                       class="form-control"
+                       required>
+            </div>
 
-    </form>
+            <div class="mb-3">
+                <label class="form-label">E-post</label>
+                <input type="email"
+                       name="epost"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Telefon</label>
+                <input type="text"
+                       name="telefon"
+                       class="form-control">
+            </div>
+
+            <button type="submit"
+                    class="btn btn-success">
+                Send påmelding
+            </button>
+
+        </form>
+
+    {% endif %}
 
 </div>
 
 {% endblock %}
+

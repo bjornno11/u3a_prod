@@ -9,6 +9,16 @@ urlpatterns = [
     path("aktiviteter/", views.aktiviteter, name="aktiviteter"),
     path("aktiviteter/ny/", views.aktivitet_ny, name="aktivitet_ny"),
     path("aktiviteter/<int:aktivitet_id>/rediger/", views.aktivitet_rediger, name="aktivitet_rediger"),
+    path(
+    "aktiviteter/<int:aktivitet_id>/pameldinger/",
+    views.aktivitet_pameldinger,
+    name="aktivitet_pameldinger",
+    ),
+    path(
+    "aktiviteter/<int:aktivitet_id>/pameldinger/csv/",
+    views.aktivitet_pameldinger_csv,
+    name="aktivitet_pameldinger_csv",
+    ),
     path("logg-ut/", views.logg_ut, name="logg_ut"),
     path("medlemmer/", views.medlemmer, name="medlemmer"),
     path("dokumenter/", views.dokumenter, name="dokumenter"),
