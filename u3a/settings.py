@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "info",
     "lokaladmin",
     "school",
+    "regnskap",
 ]
 STATIC_URL = "static/"
 STATIC_ROOT = "/srv/u3a/staticfiles"
