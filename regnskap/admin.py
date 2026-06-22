@@ -5,6 +5,7 @@ from .models import (
     Regnskapsperiode,
     Bilagsserie,
     Konto,
+    Styrekode,
     Avdeling,
     Prosjekt,
     ReskontroKonto,
@@ -81,6 +82,25 @@ class BilagAdmin(admin.ModelAdmin):
     list_filter = ("organisasjon", "regnskapsaar", "bilagsserie", "h_status")
     search_fields = ("bilagsnummer", "bilagstekst")
     inlines = [BilagslinjeInline]
+
+@admin.register(Styrekode)
+class StyrekodeAdmin(admin.ModelAdmin):
+    list_display = (
+        "organisasjon",
+        "kode",
+        "fortekst",
+        "sumtekst",
+        "aktiv",
+    )
+    list_filter = (
+        "organisasjon",
+        "aktiv",
+    )
+    search_fields = (
+        "kode",
+        "fortekst",
+        "sumtekst",
+    )
 
 
 @admin.register(SystemLogg)

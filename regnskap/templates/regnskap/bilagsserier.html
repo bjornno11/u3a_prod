@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Bilagsserier{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:faste_data' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til faste data
+    </a>
+
+    <h1>🔢 Bilagsserier</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    {% if not regnskapsaar %}
+        <div class="alert alert-warning">
+            Det finnes ikke noe aktivt regnskapsår.
+        </div>
+    {% else %}
+
+        <form method="get" class="mb-3">
+
+            <label class="form-label">
+                Regnskapsår
+            </label>
+
+            <select name="aar"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                {% for a in regnskapsaar_liste %}
+
+                    <option value="{{ a.id }}"
+                        {% if regnskapsaar and a.id == regnskapsaar.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ a.aar }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </form>
+
+        <div class="mb-3">
+            <a href="{% url 'regnskap:bilagsserie_ny' %}?aar={{ regnskapsaar.id }}"
+               class="btn btn-primary">
+                ➕ Ny bilagsserie
+            </a>
+        </div>
+
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Navn</th>
+                    <th>Neste nr</th>
+                    <th>Standard konto</th>
+                    <th>Fortegn</th>
+                    <th>Aktiv</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for b in bilagsserier %}
+                <tr>
+                    <td>
+                        <a href="{% url 'regnskap:bilagsserie_endre' b.id %}">
+                            {{ b.kode }}
+                        </a>
+                    </td>
+                    <td>{{ b.navn }}</td>
+                    <td>{{ b.neste_nummer }}</td>
+                    <td>{{ b.standard_konto|default:"" }}</td>
+                    <td>{{ b.standard_fortegn }}</td>
+                    <td>{% if b.aktiv %}Ja{% else %}Nei{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Ingen bilagsserier registrert.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

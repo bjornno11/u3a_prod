@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Slett styrekode{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:styrekoder' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til styrekoder
+    </a>
+
+    <h1>🗑 Slett styrekode</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="alert alert-danger">
+        Er du sikker på at du vil slette styrekoden?
+
+        <br><br>
+
+        <strong>{{ styrekode.kode }}</strong>
+        —
+        {{ styrekode.fortekst }}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">
+            Ja, slett
+        </button>
+
+        <a href="{% url 'regnskap:styrekoder' %}"
+           class="btn btn-secondary">
+            Avbryt
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}
+

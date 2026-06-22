@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Slett bilagsserie{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:bilagsserier' %}?aar={{ regnskapsaar.id }}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til bilagsserier
+    </a>
+
+    <h1>🗑 Slett bilagsserie</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }} – {{ regnskapsaar.aar }}
+    </p>
+
+    <div class="alert alert-danger">
+        Er du sikker på at du vil slette:
+
+        <br><br>
+
+        <strong>
+            {{ bilagsserie.kode }} – {{ bilagsserie.navn }}
+        </strong>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">
+            Ja, slett
+        </button>
+
+        <a href="{% url 'regnskap:bilagsserier' %}?aar={{ regnskapsaar.id }}"
+           class="btn btn-secondary">
+            Avbryt
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}
+

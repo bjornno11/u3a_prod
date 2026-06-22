@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if regnskapsaar %}Endre regnskapsår{% else %}Nytt regnskapsår{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:regnskapsaar' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til regnskapsår
+    </a>
+
+    <h1>
+        📅 {% if regnskapsaar %}Endre regnskapsår{% else %}Nytt regnskapsår{% endif %}
+    </h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">År</label>
+            <input type="number"
+                   name="aar"
+                   class="form-control"
+                   value="{{ regnskapsaar.aar|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{{ regnskapsaar.navn|default:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Fra dato</label>
+            <input type="date"
+                   name="fra_dato"
+                   class="form-control"
+                   value="{{ regnskapsaar.fra_dato|date:'Y-m-d' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Til dato</label>
+            <input type="date"
+                   name="til_dato"
+                   class="form-control"
+                   value="{{ regnskapsaar.til_dato|date:'Y-m-d' }}"
+                   required>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not regnskapsaar or regnskapsaar.aktiv %}checked{% endif %}>
+            <label class="form-check-label">
+                Aktiv
+            </label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="avsluttet"
+                   class="form-check-input"
+                   {% if regnskapsaar.avsluttet %}checked{% endif %}>
+            <label class="form-check-label">
+                Avsluttet
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+

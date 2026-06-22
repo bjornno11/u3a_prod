@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Prosjekter{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:faste_data' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til faste data
+    </a>
+
+    <h1>🎯 Prosjekter</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:prosjekt_ny' %}"
+           class="btn btn-primary">
+            ➕ Nytt prosjekt
+        </a>
+    </div>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Navn</th>
+                <th>Aktiv</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for p in prosjekter %}
+            <tr>
+                <td>
+                    <a href="{% url 'regnskap:prosjekt_endre' p.id %}">
+                        {{ p.prosjektnummer }}
+                    </a>
+                </td>
+
+                <td>{{ p.navn }}</td>
+
+                <td>
+                    {% if p.aktiv %}
+                        Ja
+                    {% else %}
+                        Nei
+                    {% endif %}
+                </td>
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="3">
+                    Ingen prosjekter registrert.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+

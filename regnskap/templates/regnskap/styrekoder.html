@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Styrekoder{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:faste_data' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til faste data
+    </a>
+
+    <h1>🧭 Styrekoder</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:styrekode_ny' %}"
+           class="btn btn-primary">
+            ➕ Ny styrekode
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Kode</th>
+                <th>Fortekst</th>
+                <th>Sumtekst</th>
+                <th>Aktiv</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for s in styrekoder %}
+            <tr>
+                <td>
+                    <a href="{% url 'regnskap:styrekode_endre' s.id %}">
+                        {{ s.kode }}
+                    </a>
+                </td>
+                <td>{{ s.fortekst }}</td>
+                <td>{{ s.sumtekst }}</td>
+                <td>
+                    {% if s.aktiv %}
+                        Ja
+                    {% else %}
+                        Nei
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">
+                    Ingen styrekoder registrert.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
+

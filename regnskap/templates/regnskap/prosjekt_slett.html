@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Slett prosjekt{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:prosjekter' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til prosjekter
+    </a>
+
+    <h1>🗑 Slett prosjekt</h1>
+
+    <div class="alert alert-danger">
+        Er du sikker på at du vil slette:
+
+        <br><br>
+
+        <strong>
+            {{ prosjekt.prosjektnummer }} {{ prosjekt.navn }}
+        </strong>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">
+            Ja, slett
+        </button>
+
+        <a href="{% url 'regnskap:prosjekter' %}"
+           class="btn btn-secondary">
+            Avbryt
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}
+

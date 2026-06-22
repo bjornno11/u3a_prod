@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Regnskap{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+```
+<h1 class="mb-4">💰 Regnskap</h1>
+
+{% if organisasjon %}
+    <p class="lead mb-4">
+        Regnskap for <strong>{{ organisasjon.organisasjon }}</strong>
+    </p>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="bg-light rounded-3 p-3 text-center">
+                <div class="fw-bold fs-4">{{ antall_kontoer }}</div>
+                <div class="text-muted">Kontoer</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="bg-light rounded-3 p-3 text-center">
+                <div class="fw-bold fs-4">{{ antall_bilag }}</div>
+                <div class="text-muted">Bilag</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="bg-light rounded-3 p-3 text-center">
+                <div class="fw-bold fs-4">{{ antall_avdelinger }}</div>
+                <div class="text-muted">Avdelinger</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="bg-light rounded-3 p-3 text-center">
+                <div class="fw-bold fs-4">{{ antall_prosjekter }}</div>
+                <div class="text-muted">Prosjekter</div>
+            </div>
+        </div>
+
+    </div>
+
+{% else %}
+    <p class="text-danger">
+        Din bruker er ikke koblet til et lokallag.
+    </p>
+{% endif %}
+
+<div class="row g-4">
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'regnskap:faste_data' %}"
+           class="text-decoration-none text-dark">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div style="font-size:48px;">💾</div>
+                <h4 class="mt-3">Faste data</h4>
+                <p class="text-muted">
+                    Kontoplan, kunder, leverandører, avdelinger og prosjekter.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'regnskap:bilag_liste' %}"
+           class="text-decoration-none text-dark">
+
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+
+                <div style="font-size:48px;">🧾</div>
+
+                <h4 class="mt-3">
+                    Bilag
+                </h4>
+
+                <p class="text-muted">
+                    Registrering, spørring og bilagsjournal.
+                </p>
+
+            </div>
+
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">📒</div>
+            <h4 class="mt-3">Konto</h4>
+            <p class="text-muted">
+                Kontospørring, reskontro og saldolister.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+        <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">📊</div>
+            <h4 class="mt-3">Regnskap</h4>
+            <p class="text-muted">
+                Resultat, balanse og hovedbok.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+        <div class="card shadow-sm border-0 h-100 text-center p-4">
+            <div style="font-size:48px;">🎯</div>
+            <h4 class="mt-3">Budsjett</h4>
+            <p class="text-muted">
+                Budsjett og avviksrapportering.
+            </p>
+        </div>
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}
+

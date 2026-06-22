@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Nytt bilag{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:bilag_liste' %}?aar={{ regnskapsaar.id }}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til bilag
+    </a>
+
+    <h1>🧾 Nytt bilag</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }} – {{ regnskapsaar.aar }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="regnskapsaar_id"
+               value="{{ regnskapsaar.id }}">
+
+        <div class="mb-3">
+            <label class="form-label">Bilagsserie</label>
+            <select name="bilagsserie" class="form-select" required>
+                {% for s in bilagsserier %}
+                    <option value="{{ s.id }}">
+                        {{ s.kode }} - {{ s.navn }} / neste nr {{ s.neste_nummer }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bilagsdato</label>
+
+            <input type="date"
+                   name="bilagsdato"
+                   class="form-control"
+                   value="{{ dagens_dato|date:'Y-m-d' }}"
+                   required>
+
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Føringsdato</label>
+
+            <input type="hidden"
+                   name="foringsdato"
+                   value="{{ dagens_dato|date:'Y-m-d' }}"
+                   required>
+
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bilagstekst</label>
+            <input type="text"
+                   name="bilagstekst"
+                   class="form-control"
+                   required>
+        </div>
+
+        <hr>
+
+        <h4>Linjer</h4>
+
+        {% for nr in "12" %}
+            <div class="row mb-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Konto {{ nr }}</label>
+                    <select name="konto_{{ nr }}" class="form-select">
+                        <option value="">Velg konto</option>
+                        {% for k in kontoer %}
+                            <option value="{{ k.kontonummer }}">
+                                {{ k.kontonummer }} - {{ k.kontonavn }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Tekst</label>
+                    <input type="text"
+                           name="tekst_{{ nr }}"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Beløp</label>
+                    <input type="number"
+                           step="0.01"
+                           name="belop_{{ nr }}"
+                           class="form-control"
+                           placeholder="1000 eller -1000">
+                </div>
+
+            </div>
+        {% endfor %}
+
+        <button type="submit"
+                class="btn btn-primary">
+            Lagre bilag
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const belop1 = document.querySelector('[name="belop_1"]');
+    const belop2 = document.querySelector('[name="belop_2"]');
+
+    if (belop1 && belop2) {
+        belop1.addEventListener("change", function () {
+            const verdi = parseFloat(belop1.value);
+
+            if (!isNaN(verdi) && !belop2.value) {
+                belop2.value = (-verdi).toFixed(2);
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}
+

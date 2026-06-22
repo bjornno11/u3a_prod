@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if avdeling %}Endre avdeling{% else %}Ny avdeling{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:avdelinger' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til avdelinger
+    </a>
+
+    <h1>
+        🏢 {% if avdeling %}Endre avdeling{% else %}Ny avdeling{% endif %}
+    </h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Avdelingsnummer</label>
+            <input type="number"
+                   name="avdelingsnummer"
+                   class="form-control"
+                   value="{{ avdeling.avdelingsnummer|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{{ avdeling.navn|default:'' }}"
+                   required>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not avdeling or avdeling.aktiv %}checked{% endif %}>
+            <label class="form-check-label">
+                Aktiv
+            </label>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Lagre
+        </button>
+
+        {% if avdeling %}
+            <a href="{% url 'regnskap:avdeling_slett' avdeling.id %}"
+               class="btn btn-outline-danger ms-2">
+                Slett
+            </a>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}

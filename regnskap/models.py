@@ -125,6 +125,41 @@ class Bilagsserie(models.Model):
     def __str__(self):
         return f"{self.kode} - {self.navn}"
 
+class Styrekode(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="regnskap_styrekoder"
+    )
+
+    kode = models.CharField(
+        max_length=4
+    )
+
+    fortekst = models.CharField(
+        max_length=100
+    )
+
+    sumtekst = models.CharField(
+        max_length=100
+    )
+
+    aktiv = models.BooleanField(
+        default=True
+    )
+
+    class Meta:
+        verbose_name = "Styrekode"
+        verbose_name_plural = "Styrekoder"
+        ordering = ["kode"]
+        unique_together = (
+            "organisasjon",
+            "kode",
+        )
+
+    def __str__(self):
+        return f"{self.kode} {self.fortekst}"
+
 
 class Konto(models.Model):
     organisasjon = models.ForeignKey(

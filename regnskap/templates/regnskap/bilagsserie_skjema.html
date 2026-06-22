@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if bilagsserie %}Endre bilagsserie{% else %}Ny bilagsserie{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:bilagsserier' %}?aar={{ regnskapsaar.id }}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til bilagsserier
+    </a>
+
+    <h1>
+        🔢 {% if bilagsserie %}Endre bilagsserie{% else %}Ny bilagsserie{% endif %}
+    </h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }} – {{ regnskapsaar.aar }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="regnskapsaar_id"
+               value="{{ regnskapsaar.id }}">
+
+        <div class="mb-3">
+            <label class="form-label">Kode</label>
+            <input type="text"
+                   name="kode"
+                   class="form-control"
+                   value="{{ bilagsserie.kode|default:'' }}"
+                   placeholder="B"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{{ bilagsserie.navn|default:'' }}"
+                   placeholder="Bankbilag"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Neste nummer</label>
+            <input type="number"
+                   name="neste_nummer"
+                   class="form-control"
+                   value="{{ bilagsserie.neste_nummer|default:'1' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Standard konto</label>
+            <input type="number"
+                   name="standard_konto"
+                   class="form-control"
+                   value="{{ bilagsserie.standard_konto|default:'' }}"
+                   placeholder="190">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Standard fortegn</label>
+            <select name="standard_fortegn" class="form-select">
+                <option value="">Ingen</option>
+                <option value="+"
+                    {% if bilagsserie.standard_fortegn == "+" %}selected{% endif %}>
+                    Debet
+                </option>
+                <option value="-"
+                    {% if bilagsserie.standard_fortegn == "-" %}selected{% endif %}>
+                    Kredit
+                </option>
+            </select>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not bilagsserie or bilagsserie.aktiv %}checked{% endif %}>
+            <label class="form-check-label">Aktiv</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+        {% if bilagsserie %}
+            <a href="{% url 'regnskap:bilagsserie_slett' bilagsserie.id %}"
+               class="btn btn-outline-danger ms-2">
+                Slett
+            </a>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}
+

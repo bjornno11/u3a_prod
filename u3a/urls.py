@@ -56,6 +56,7 @@ urlpatterns = [
     path("styre/", styre_side, name="styre_side"),
     # Regnskap
     path("regnskap/", regnskap_side, name="regnskap"),
+    path("lokaladmin/regnskap/", include("regnskap.urls")),
 
     # Lag
     path(

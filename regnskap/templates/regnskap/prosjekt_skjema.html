@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if prosjekt %}Endre prosjekt{% else %}Nytt prosjekt{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:prosjekter' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til prosjekter
+    </a>
+
+    <h1>🎯 {% if prosjekt %}Endre prosjekt{% else %}Nytt prosjekt{% endif %}</h1>
+
+    <p class="lead">{{ organisasjon.organisasjon }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Prosjektnummer</label>
+            <input type="number"
+                   name="prosjektnummer"
+                   class="form-control"
+                   value="{{ prosjekt.prosjektnummer|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{{ prosjekt.navn|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Beskrivelse</label>
+            <textarea name="beskrivelse"
+                      class="form-control"
+                      rows="4">{{ prosjekt.beskrivelse|default:'' }}</textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not prosjekt or prosjekt.aktiv %}checked{% endif %}>
+            <label class="form-check-label">Aktiv</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+        {% if prosjekt %}
+            <a href="{% url 'regnskap:prosjekt_slett' prosjekt.id %}"
+               class="btn btn-outline-danger ms-2">
+                Slett
+            </a>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}
+

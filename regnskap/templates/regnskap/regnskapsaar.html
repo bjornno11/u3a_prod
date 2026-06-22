@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Regnskapsår{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:faste_data' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til faste data
+    </a>
+
+    <h1>📅 Regnskapsår</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:regnskapsaar_ny' %}"
+           class="btn btn-primary">
+            ➕ Nytt regnskapsår
+        </a>
+    </div>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>År</th>
+                <th>Fra</th>
+                <th>Til</th>
+                <th>Aktiv</th>
+                <th>Avsluttet</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for a in regnskapsaar_liste %}
+            <tr>
+                <td>
+                    <a href="{% url 'regnskap:regnskapsaar_endre' a.id %}">
+                        {{ a.aar }}
+                    </a>
+                </td>
+                <td>{{ a.fra_dato }}</td>
+                <td>{{ a.til_dato }}</td>
+                <td>{% if a.aktiv %}Ja{% else %}Nei{% endif %}</td>
+                <td>{% if a.avsluttet %}Ja{% else %}Nei{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">
+                    Ingen regnskapsår registrert.
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+
+

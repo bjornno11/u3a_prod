@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Kontoplan{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <h1>📒 Kontoplan</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Konto</th>
+                <th>Navn</th>
+                <th>Styrekode</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for konto in kontoer %}
+            <tr>
+                <td>{{ konto.kontonummer }}</td>
+                <td>{{ konto.kontonavn }}</td>
+                <td>{{ konto.styrekode }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">
+                    Ingen kontoer registrert.
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+

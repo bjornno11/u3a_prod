@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Bilag{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:dashboard' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til regnskap
+    </a>
+
+    <h1>🧾 Bilag</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    {% if regnskapsaar_liste %}
+
+        <form method="get" class="mb-3">
+            <label class="form-label">Regnskapsår</label>
+
+            <select name="aar"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                {% for a in regnskapsaar_liste %}
+                    <option value="{{ a.id }}"
+                        {% if regnskapsaar and a.id == regnskapsaar.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ a.aar }}
+                    </option>
+                {% endfor %}
+
+            </select>
+        </form>
+
+        <div class="mb-3">
+            <a href="{% url 'regnskap:bilag_ny' %}?aar={{ regnskapsaar.id }}"
+               class="btn btn-primary">
+                ➕ Nytt bilag
+            </a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Serie</th>
+                    <th>Nr</th>
+                    <th>Dato</th>
+                    <th>Tekst</th>
+                    <th>Sum</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for b in bilag %}
+                <tr>
+                    <td>{{ b.bilagsserie.kode }}</td>
+                    <td>{{ b.bilagsnummer }}</td>
+                    <td>{{ b.bilagsdato }}</td>
+                    <td>{{ b.bilagstekst }}</td>
+                    <td>{{ b.sum_belop }}</td>
+                    <td>
+                        {% if b.har_differanse %}
+                            ⚠ Differanse
+                        {% else %}
+                            OK
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">
+                        Ingen bilag registrert.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <div class="alert alert-warning">
+            Det finnes ikke noe aktivt regnskapsår.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

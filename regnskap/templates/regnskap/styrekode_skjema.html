@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if styrekode %}Endre styrekode{% else %}Ny styrekode{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:styrekoder' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til styrekoder
+    </a>
+
+    <h1>
+        🧭 {% if styrekode %}Endre styrekode{% else %}Ny styrekode{% endif %}
+    </h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Kode</label>
+            <input type="text"
+                   name="kode"
+                   class="form-control"
+                   value="{{ styrekode.kode|default:'' }}"
+                   placeholder="f.eks. 10xx eller 1001"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Fortekst</label>
+            <input type="text"
+                   name="fortekst"
+                   class="form-control"
+                   value="{{ styrekode.fortekst|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sumtekst</label>
+            <input type="text"
+                   name="sumtekst"
+                   class="form-control"
+                   value="{{ styrekode.sumtekst|default:'' }}">
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not styrekode or styrekode.aktiv %}checked{% endif %}>
+            <label class="form-check-label">
+                Aktiv
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+        {% if styrekode %}
+            <a href="{% url 'regnskap:styrekode_slett' styrekode.id %}"
+               class="btn btn-outline-danger ms-2">
+                Slett
+            </a>
+        {% endif %}
+    </form>
+
+</div>
+
+{% endblock %}
+
