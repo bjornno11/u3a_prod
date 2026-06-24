@@ -62,6 +62,7 @@
                 <tr>
                     <th>Kode</th>
                     <th>Navn</th>
+                    <th>Standard tekst</th>
                     <th>Neste nr</th>
                     <th>Standard konto</th>
                     <th>Fortegn</th>
@@ -78,6 +79,7 @@
                         </a>
                     </td>
                     <td>{{ b.navn }}</td>
+                    <td>{{ b.standard_tekst }}</td>
                     <td>{{ b.neste_nummer }}</td>
                     <td>{{ b.standard_konto|default:"" }}</td>
                     <td>{{ b.standard_fortegn }}</td>
@@ -85,7 +87,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">Ingen bilagsserier registrert.</td>
+                    <td colspan="7">Ingen bilagsserier registrert.</td>
                 </tr>
             {% endfor %}
             </tbody>

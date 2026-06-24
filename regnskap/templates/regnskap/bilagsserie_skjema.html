@@ -59,12 +59,31 @@
 
         <div class="mb-3">
             <label class="form-label">Standard konto</label>
-            <input type="number"
-                   name="standard_konto"
-                   class="form-control"
-                   value="{{ bilagsserie.standard_konto|default:'' }}"
-                   placeholder="190">
+
+            <select name="standard_konto" class="form-select">
+                <option value="">Ingen standard konto</option>
+
+                {% for konto in kontoer %}
+                    <option value="{{ konto.kontonummer }}"
+                        {% if bilagsserie.standard_konto == konto.kontonummer %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ konto.kontonummer }} - {{ konto.kontonavn }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
+
+        <div class="mb-3">
+            <label class="form-label">Standard tekst</label>
+
+            <input type="text"
+                   name="standard_tekst"
+                   class="form-control"
+                   value="{{ bilagsserie.standard_tekst|default:'' }}">
+        </div>
+
 
         <div class="mb-3">
             <label class="form-label">Standard fortegn</label>

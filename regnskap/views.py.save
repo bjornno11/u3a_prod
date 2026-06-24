@@ -926,12 +926,11 @@ def bilag_ny(request):
             )
 
             for linjenr in range(1, 7):
-                konto = request.POST.get(f"konto_{linjenr}", "").strip()
+                konto = request.POST.get(f"konto_{linjenr}")
                 tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
                 belop = request.POST.get(f"belop_{linjenr}", "").strip()
                 avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
                 prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
-
                 if konto and belop:
 
                     konto_obj = Konto.objects.filter(
@@ -945,10 +944,8 @@ def bilag_ny(request):
                         bilag=bilag,
                         linjenummer=linjenr,
                         kontonummer=konto,
-                        avdeling_id=avdeling_id,
-                        prosjekt_id=prosjekt_id,
                         linjetekst=tekst,
-                        belop=Decimal(belop.replace(",", ".")),
+                        belop=Decimal(belop),
                     )
 
         return redirect(
@@ -1115,55 +1112,4 @@ def bilag_endre(request, bilag_id):
 
     })
 
-@login_required
-def kontosporring(request):
-    organisasjon = Organisasjon.objects.filter(
-        redaktorer=request.user
-    ).first()
-
-    kontoer = Konto.objects.filter(
-        organisasjon=organisasjon
-    ).order_by("kontonummer")
-
-    valgt_konto = request.GET.get("konto")
-
-    posteringer = []
-    valgt_kontonavn = ""
-
-    sum_belop = 0
-
-    if valgt_konto:
-        konto_obj = Konto.objects.filter(
-            organisasjon=organisasjon,
-            kontonummer=valgt_konto,
-        ).first()
-
-        if konto_obj:
-            valgt_kontonavn = konto_obj.kontonavn
-
-        posteringer = Bilagslinje.objects.filter(
-            bilag__organisasjon=organisasjon,
-            kontonummer=valgt_konto,
-        ).select_related(
-            "bilag",
-            "avdeling",
-            "prosjekt",
-        ).order_by(
-            "bilag__bilagsdato",
-            "bilag__bilagsnummer",
-        )
-    sum_belop = sum(p.belop for p in posteringer)
-
-    return render(
-        request,
-        "regnskap/kontosporring.html",
-        {
-            "organisasjon": organisasjon,
-            "kontoer": kontoer,
-            "valgt_konto": valgt_konto,
-            "posteringer": posteringer,
-            "sum_belop": sum_belop,
-            "valgt_kontonavn": valgt_kontonavn,
-        }
-    )
 

@@ -1,109 +1,212 @@
 {% extends "base.html" %}
 
-{% block title %}Nytt bilag{% endblock %}
-
+{% block title %}
+{% if bilag %}
+Endre bilag
+{% else %}
+Nytt bilag
+{% endif %}
+{% endblock %}
 {% block content %}
 
 <div class="container my-4">
 
+    {% if bilag %}
+    <div class="alert alert-secondary">
+        Bilagsserie: {{ bilag.bilagsserie.kode }}
+        &nbsp;&nbsp;
+        Bilagsnummer: {{ bilag.bilagsnummer }}
+    </div>
+    {% endif %}
+
     <a href="{% url 'regnskap:bilag_liste' %}?aar={{ regnskapsaar.id }}"
+
        class="btn btn-outline-secondary btn-sm mb-3">
         ← Tilbake til bilag
     </a>
 
-    <h1>🧾 Nytt bilag</h1>
-
+    <h1>
+        {% if bilag %}
+            Endre bilag
+        {% else %}
+            Nytt bilag
+        {% endif %}
+    </h1>
     <p class="lead">
         {{ organisasjon.organisasjon }} – {{ regnskapsaar.aar }}
     </p>
 
-    <form method="post">
+    <form method="post" id="bilagForm">
         {% csrf_token %}
 
         <input type="hidden"
                name="regnskapsaar_id"
                value="{{ regnskapsaar.id }}">
 
-        <div class="mb-3">
-            <label class="form-label">Bilagsserie</label>
-            <select name="bilagsserie" class="form-select" required>
-                {% for s in bilagsserier %}
-                    <option value="{{ s.id }}">
-                        {{ s.kode }} - {{ s.navn }} / neste nr {{ s.neste_nummer }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
+        <input type="hidden"
+               name="foringsdato"
+               value="{{ dagens_dato_iso }}">
 
-        <div class="mb-3">
-            <label class="form-label">Bilagsdato</label>
+            {% if not bilag %}
+            <div class="mb-2">
+                <label class="form-label mb-1">
+                    Bilagsserie
+                </label>
+
+                <select name="bilagsserie"
+                        class="form-select"
+                        style="max-width: 400px;"
+                        required>
+
+                    {% for s in bilagsserier %}
+                        <option value="{{ s.id }}"
+                                data-standard-konto="{{ s.standard_konto|default:'' }}"
+                                data-standard-tekst="{{ s.standard_tekst|default:'' }}"
+                                data-standard-fortegn="{{ s.standard_fortegn|default:'' }}">
+                            {{ s.kode }} - {{ s.navn }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            {% endif %}
+        <div class="mb-2">
+            <label class="form-label mb-1">
+                Bilagsdato
+            </label>
 
             <input type="date"
                    name="bilagsdato"
                    class="form-control"
-                   value="{{ dagens_dato|date:'Y-m-d' }}"
+                   style="max-width: 220px;"
+                   value="{% if bilag %}{{ bilag.bilagsdato|date:'Y-m-d' }}{% else %}{{ dagens_dato_iso }}{% endif %}"
                    required>
-
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Føringsdato</label>
+        {% if not bilag %}
+        <div class="mb-2">
+            <label class="form-label mb-1">
+                Bilagsbeløp
+            </label>
 
-            <input type="hidden"
-                   name="foringsdato"
-                   value="{{ dagens_dato|date:'Y-m-d' }}"
-                   required>
-
+            <input type="text"
+                   id="bilagsbelop"
+                   class="form-control"
+                   style="max-width: 220px;">
         </div>
+        {% endif %}
+        <div class="mb-2">
+            <label class="form-label mb-1">
+                Bilagstekst
+            </label>
 
-        <div class="mb-3">
-            <label class="form-label">Bilagstekst</label>
             <input type="text"
                    name="bilagstekst"
                    class="form-control"
+                   value="{{ bilag.bilagstekst|default:'' }}"
                    required>
         </div>
-
         <hr>
 
         <h4>Linjer</h4>
 
-        {% for nr in "12" %}
-            <div class="row mb-3">
+            <div class="row mb-2 fw-bold">
+                <div class="col-md-2">Konto</div>
+                <div class="col-md-2">Beløp</div>
+                <div class="col-md-2">Avdeling</div>
+                <div class="col-md-2">Prosjekt</div>
+                <div class="col-md-4">Tekst</div>
+            </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Konto {{ nr }}</label>
-                    <select name="konto_{{ nr }}" class="form-select">
-                        <option value="">Velg konto</option>
-                        {% for k in kontoer %}
-                            <option value="{{ k.kontonummer }}">
-                                {{ k.kontonummer }} - {{ k.kontonavn }}
-                            </option>
+        {% for nr in "123456" %}
+            <div class="row mb-2 align-items-center">
+
+
+            <div class="col-md-2">
+                <input type="text"
+                       name="konto_{{ nr }}"
+                       class="form-control konto-felt"
+                       placeholder="Kontonr"
+                       {% if nr == "1" and linje1 %}value="{{ linje1.kontonummer }}"
+                       {% elif nr == "2" and linje2 %}value="{{ linje2.kontonummer }}"
+                       {% elif nr == "3" and linje3 %}value="{{ linje3.kontonummer }}"
+                       {% elif nr == "4" and linje4 %}value="{{ linje4.kontonummer }}"
+                       {% elif nr == "5" and linje5 %}value="{{ linje5.kontonummer }}"
+                       {% elif nr == "6" and linje6 %}value="{{ linje6.kontonummer }}"
+                       {% endif %}>
+                <small class="text-muted kontonavn"></small>
+            </div>
+
+            <div class="col-md-2">
+                <input type="text"
+                       name="belop_{{ nr }}"
+                       class="form-control"
+                       {% if nr == "1" and linje1 %}value="{{ linje1.belop }}"
+                       {% elif nr == "2" and linje2 %}value="{{ linje2.belop }}"
+                       {% elif nr == "3" and linje3 %}value="{{ linje3.belop }}"
+                       {% elif nr == "4" and linje4 %}value="{{ linje4.belop }}"
+                       {% elif nr == "5" and linje5 %}value="{{ linje5.belop }}"
+                       {% elif nr == "6" and linje6 %}value="{{ linje6.belop }}"
+                       {% endif %}>
+            </div>
+
+            <div class="col-md-2">
+                <select name="avdeling_{{ nr }}"
+                        class="form-select form-select-sm">
+                    <option value="">--</option>
+
+                        {% for a in avdelinger %}
+                        <option value="{{ a.id }}"
+                            {% if nr == "1" and linje1.avdeling_id == a.id %}selected
+                            {% elif nr == "2" and linje2.avdeling_id == a.id %}selected
+                            {% elif nr == "3" and linje3.avdeling_id == a.id %}selected
+                            {% elif nr == "4" and linje4.avdeling_id == a.id %}selected
+                            {% elif nr == "5" and linje5.avdeling_id == a.id %}selected
+                            {% elif nr == "6" and linje6.avdeling_id == a.id %}selected
+                            {% endif %}>
+                            {{ a.avdelingsnummer }} {{ a.navn }}
+                        </option>
                         {% endfor %}
-                    </select>
-                </div>
+                </select>
+            </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Tekst</label>
-                    <input type="text"
-                           name="tekst_{{ nr }}"
-                           class="form-control">
-                </div>
+            <div class="col-md-2">
+                <select name="prosjekt_{{ nr }}"
+                        class="form-select form-select-sm">
+                    <option value="">--</option>
 
-                <div class="col-md-3">
-                    <label class="form-label">Beløp</label>
-                    <input type="number"
-                           step="0.01"
-                           name="belop_{{ nr }}"
-                           class="form-control"
-                           placeholder="1000 eller -1000">
-                </div>
+                        {% for p in prosjekter %}
 
+                        <option value="{{ p.id }}"
+                            {% if nr == "1" and linje1 and linje1.prosjekt_id == p.id %}selected
+                            {% elif nr == "2" and linje2 and linje2.prosjekt_id == p.id %}selected
+                            {% elif nr == "3" and linje3 and linje3.prosjekt_id == p.id %}selected
+                            {% elif nr == "4" and linje4 and linje4.prosjekt_id == p.id %}selected
+                            {% elif nr == "5" and linje5 and linje5.prosjekt_id == p.id %}selected
+                            {% elif nr == "6" and linje6 and linje6.prosjekt_id == p.id %}selected
+                            {% endif %}>
+                            {{ p.prosjektnummer }} {{ p.navn }}
+                        </option>
+                        {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <input type="text"
+                       name="tekst_{{ nr }}"
+                       class="form-control"
+                       {% if nr == "1" and linje1 %}value="{{ linje1.linjetekst }}"
+                       {% elif nr == "2" and linje2 %}value="{{ linje2.linjetekst }}"
+                       {% elif nr == "3" and linje3 %}value="{{ linje3.linjetekst }}"
+                       {% elif nr == "4" and linje4 %}value="{{ linje4.linjetekst }}"
+                       {% elif nr == "5" and linje5 %}value="{{ linje5.linjetekst }}"
+                       {% elif nr == "6" and linje6 %}value="{{ linje6.linjetekst }}"
+                       {% endif %}>
+            </div>
             </div>
         {% endfor %}
 
-        <button type="submit"
-                class="btn btn-primary">
+        <button type="submit" class="btn btn-primary">
             Lagre bilag
         </button>
 
@@ -112,19 +215,150 @@
 </div>
 
 <script>
+const kontonavn = {{ kontonavn_json|safe }};
+
 document.addEventListener("DOMContentLoaded", function () {
+    const bilagsserie = document.querySelector('[name="bilagsserie"]');
+    const bilagsbelop = document.querySelector("#bilagsbelop");
+
+    const konto1 = document.querySelector('[name="konto_1"]');
     const belop1 = document.querySelector('[name="belop_1"]');
     const belop2 = document.querySelector('[name="belop_2"]');
+    const bilagstekst = document.querySelector('[name="bilagstekst"]');
 
-    if (belop1 && belop2) {
-        belop1.addEventListener("change", function () {
-            const verdi = parseFloat(belop1.value);
+    const bilagForm = document.querySelector("#bilagForm");
 
-            if (!isNaN(verdi) && !belop2.value) {
-                belop2.value = (-verdi).toFixed(2);
+    function hentValgtBilagsserie() {
+        if (!bilagsserie) {
+            return null;
+        }
+        return bilagsserie.options[bilagsserie.selectedIndex];
+    }
+
+    function oppdaterKontonavn() {
+        document.querySelectorAll(".konto-felt").forEach(function (felt) {
+            const navnFelt = felt.parentElement.querySelector(".kontonavn");
+            const konto = felt.value.trim();
+
+            felt.classList.remove("is-invalid");
+
+            if (!navnFelt) {
+                return;
+            }
+
+            if (!konto) {
+                navnFelt.textContent = "";
+                navnFelt.classList.remove("text-danger");
+                navnFelt.classList.add("text-muted");
+                return;
+            }
+
+            if (kontonavn[konto]) {
+                navnFelt.textContent = kontonavn[konto];
+                navnFelt.classList.remove("text-danger");
+                navnFelt.classList.add("text-muted");
+            } else {
+                navnFelt.textContent = "Konto finnes ikke";
+                navnFelt.classList.remove("text-muted");
+                navnFelt.classList.add("text-danger");
+                felt.classList.add("is-invalid");
             }
         });
     }
+
+    function fyllBelop() {
+        if (!bilagsbelop || !belop1 || !belop2) {
+            return;
+        }
+
+        const valgt = hentValgtBilagsserie();
+
+        if (!valgt) {
+            return;
+        }
+
+        const standardFortegn = valgt.dataset.standardFortegn || "";
+        const verdi = parseFloat(bilagsbelop.value.replace(",", "."));
+
+        if (isNaN(verdi)) {
+            return;
+        }
+
+        if (standardFortegn === "-") {
+            belop1.value = (-verdi).toFixed(2);
+            belop2.value = verdi.toFixed(2);
+        } else {
+            belop1.value = verdi.toFixed(2);
+            belop2.value = (-verdi).toFixed(2);
+        }
+    }
+
+    function fyllFraBilagsserie() {
+        const valgt = hentValgtBilagsserie();
+
+        if (!valgt) {
+            return;
+        }
+
+        const standardKonto = valgt.dataset.standardKonto || "";
+        const standardTekst = valgt.dataset.standardTekst || "";
+
+        if (konto1) {
+            konto1.value = standardKonto;
+        }
+
+        if (bilagstekst) {
+            bilagstekst.value = standardTekst;
+        }
+
+        fyllBelop();
+        oppdaterKontonavn();
+    }
+
+    if (bilagForm) {
+        bilagForm.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+
+                if (document.activeElement && document.activeElement.classList.contains("konto-felt")) {
+                    oppdaterKontonavn();
+                    document.activeElement.blur();
+                }
+            }
+        });
+
+        bilagForm.addEventListener("submit", function (event) {
+            oppdaterKontonavn();
+
+            const feilFelt = bilagForm.querySelector(".konto-felt.is-invalid");
+
+            if (feilFelt) {
+                event.preventDefault();
+                feilFelt.focus();
+            }
+        });
+    }
+
+    document.querySelectorAll(".konto-felt").forEach(function (felt) {
+        felt.addEventListener("input", oppdaterKontonavn);
+        felt.addEventListener("change", oppdaterKontonavn);
+        felt.addEventListener("focusout", oppdaterKontonavn);
+    });
+
+    if (bilagsserie) {
+        bilagsserie.addEventListener("change", function () {
+            fyllFraBilagsserie();
+        });
+    }
+
+    if (bilagsbelop) {
+        bilagsbelop.addEventListener("change", function () {
+            fyllBelop();
+        });
+    }
+
+    fyllFraBilagsserie();
+    oppdaterKontonavn();
 });
 </script>
 

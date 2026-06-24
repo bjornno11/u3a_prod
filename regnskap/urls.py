@@ -7,6 +7,24 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("faste-data/", views.faste_data, name="faste_data"),
     path("faste-data/kontoplan/", views.kontoplan, name="kontoplan"),
+    path(
+        "faste-data/kontoplan/<int:konto_id>/",
+        views.konto_endre,
+        name="konto_endre",
+    ),
+
+    path(
+        "faste-data/kontoplan/ny/",
+        views.konto_ny,
+        name="konto_ny",
+    ),
+
+    path(
+        "faste-data/kontoplan/<int:konto_id>/slett/",
+        views.konto_slett,
+        name="konto_slett",
+    ),
+
     path("faste-data/styrekoder/", views.styrekoder, name="styrekoder"),
     path(
         "opprett-standard-startdata/",
@@ -111,5 +129,22 @@ urlpatterns = [
         name="bilag_ny",
     ),
 
+    path(
+        "bilag/<int:bilag_id>/",
+        views.bilag_detalj,
+        name="bilag_detalj",
+    ),
+
+    path(
+        "bilag/<int:bilag_id>/endre/",
+        views.bilag_endre,
+        name="bilag_endre",
+    ),
+
+    path(
+        "kontosporring/",
+        views.kontosporring,
+        name="kontosporring",
+    ),
 ]
 

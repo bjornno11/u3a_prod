@@ -8,6 +8,11 @@
 
     <h1 class="mb-2">💾 Faste data</h1>
 
+    <a href="{% url 'regnskap:dashboard' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til regnskap
+    </a>
+
     <p class="lead mb-4">
         {{ organisasjon.organisasjon }}
     </p>

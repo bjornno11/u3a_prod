@@ -8,9 +8,21 @@
 
     <h1>📒 Kontoplan</h1>
 
+    <a href="{% url 'regnskap:faste_data' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til faste data
+    </a>
+
     <p class="lead">
         {{ organisasjon.organisasjon }}
     </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:konto_ny' %}"
+           class="btn btn-primary">
+            ➕ Ny konto
+        </a>
+    </div>
 
     <table class="table table-striped">
 
@@ -26,7 +38,11 @@
 
         {% for konto in kontoer %}
             <tr>
-                <td>{{ konto.kontonummer }}</td>
+                <td>
+                    <a href="{% url 'regnskap:konto_endre' konto.id %}">
+                        {{ konto.kontonummer }}
+                    </a>
+                </td>
                 <td>{{ konto.kontonavn }}</td>
                 <td>{{ konto.styrekode }}</td>
             </tr>

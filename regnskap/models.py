@@ -68,6 +68,51 @@ class Regnskapsperiode(models.Model):
             f"-{self.periodenummer:02d}"
         )
 
+class Regnskapsoppsett(models.Model):
+    organisasjon = models.OneToOneField(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="regnskapsoppsett"
+    )
+
+    navn = models.CharField(max_length=150)
+    adresse = models.CharField(max_length=150, blank=True)
+    postnummer = models.CharField(max_length=10, blank=True)
+    poststed = models.CharField(max_length=80, blank=True)
+
+    bankkonto = models.CharField(max_length=30, blank=True)
+    organisasjonsnummer = models.CharField(max_length=20, blank=True)
+
+    mva_pliktig = models.BooleanField(default=False)
+
+    hovedbok_fra = models.PositiveIntegerField(default=100)
+    hovedbok_til = models.PositiveIntegerField(default=999)
+
+    leverandor_fra = models.PositiveIntegerField(default=1000)
+    leverandor_til = models.PositiveIntegerField(default=1999)
+
+    medlem_fra = models.PositiveIntegerField(default=2000)
+    medlem_til = models.PositiveIntegerField(default=2999)
+
+    kunde_fra = models.PositiveIntegerField(default=3000)
+    kunde_til = models.PositiveIntegerField(default=3999)
+
+    regnskapsaar_fra = models.PositiveIntegerField(default=2020)
+    regnskapsaar_til = models.PositiveIntegerField(default=2099)
+
+    logo = models.ImageField(
+        upload_to="regnskap/logo/",
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = "Regnskapsoppsett"
+        verbose_name_plural = "Regnskapsoppsett"
+
+    def __str__(self):
+        return self.navn
+
 
 class Bilagsserie(models.Model):
     organisasjon = models.ForeignKey(
@@ -88,6 +133,11 @@ class Bilagsserie(models.Model):
 
     navn = models.CharField(
         max_length=100
+    )
+
+    standard_tekst = models.CharField(
+        max_length=100,
+        blank=True
     )
 
     neste_nummer = models.PositiveIntegerField(

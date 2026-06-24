@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Slett konto{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:kontoplan' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til kontoplan
+    </a>
+
+    <h1>🗑 Slett konto</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    {% if feilmelding %}
+
+        <div class="alert alert-danger">
+            {{ feilmelding }}
+        </div>
+
+        <a href="{% url 'regnskap:kontoplan' %}"
+           class="btn btn-secondary">
+            Tilbake til kontoplan
+        </a>
+
+    {% else %}
+
+        <div class="alert alert-danger">
+            Er du sikker på at du vil slette:
+
+            <br><br>
+
+            <strong>
+                {{ konto.kontonummer }} {{ konto.kontonavn }}
+            </strong>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger">
+                Ja, slett
+            </button>
+
+            <a href="{% url 'regnskap:kontoplan' %}"
+               class="btn btn-secondary">
+                Avbryt
+            </a>
+        </form>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

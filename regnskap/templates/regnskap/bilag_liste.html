@@ -62,7 +62,12 @@
             {% for b in bilag %}
                 <tr>
                     <td>{{ b.bilagsserie.kode }}</td>
-                    <td>{{ b.bilagsnummer }}</td>
+                    <td>
+                        <a href="{% url 'regnskap:bilag_detalj' b.id %}">
+                            {{ b.bilagsnummer }}
+                        </a>
+                    </td>
+
                     <td>{{ b.bilagsdato }}</td>
                     <td>{{ b.bilagstekst }}</td>
                     <td>{{ b.sum_belop }}</td>

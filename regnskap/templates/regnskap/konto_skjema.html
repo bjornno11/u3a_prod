@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Endre konto{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:kontoplan' %}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til kontoplan
+    </a>
+
+    <h1>
+        📒 {% if konto %}Endre konto{% else %}Ny konto{% endif %}
+    </h1>
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Kontonummer</label>
+            <input type="number"
+                   name="kontonummer"
+                   class="form-control"
+                   value="{{ konto.kontonummer|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Kontonavn</label>
+            <input type="text"
+                   name="kontonavn"
+                   class="form-control"
+                   value="{{ konto.kontonavn|default:'' }}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Styrekode</label>
+            <input type="text"
+                   name="styrekode"
+                   class="form-control"
+                   value="{{ konto.styrekode|default:'' }}"
+                   maxlength="4"
+                   required>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="samlekonto"
+                   class="form-check-input"
+                   {% if konto.samlekonto %}checked{% endif %}>
+            <label class="form-check-label">Samlekonto</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="krever_avdeling"
+                   class="form-check-input"
+                   {% if konto.krever_avdeling %}checked{% endif %}>
+            <label class="form-check-label">Krever avdeling</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="krever_prosjekt"
+                   class="form-check-input"
+                   {% if konto.krever_prosjekt %}checked{% endif %}>
+            <label class="form-check-label">Krever prosjekt</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   {% if not konto or konto.aktiv %}checked{% endif %}>
+            <label class="form-check-label">Aktiv</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+        {% if konto %}
+            <a href="{% url 'regnskap:konto_slett' konto.id %}"
+               class="btn btn-outline-danger ms-2">
+                Slett
+            </a>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}
+

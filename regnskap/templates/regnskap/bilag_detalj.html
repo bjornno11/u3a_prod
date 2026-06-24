@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Bilag {{ bilag }}{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+
+    <a href="{% url 'regnskap:bilag_liste' %}?aar={{ bilag.regnskapsaar.id }}"
+       class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tilbake til bilag
+    </a>
+
+    <h1>🧾 Bilag {{ bilag }}</h1>
+    <a href="{% url 'regnskap:bilag_endre' bilag.id %}"
+       class="btn btn-primary mb-3">
+        Endre bilag
+    </a>
+    <p class="lead">
+        {{ organisasjon.organisasjon }} – {{ bilag.regnskapsaar.aar }}
+    </p>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <p><strong>Bilagsdato:</strong> {{ bilag.bilagsdato|date:"d.m.Y" }}</p>
+            <p><strong>Føringsdato:</strong> {{ bilag.foringsdato|date:"d.m.Y" }}</p>
+            <p><strong>Tekst:</strong> {{ bilag.bilagstekst }}</p>
+            <p><strong>Sum:</strong> {{ bilag.sum_belop }}</p>
+
+            {% if bilag.har_differanse %}
+                <div class="alert alert-warning">
+                    Bilaget har differanse.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <h4>Linjer</h4>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="width: 60px;">Linje</th>
+                <th style="width: 250px;">Konto</th>
+                <th class="text-end" style="width: 120px;">Beløp</th>
+                <th style="width: 90px;">Avd.</th>
+                <th style="width: 90px;">Prosj.</th>
+                <th>Tekst</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for linje in linjer %}
+            <tr>
+
+                <td>{{ linje.linjenummer }}</td>
+                <td>{{ linje.kontonummer }} {{ linje.kontonavn }}</td>
+                <td class="text-end">{{ linje.belop }}</td>
+
+                <td>
+                    {% if linje.avdeling %}
+                        {{ linje.avdeling.avdelingsnummer }}
+                        {{ linje.avdeling.navn }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if linje.prosjekt %}
+                        {{ linje.prosjekt.prosjektnummer }}
+                        {{ linje.prosjekt.navn }}
+                    {% endif %}
+                </td>
+
+                <td>{{ linje.linjetekst }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">
+                    Ingen linjer registrert.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
+

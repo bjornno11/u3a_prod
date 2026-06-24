@@ -13,6 +13,8 @@ from .models import (
     Bilag,
     Bilagslinje,
     SystemLogg,
+    Regnskapsoppsett,
+
 )
 
 
@@ -131,4 +133,48 @@ class SystemLoggAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+
+@admin.register(Regnskapsoppsett)
+class RegnskapsoppsettAdmin(admin.ModelAdmin):
+    list_display = (
+        "navn",
+        "organisasjonsnummer",
+        "bankkonto",
+        "mva_pliktig",
+    )
+
+    fieldsets = (
+        ("Selskap / enhet", {
+
+            "fields": (
+                "organisasjon",
+                "navn",
+                "adresse",
+                "postnummer",
+                "poststed",
+                "bankkonto",
+                "organisasjonsnummer",
+                "mva_pliktig",
+                "logo",
+            )
+        }),
+        ("Kontointervaller", {
+            "fields": (
+                "hovedbok_fra",
+                "hovedbok_til",
+                "leverandor_fra",
+                "leverandor_til",
+                "medlem_fra",
+                "medlem_til",
+                "kunde_fra",
+                "kunde_til",
+            )
+        }),
+        ("Regnskapsår", {
+            "fields": (
+                "regnskapsaar_fra",
+                "regnskapsaar_til",
+            )
+        }),
+    )
 
