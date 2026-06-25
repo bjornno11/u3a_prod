@@ -19,26 +19,69 @@
 
     {% if regnskapsaar_liste %}
 
-        <form method="get" class="mb-3">
+    <form method="get" class="row g-2 align-items-end mb-3">
+
+        <div class="col-md-3">
             <label class="form-label">Regnskapsår</label>
-
-            <select name="aar"
-                    class="form-select"
-                    onchange="this.form.submit()">
-
+            <select name="aar" class="form-select">
                 {% for a in regnskapsaar_liste %}
                     <option value="{{ a.id }}"
-                        {% if regnskapsaar and a.id == regnskapsaar.id %}
-                            selected
-                        {% endif %}
-                    >
+                        {% if regnskapsaar and a.id == regnskapsaar.id %}selected{% endif %}>
                         {{ a.aar }}
                     </option>
                 {% endfor %}
-
             </select>
-        </form>
+        </div>
 
+        <div class="col-md-3">
+            <label class="form-label">Fra dato</label>
+            <input type="date"
+                   name="fra_dato"
+                   class="form-control"
+                   value="{{ fra_dato }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Til dato</label>
+            <input type="date"
+                   name="til_dato"
+                   class="form-control"
+                   value="{{ til_dato }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Avdeling</label>
+            <select name="avdeling" class="form-select">
+                <option value="">Alle</option>
+                {% for a in avdelinger %}
+                    <option value="{{ a.id }}"
+                        {% if valgt_avdeling_id|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}>
+                        {{ a.avdelingsnummer }} {{ a.navn }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Prosjekt</label>
+            <select name="prosjekt" class="form-select">
+                <option value="">Alle</option>
+                {% for p in prosjekter %}
+                    <option value="{{ p.id }}"
+                        {% if valgt_prosjekt_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
+                        {{ p.prosjektnummer }} {{ p.navn }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">
+                Vis
+            </button>
+        </div>
+
+    </form>
         <div class="mb-3">
             <a href="{% url 'regnskap:bilag_ny' %}?aar={{ regnskapsaar.id }}"
                class="btn btn-primary">
@@ -88,6 +131,14 @@
             {% endfor %}
             </tbody>
         </table>
+
+        <div class="mt-3 fw-bold">
+            Sum debet: {{ sum_debet }}
+            &nbsp;&nbsp;
+            Sum kredit: {{ sum_kredit }}
+            &nbsp;&nbsp;
+            Tot. diff.: {{ total_differanse }}
+        </div>
 
     {% else %}
 

@@ -10,6 +10,12 @@ from decimal import Decimal
 from django.utils import timezone
 import json
 
+def konto_kan_foeres_paa(konto):
+    if konto.samlekonto:
+        return False
+    return True
+
+
 @login_required
 def dashboard(request):
     organisasjon = Organisasjon.objects.filter(
@@ -24,7 +30,32 @@ def dashboard(request):
         organisasjon=organisasjon
     ).count()
 
-    return render(
+
+    sum_debet = Decimal("0")
+    sum_kredit = Decimal("0")
+    omsetning = Decimal("0")
+    kostnader = Decimal("0")
+
+    linjer = Bilagslinje.objects.filter(
+        bilag__organisasjon=organisasjon
+    )
+
+    for linje in linjer:
+        if linje.belop > 0:
+            sum_debet += linje.belop
+        else:
+            sum_kredit += linje.belop
+
+        if 300 <= linje.kontonummer <= 399:
+            omsetning += linje.belop
+
+        if 400 <= linje.kontonummer <= 999:
+            kostnader += linje.belop
+
+    differanse = sum_debet + sum_kredit
+    resultat = omsetning + kostnader
+
+    return render (
         request,
         "regnskap/dashboard.html",
         {
@@ -34,6 +65,13 @@ def dashboard(request):
             "antall_avdelinger": antall_avdelinger,
             "antall_prosjekter": antall_prosjekter,
             "antall_styrekoder": antall_styrekoder,
+            "sum_debet": sum_debet,
+            "sum_kredit": sum_kredit,
+            "differanse": differanse,
+            "omsetning": omsetning,
+            "kostnader": kostnader,
+            "resultat": resultat,
+
         }
     )
 
@@ -806,12 +844,68 @@ def bilag_liste(request):
         regnskapsaar = regnskapsaar_liste.first()
 
     bilag = Bilag.objects.none()
+    fra_dato = request.GET.get("fra_dato")
+    til_dato = request.GET.get("til_dato")
+    valgt_avdeling_id = request.GET.get("avdeling")
+    valgt_prosjekt_id = request.GET.get("prosjekt")
+
+    avdelinger = Avdeling.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("avdelingsnummer")
+
+    prosjekter = Prosjekt.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("prosjektnummer")
 
     if regnskapsaar:
-        bilag = Bilag.objects.filter(
+        alle_bilag = Bilag.objects.filter(
             organisasjon=organisasjon,
             regnskapsaar=regnskapsaar,
-        ).order_by("bilagsserie__kode", "bilagsnummer")
+        )
+
+        if not fra_dato and not til_dato:
+            siste_50 = list(
+                alle_bilag.order_by(
+                    "-bilagsdato",
+                    "-bilagsnummer",
+                )[:50]
+            )
+
+            if siste_50:
+                fra_dato = min(b.bilagsdato for b in siste_50).isoformat()
+                til_dato = max(b.bilagsdato for b in siste_50).isoformat()
+
+        bilag = alle_bilag
+
+        if fra_dato:
+            bilag = bilag.filter(bilagsdato__gte=fra_dato)
+
+        if til_dato:
+            bilag = bilag.filter(bilagsdato__lte=til_dato)
+        if valgt_avdeling_id:
+            bilag = bilag.filter(linjer__avdeling_id=valgt_avdeling_id)
+
+        if valgt_prosjekt_id:
+            bilag = bilag.filter(linjer__prosjekt_id=valgt_prosjekt_id)
+
+        bilag = bilag.distinct()
+
+
+        bilag = bilag.order_by("bilagsdato", "bilagsserie__kode", "bilagsnummer")
+
+        sum_debet = Decimal("0")
+        sum_kredit = Decimal("0")
+
+        for b in bilag:
+            for linje in b.linjer.all():
+                if linje.belop > 0:
+                    sum_debet += linje.belop
+                else:
+                    sum_kredit += linje.belop
+
+        total_differanse = sum_debet + sum_kredit
 
     return render(
         request,
@@ -821,6 +915,15 @@ def bilag_liste(request):
             "regnskapsaar": regnskapsaar,
             "regnskapsaar_liste": regnskapsaar_liste,
             "bilag": bilag,
+            "fra_dato": fra_dato,
+            "til_dato": til_dato,
+            "avdelinger": avdelinger,
+            "prosjekter": prosjekter,
+            "valgt_avdeling_id": valgt_avdeling_id,
+            "valgt_prosjekt_id": valgt_prosjekt_id,
+            "sum_debet": sum_debet,
+            "sum_kredit": sum_kredit,
+            "total_differanse": total_differanse,
         }
     )
 
@@ -867,6 +970,7 @@ def bilag_ny(request):
     ).order_by("aar")
 
     valgt_aar_id = request.GET.get("aar") or request.POST.get("regnskapsaar_id")
+    valgt_serie_id = request.GET.get("serie")
 
     if valgt_aar_id:
         regnskapsaar = regnskapsaar_liste.filter(id=valgt_aar_id).first()
@@ -886,6 +990,13 @@ def bilag_ny(request):
         organisasjon=organisasjon
     ).order_by("kontonummer")
 
+    kontonavn_json = json.dumps({
+        str(k.kontonummer): {
+            "navn": k.kontonavn,
+            "samlekonto": k.samlekonto,
+        }
+        for k in kontoer
+    })    
     avdelinger = Avdeling.objects.filter(
         organisasjon=organisasjon,
         aktiv=True,
@@ -895,6 +1006,14 @@ def bilag_ny(request):
         organisasjon=organisasjon,
         aktiv=True,
     ).order_by("prosjektnummer")
+
+    kontonavn_json = json.dumps({
+        str(k.kontonummer): {
+            "navn": k.kontonavn,
+            "samlekonto": k.samlekonto,
+        }
+        for k in kontoer
+    })
 
     if request.method == "POST":
         bilagsserie_id = request.POST.get("bilagsserie")
@@ -941,6 +1060,24 @@ def bilag_ny(request):
 
                     if not konto_obj:
                         raise ValueError(f"Konto {konto} finnes ikke i kontoplanen.")
+
+                    if not konto_kan_foeres_paa(konto_obj):
+                        messages.error(
+                            request,
+                            f"Konto {konto_obj.kontonummer} {konto_obj.kontonavn} er samlekonto og kan ikke føres på."
+                        )
+                        return render(request, "regnskap/bilag_skjema.html", {
+                            "organisasjon": organisasjon,
+                            "regnskapsaar": regnskapsaar,
+                            "bilagsserier": bilagsserier,
+                            "kontoer": kontoer,
+                            "dagens_dato": timezone.localdate(),
+                            "dagens_dato_iso": timezone.localdate().isoformat(),
+                            "kontonavn_json": kontonavn_json,
+                            "avdelinger": avdelinger,
+                            "prosjekter": prosjekter,
+                        })
+
                     Bilagslinje.objects.create(
                         bilag=bilag,
                         linjenummer=linjenr,
@@ -951,16 +1088,15 @@ def bilag_ny(request):
                         belop=Decimal(belop.replace(",", ".")),
                     )
 
-        return redirect(
-            f"{reverse('regnskap:bilag_liste')}?aar={regnskapsaar.id}"
+        messages.success(
+            request,
+            f"Bilag {bilagsserie.kode}{bilagsnummer} er lagret."
         )
 
+        return redirect(
+            f"{reverse('regnskap:bilag_ny')}?aar={regnskapsaar.id}&serie={bilagsserie.id}"
+        )
     dagens_dato = timezone.localdate()
-
-    kontonavn_json = json.dumps({
-        str(k.kontonummer): k.kontonavn
-        for k in kontoer
-    })
 
     return render(request, "regnskap/bilag_skjema.html", {
         "organisasjon": organisasjon,
@@ -972,6 +1108,7 @@ def bilag_ny(request):
         "kontonavn_json": kontonavn_json,
         "avdelinger": avdelinger,
         "prosjekter": prosjekter,
+        "valgt_serie_id": valgt_serie_id,
     })
 
 @login_required
@@ -1012,10 +1149,12 @@ def bilag_endre(request, bilag_id):
     ).order_by("prosjektnummer")
 
     kontonavn_json = json.dumps({
-        str(k.kontonummer): k.kontonavn
+        str(k.kontonummer): {
+            "navn": k.kontonavn,
+            "samlekonto": k.samlekonto,
+        }
         for k in kontoer
     })
-
     if request.method == "POST":
         nye_linjer = []
         post_linjer = [None, None, None, None, None, None]
@@ -1063,6 +1202,33 @@ def bilag_endre(request, bilag_id):
                         "linje5": post_linjer[4],
                         "linje6": post_linjer[5],
                         "feil_linje": str(linjenr),
+                        "avdelinger": avdelinger,
+                        "prosjekter": prosjekter,
+                    })
+
+                if not konto_kan_foeres_paa(konto_obj):
+                    messages.error(
+                        request,
+                        f"Konto {konto_obj.kontonummer} {konto_obj.kontonavn} er samlekonto og kan ikke føres på."
+                    )
+                    return render(request, "regnskap/bilag_skjema.html", {
+                        "organisasjon": organisasjon,
+                        "regnskapsaar": bilag.regnskapsaar,
+                        "bilag": bilag,
+                        "linjer": linjer,
+                        "dagens_dato": bilag.bilagsdato,
+                        "dagens_dato_iso": bilag.bilagsdato.isoformat(),
+                        "kontoer": kontoer,
+                        "kontonavn_json": kontonavn_json,
+                        "linje1": post_linjer[0],
+                        "linje2": post_linjer[1],
+                        "linje3": post_linjer[2],
+                        "linje4": post_linjer[3],
+                        "linje5": post_linjer[4],
+                        "linje6": post_linjer[5],
+                        "feil_linje": str(linjenr),
+                        "avdelinger": avdelinger,
+                        "prosjekter": prosjekter,
                     })
 
                 nye_linjer.append(
@@ -1166,4 +1332,19 @@ def kontosporring(request):
             "valgt_kontonavn": valgt_kontonavn,
         }
     )
+
+@login_required
+def bilagsjournal(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    return render(
+        request,
+        "regnskap/bilagsjournal.html",
+        {
+            "organisasjon": organisasjon,
+        }
+    )
+
 

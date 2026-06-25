@@ -5,46 +5,202 @@
 {% block content %}
 
 <div class="container my-4">
-
-```
-<h1 class="mb-4">💰 Regnskap</h1>
-
 {% if organisasjon %}
-    <p class="lead mb-4">
-        Regnskap for <strong>{{ organisasjon.organisasjon }}</strong>
-    </p>
 
-    <div class="row g-3 mb-4">
+<div class="p-4 mb-4 rounded-4 text-white"
+     style="background: linear-gradient(135deg, #071426, #102a44); border: 1px solid #1f6feb; box-shadow: 0 0 25px rgba(31,111,235,0.35);">
+
+    <div class="row g-4 mb-4">
 
         <div class="col-md-3">
-            <div class="bg-light rounded-3 p-3 text-center">
-                <div class="fw-bold fs-4">{{ antall_kontoer }}</div>
-                <div class="text-muted">Kontoer</div>
+            <div class="rounded-3 p-3 h-100"
+                 style="background: rgba(255,255,255,0.06); border: 1px solid rgba(13,202,240,0.25);">
+
+                <div class="text-info fw-bold mb-3">
+                    Meny
+                </div>
+
+                        <div class="accordion accordion-flush" id="regnskapMeny">
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menyRegistrering">
+                                        ✍ Registrering
+                                    </button>
+                                </h2>
+                                <div id="menyRegistrering"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+                                    <div class="accordion-body p-2">
+                                        <a href="{% url 'regnskap:bilag_ny' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Nytt bilag
+                                        </a>
+                                        <a href="{% url 'regnskap:bilag_liste' %}"
+                                           class="d-block text-light text-decoration-none">
+                                            Bilagsliste
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menySporring">
+                                        🔎 Spørring
+                                    </button>
+                                </h2>
+                                <div id="menySporring"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+                                    <div class="accordion-body p-2">
+                                        <a href="{% url 'regnskap:kontosporring' %}"
+                                           class="d-block text-light text-decoration-none">
+                                            Kontospørring
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menyJournaler">
+                                        📘 Journaler
+                                    </button>
+                                </h2>
+                                <div id="menyJournaler"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+                                    <div class="accordion-body p-2">
+                                        <a href="{% url 'regnskap:bilagsjournal' %}"
+                                           class="d-block text-light text-decoration-none">
+                                            Bilagsjournal
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menyFasteData">
+                                        💾 Faste data
+                                    </button>
+                                </h2>
+                                <div id="menyFasteData"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+                                    <div class="accordion-body p-2">
+                                        <a href="{% url 'regnskap:faste_data' %}"
+                                           class="d-block text-light text-decoration-none">
+                                            Faste data
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="bg-light rounded-3 p-3 text-center">
-                <div class="fw-bold fs-4">{{ antall_bilag }}</div>
-                <div class="text-muted">Bilag</div>
+        <div class="col-md-9">
+            <h1 class="mb-1">BAS</h1>
+            <div class="text-info fs-5">Spartacus</div>
+            <div class="text-light mt-2">
+                Regnskap for <strong>{{ organisasjon.organisasjon }}</strong>
             </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="bg-light rounded-3 p-3 text-center">
-                <div class="fw-bold fs-4">{{ antall_avdelinger }}</div>
-                <div class="text-muted">Avdelinger</div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="bg-light rounded-3 p-3 text-center">
-                <div class="fw-bold fs-4">{{ antall_prosjekter }}</div>
-                <div class="text-muted">Prosjekter</div>
+            <div class="text-info mt-3">
+                Kontrollpanel
             </div>
         </div>
 
     </div>
+    <div class="row g-3 mb-3">
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(13,202,240,0.35);">
+                <div class="fw-bold fs-4">{{ omsetning }}</div>
+                <div class="text-info">Omsetning</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(13,202,240,0.35);">
+                <div class="fw-bold fs-4">{{ kostnader }}</div>
+                <div class="text-info">Kostnader</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(13,202,240,0.35);">
+                <div class="fw-bold fs-4">{{ resultat }}</div>
+                <div class="text-info">Resultat</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(13,202,240,0.35);">
+                <div class="fw-bold fs-4">{{ differanse }}</div>
+                <div class="text-info">Differanse</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.05);">
+                <div class="fw-bold fs-5">{{ antall_bilag }}</div>
+                <div class="text-light">Bilag</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.05);">
+                <div class="fw-bold fs-5">{{ antall_kontoer }}</div>
+                <div class="text-light">Kontoer</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.05);">
+                <div class="fw-bold fs-5">{{ antall_avdelinger }}</div>
+                <div class="text-light">Avdelinger</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-3 p-3 text-center"
+                 style="background: rgba(255,255,255,0.05);">
+                <div class="fw-bold fs-5">{{ antall_prosjekter }}</div>
+                <div class="text-light">Prosjekter</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
 
 {% else %}
     <p class="text-danger">
@@ -54,75 +210,59 @@
 
 <div class="row g-4">
 
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'regnskap:bilag_ny' %}"
+           class="text-decoration-none text-dark">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div style="font-size:48px;">✍️</div>
+                <h4 class="mt-3">Registrering</h4>
+                <p class="text-muted">
+                    Nytt bilag og bilagsliste.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'regnskap:kontosporring' %}"
+           class="text-decoration-none text-dark">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div style="font-size:48px;">🔎</div>
+                <h4 class="mt-3">Spørring</h4>
+                <p class="text-muted">
+                    Konto, avdeling og prosjekt.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'regnskap:bilagsjournal' %}"
+           class="text-decoration-none text-dark">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div style="font-size:48px;">📘</div>
+                <h4 class="mt-3">Journaler</h4>
+                <p class="text-muted">
+                    Bilagsjournal.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
         <a href="{% url 'regnskap:faste_data' %}"
            class="text-decoration-none text-dark">
             <div class="card shadow-sm border-0 h-100 text-center p-4">
                 <div style="font-size:48px;">💾</div>
                 <h4 class="mt-3">Faste data</h4>
                 <p class="text-muted">
-                    Kontoplan, kunder, leverandører, avdelinger og prosjekter.
+                    Kontoplan, bilagsserier, avdelinger og prosjekter.
                 </p>
             </div>
         </a>
-    </div>
-
-    <div class="col-md-6 col-lg-4">
-        <a href="{% url 'regnskap:bilag_liste' %}"
-           class="text-decoration-none text-dark">
-
-            <div class="card shadow-sm border-0 h-100 text-center p-4">
-
-                <div style="font-size:48px;">🧾</div>
-
-                <h4 class="mt-3">
-                    Bilag
-                </h4>
-
-                <p class="text-muted">
-                    Registrering, spørring og bilagsjournal.
-                </p>
-
-            </div>
-
-        </a>
-    </div>
-
-    <div class="col-md-6 col-lg-4">
-        <a href="{% url 'regnskap:kontosporring' %}"
-           class="text-decoration-none text-dark">
-            <div class="card shadow-sm border-0 h-100 text-center p-4">
-                <div style="font-size:48px;">📒</div>
-                <h4 class="mt-3">Konto</h4>
-                <p class="text-muted">
-                    Kontospørring, reskontro og saldolister.
-                </p>
-            </div>
-        </a>
-    </div>
-
-    <div class="col-md-6 col-lg-6">
-        <div class="card shadow-sm border-0 h-100 text-center p-4">
-            <div style="font-size:48px;">📊</div>
-            <h4 class="mt-3">Regnskap</h4>
-            <p class="text-muted">
-                Resultat, balanse og hovedbok.
-            </p>
-        </div>
-regnskap/templates/regnskap/dashboard.html    </div>
-
-    <div class="col-md-6 col-lg-6">
-        <div class="card shadow-sm border-0 h-100 text-center p-4">
-            <div style="font-size:48px;">🎯</div>
-            <h4 class="mt-3">Budsjett</h4>
-            <p class="text-muted">
-                Budsjett og avviksrapportering.
-            </p>
-        </div>
     </div>
 
 </div>
-```
 
 </div>
 

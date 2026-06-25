@@ -146,5 +146,11 @@ urlpatterns = [
         views.kontosporring,
         name="kontosporring",
     ),
+
+    path(
+        "journaler/bilagsjournal/",
+        views.bilagsjournal,
+        name="bilagsjournal",
+    ),
 ]
 

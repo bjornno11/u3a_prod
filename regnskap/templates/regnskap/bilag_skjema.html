@@ -60,10 +60,10 @@ Nytt bilag
 
                     {% for s in bilagsserier %}
                         <option value="{{ s.id }}"
+                                {% if valgt_serie_id|stringformat:"s" == s.id|stringformat:"s" %}selected{% endif %}
                                 data-standard-konto="{{ s.standard_konto|default:'' }}"
                                 data-standard-tekst="{{ s.standard_tekst|default:'' }}"
-                                data-standard-fortegn="{{ s.standard_fortegn|default:'' }}">
-                            {{ s.kode }} - {{ s.navn }}
+                                data-standard-fortegn="{{ s.standard_fortegn|default:'' }}">                            {{ s.kode }} - {{ s.navn }}
                         </option>
                     {% endfor %}
 
@@ -140,7 +140,7 @@ Nytt bilag
             <div class="col-md-2">
                 <input type="text"
                        name="belop_{{ nr }}"
-                       class="form-control"
+                       class="form-control belop-felt"
                        {% if nr == "1" and linje1 %}value="{{ linje1.belop }}"
                        {% elif nr == "2" and linje2 %}value="{{ linje2.belop }}"
                        {% elif nr == "3" and linje3 %}value="{{ linje3.belop }}"
@@ -206,6 +206,11 @@ Nytt bilag
             </div>
         {% endfor %}
 
+        <div class="mt-3 mb-3 fw-bold">
+            Restbeløp:
+            <span id="bilagDifferanse" class="text-success">0,00</span>
+        </div>
+
         <button type="submit" class="btn btn-primary">
             Lagre bilag
         </button>
@@ -254,9 +259,16 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (kontonavn[konto]) {
-                navnFelt.textContent = kontonavn[konto];
-                navnFelt.classList.remove("text-danger");
-                navnFelt.classList.add("text-muted");
+                if (kontonavn[konto].samlekonto) {
+                    navnFelt.textContent = kontonavn[konto].navn + " er samlekonto og kan ikke føres på";
+                    navnFelt.classList.remove("text-muted");
+                    navnFelt.classList.add("text-danger");
+                    felt.classList.add("is-invalid");
+                } else {
+                    navnFelt.textContent = kontonavn[konto].navn;
+                    navnFelt.classList.remove("text-danger");
+                    navnFelt.classList.add("text-muted");
+                }
             } else {
                 navnFelt.textContent = "Konto finnes ikke";
                 navnFelt.classList.remove("text-muted");
@@ -264,6 +276,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 felt.classList.add("is-invalid");
             }
         });
+    }
+
+    function oppdaterDifferanse() {
+        let sum = 0;
+
+        document.querySelectorAll(".belop-felt").forEach(function (felt) {
+            const verdi = parseFloat(
+                (felt.value || "").replace(",", ".")
+            );
+
+            if (!isNaN(verdi)) {
+                sum += verdi;
+            }
+        });
+
+        const diffFelt = document.getElementById("bilagDifferanse");
+
+        if (!diffFelt) {
+            return;
+        }
+
+        const restbelop = sum * -1;
+
+        diffFelt.textContent = restbelop.toFixed(2).replace(".", ",");
+
+        diffFelt.classList.remove("text-success");
+        diffFelt.classList.remove("text-danger");
+
+        if (Math.abs(sum) < 0.005) {
+            diffFelt.classList.add("text-success");
+        } else {
+            diffFelt.classList.add("text-danger");
+        }
     }
 
     function fyllBelop() {
@@ -291,6 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
             belop1.value = verdi.toFixed(2);
             belop2.value = (-verdi).toFixed(2);
         }
+        oppdaterDifferanse();
     }
 
     function fyllFraBilagsserie() {
@@ -345,6 +391,59 @@ document.addEventListener("DOMContentLoaded", function () {
         felt.addEventListener("focusout", oppdaterKontonavn);
     });
 
+    document.querySelectorAll(".belop-felt").forEach(function (felt) {
+        felt.addEventListener("input", oppdaterDifferanse);
+        felt.addEventListener("change", oppdaterDifferanse);
+    });
+
+    document.querySelectorAll(".konto-felt").forEach(function (felt) {
+        felt.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+            oppdaterKontonavn();
+
+            if (felt.classList.contains("is-invalid")) {
+                return;
+            }
+
+            const navn = felt.getAttribute("name"); // konto_1
+            const nr = navn.replace("konto_", "");
+            const belopFelt = document.querySelector('[name="belop_' + nr + '"]');
+
+            if (belopFelt) {
+                belopFelt.focus();
+                belopFelt.select();
+            }
+        });
+    });
+
+    document.querySelectorAll(".belop-felt").forEach(function (felt) {
+        felt.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            oppdaterDifferanse();
+
+            const navn = felt.getAttribute("name"); // belop_1
+            const nr = parseInt(navn.replace("belop_", ""), 10);
+            const nesteKonto = document.querySelector('[name="konto_' + (nr + 1) + '"]');
+
+            if (nesteKonto) {
+                setTimeout(function () {
+                    nesteKonto.focus();
+                    nesteKonto.select();
+                }, 0);
+            }
+        });
+    });
+
     if (bilagsserie) {
         bilagsserie.addEventListener("change", function () {
             fyllFraBilagsserie();
@@ -359,6 +458,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fyllFraBilagsserie();
     oppdaterKontonavn();
+    oppdaterDifferanse();
 });
 </script>
 
