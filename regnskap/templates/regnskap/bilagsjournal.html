@@ -4,13 +4,54 @@
 
 {% block content %}
 
-<div class="container my-4">
+<div class="container mt-4">
 
-    <h1>📘 Bilagsjournal</h1>
+    <h1>Bilagsjournal</h1>
 
-    <p>
-        Under utvikling.
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
     </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:bilag_ny' %}" class="btn btn-primary">
+            Nytt bilag
+        </a>
+
+        <a href="/lokaladmin/regnskap/" class="btn btn-secondary">
+            Tilbake til regnskap
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover bas-grid">
+        <thead>
+            <tr>
+                <th>Dato</th>
+                <th>Bilag</th>
+                <th>År</th>
+                <th>Tekst</th>
+                <th class="text-end">Sum</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bilag in bilag_liste %}
+                <tr>
+                    <td>{{ bilag.dato }}</td>
+                    <td>{{ bilag.bilagsnummer }}</td>
+                    <td>{{ bilag.regnskapsaar.aar }}</td>
+                    <td>{{ bilag.bilagstekst }}</td>
+                    <td class="text-end">
+                        {{ bilag.sum_belop }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-muted">
+                        Ingen bilag funnet.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
 

@@ -94,12 +94,15 @@ def faste_data(request):
         }
     )
 
+
 @login_required
 def kontoplan(request):
 
     organisasjon = Organisasjon.objects.filter(
         redaktorer=request.user
     ).first()
+
+    oppslag = request.GET.get("oppslag") == "1"
 
     kontoer = Konto.objects.filter(
         organisasjon=organisasjon
@@ -111,6 +114,7 @@ def kontoplan(request):
         {
             "organisasjon": organisasjon,
             "kontoer": kontoer,
+            "oppslag": oppslag,
         }
     )
 
@@ -1333,18 +1337,26 @@ def kontosporring(request):
         }
     )
 
+
 @login_required
 def bilagsjournal(request):
     organisasjon = Organisasjon.objects.filter(
         redaktorer=request.user
     ).first()
 
+    bilag_liste = (
+        Bilag.objects
+        .filter(organisasjon=organisasjon)
+        .select_related("regnskapsaar")
+        .order_by("-bilagsdato", "-bilagsnummer")
+    )
+
     return render(
         request,
         "regnskap/bilagsjournal.html",
         {
             "organisasjon": organisasjon,
-        }
+            "bilag_liste": bilag_liste,
+        },
     )
-
 

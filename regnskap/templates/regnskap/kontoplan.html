@@ -6,22 +6,30 @@
 
 <div class="container my-4">
 
-    <h1>📒 Kontoplan</h1>
+    {% if oppslag %}
+        <h1>📒 Kontooppslag</h1>
+    {% else %}
+        <h1>📒 Kontoplan</h1>
+    {% endif %}
 
+    {% if not oppslag %}
     <a href="{% url 'regnskap:faste_data' %}"
-       class="btn btn-outline-secondary btn-sm mb-3">
+       class="btn btn-outline-secondary">
         ← Tilbake til faste data
     </a>
+    {% endif %}
 
     <p class="lead">
         {{ organisasjon.organisasjon }}
     </p>
 
     <div class="mb-3">
+        {% if not oppslag %}
         <a href="{% url 'regnskap:konto_ny' %}"
            class="btn btn-primary">
-            ➕ Ny konto
+            Ny konto
         </a>
+        {% endif %}
     </div>
 
     <table class="table table-striped">
@@ -31,24 +39,56 @@
                 <th>Konto</th>
                 <th>Navn</th>
                 <th>Styrekode</th>
+                <th class="text-center">Samle</th>
+                <th class="text-center">Avd</th>
+                <th class="text-center">Prosj</th>
+                <th class="text-center">Aktiv</th>
             </tr>
         </thead>
 
         <tbody>
 
         {% for konto in kontoer %}
+
             <tr>
                 <td>
-                    <a href="{% url 'regnskap:konto_endre' konto.id %}">
-                        {{ konto.kontonummer }}
-                    </a>
+
+                    {% if oppslag %}
+                        <button type="button"
+                                class="btn btn-link p-0"
+                                onclick="window.opener.BAS.velgOppslag('{{ konto.kontonummer }}'); window.close();">
+                            {{ konto.kontonummer }}
+                        </button>
+                    {% else %}
+                        <a href="{% url 'regnskap:konto_endre' konto.id %}">
+                            {{ konto.kontonummer }}
+                        </a>
+                    {% endif %}
                 </td>
+
                 <td>{{ konto.kontonavn }}</td>
+
                 <td>{{ konto.styrekode }}</td>
+
+                <td class="text-center">
+                    {% if konto.samlekonto %}✓{% endif %}
+                </td>
+
+                <td class="text-center">
+                    {% if konto.krever_avdeling %}✓{% endif %}
+                </td>
+
+                <td class="text-center">
+                    {% if konto.krever_prosjekt %}✓{% endif %}
+                </td>
+
+                <td class="text-center">
+                    {% if konto.aktiv %}✓{% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="3">
+                <td colspan="7">
                     Ingen kontoer registrert.
                 </td>
             </tr>

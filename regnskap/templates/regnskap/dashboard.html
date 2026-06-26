@@ -98,23 +98,49 @@
                                         💾 Faste data
                                     </button>
                                 </h2>
+
                                 <div id="menyFasteData"
                                      class="accordion-collapse collapse"
                                      data-bs-parent="#regnskapMeny">
                                     <div class="accordion-body p-2">
-                                        <a href="{% url 'regnskap:faste_data' %}"
-                                           class="d-block text-light text-decoration-none">
-                                            Faste data
+
+                                        <a href="{% url 'regnskap:kontoplan' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Kontoplan
                                         </a>
+
+                                        <a href="{% url 'regnskap:bilagsserier' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Bilagsserier
+                                        </a>
+
+                                        <a href="{% url 'regnskap:regnskapsaar' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Regnskapsår
+                                        </a>
+
+                                        <a href="{% url 'regnskap:avdelinger' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Avdelinger
+                                        </a>
+
+                                        <a href="{% url 'regnskap:prosjekter' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Prosjekter
+                                        </a>
+
+                                        <a href="{% url 'regnskap:styrekoder' %}"
+                                           class="d-block text-light text-decoration-none">
+                                            Styrekoder
+                                        </a>
+
                                     </div>
                                 </div>
                             </div>
 
-                        </div>
-
-
-                </div>
-            </div>
+                            </div>
+                            </div>
+                            </div>
 
         <div class="col-md-9">
             <h1 class="mb-1">BAS</h1>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}
 {% if bilag %}
 Endre bilag
@@ -219,6 +219,9 @@ Nytt bilag
 
 </div>
 
+<script src="{% static 'regnskap/js/bas_spartacus.js' %}"></script>
+<script src="{% static 'regnskap/js/bilag_skjema.js' %}"></script>
+
 <script>
 const kontonavn = {{ kontonavn_json|safe }};
 
@@ -231,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const belop2 = document.querySelector('[name="belop_2"]');
     const bilagstekst = document.querySelector('[name="bilagstekst"]');
 
-    const bilagForm = document.querySelector("#bilagForm");
+    const bilagForm = document.querySelector("#bilag-form");
 
     function hentValgtBilagsserie() {
         if (!bilagsserie) {
@@ -279,36 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function oppdaterDifferanse() {
-        let sum = 0;
-
-        document.querySelectorAll(".belop-felt").forEach(function (felt) {
-            const verdi = parseFloat(
-                (felt.value || "").replace(",", ".")
-            );
-
-            if (!isNaN(verdi)) {
-                sum += verdi;
-            }
-        });
-
-        const diffFelt = document.getElementById("bilagDifferanse");
-
-        if (!diffFelt) {
-            return;
-        }
-
-        const restbelop = sum * -1;
-
-        diffFelt.textContent = restbelop.toFixed(2).replace(".", ",");
-
-        diffFelt.classList.remove("text-success");
-        diffFelt.classList.remove("text-danger");
-
-        if (Math.abs(sum) < 0.005) {
-            diffFelt.classList.add("text-success");
-        } else {
-            diffFelt.classList.add("text-danger");
-        }
+        BASBilag.oppdaterDifferanse();
     }
 
     function fyllBelop() {
@@ -457,8 +431,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     fyllFraBilagsserie();
+
+    if (bilagsbelop) {
+        bilagsbelop.focus();
+        bilagsbelop.select();
+    }
+
     oppdaterKontonavn();
     oppdaterDifferanse();
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    BAS.initEsc("/lokaladmin/regnskap/");
+    BAS.initOppslag();
 });
 </script>
 

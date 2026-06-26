@@ -128,6 +128,7 @@ urlpatterns = [
         views.bilag_ny,
         name="bilag_ny",
     ),
+    path("bilag/journal/", views.bilagsjournal, name="bilagsjournal"),
 
     path(
         "bilag/<int:bilag_id>/",
