@@ -19,11 +19,10 @@ Nytt bilag
     </div>
     {% endif %}
 
-    <a href="{% url 'regnskap:bilag_liste' %}?aar={{ regnskapsaar.id }}"
-
-       class="btn btn-outline-secondary btn-sm mb-3">
-        ← Tilbake til bilag
-    </a>
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-outline-secondary btn-sm mb-3">
+            ← Tilbake til regnskap
+        </a>
 
     <h1>
         {% if bilag %}
@@ -36,7 +35,7 @@ Nytt bilag
         {{ organisasjon.organisasjon }} – {{ regnskapsaar.aar }}
     </p>
 
-    <form method="post" id="bilagForm">
+    <form method="post" id="bilag-form">
         {% csrf_token %}
 
         <input type="hidden"
@@ -63,7 +62,8 @@ Nytt bilag
                                 {% if valgt_serie_id|stringformat:"s" == s.id|stringformat:"s" %}selected{% endif %}
                                 data-standard-konto="{{ s.standard_konto|default:'' }}"
                                 data-standard-tekst="{{ s.standard_tekst|default:'' }}"
-                                data-standard-fortegn="{{ s.standard_fortegn|default:'' }}">                            {{ s.kode }} - {{ s.navn }}
+                                data-standard-fortegn="{{ s.standard_fortegn|default:'' }}">
+                            {{ s.kode }} - {{ s.navn }}
                         </option>
                     {% endfor %}
 
@@ -284,8 +284,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function oppdaterDifferanse() {
         BASBilag.oppdaterDifferanse();
     }
-
-    function fyllBelop() {
+ 
+   function fyllBelop() {
         if (!bilagsbelop || !belop1 || !belop2) {
             return;
         }
@@ -335,29 +335,38 @@ document.addEventListener("DOMContentLoaded", function () {
         oppdaterKontonavn();
     }
 
-    if (bilagForm) {
-        bilagForm.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
+if (bilagForm) {
+    bilagForm.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
 
-                if (document.activeElement && document.activeElement.classList.contains("konto-felt")) {
-                    oppdaterKontonavn();
-                    document.activeElement.blur();
-                }
+            if (document.activeElement && document.activeElement.classList.contains("konto-felt")) {
+                oppdaterKontonavn();
+                document.activeElement.blur();
             }
-        });
+        }
+    });
 
-        bilagForm.addEventListener("submit", function (event) {
-            oppdaterKontonavn();
+    bilagForm.addEventListener("submit", function (event) {
+        oppdaterKontonavn();
+        oppdaterDifferanse();
 
-            const feilFelt = bilagForm.querySelector(".konto-felt.is-invalid");
+        const resultat = BASBilag.validerBilag();
 
-            if (feilFelt) {
-                event.preventDefault();
-                feilFelt.focus();
+        if (!resultat.ok) {
+            event.preventDefault();
+
+            alert(resultat.melding);
+
+            if (resultat.felt) {
+                resultat.felt.focus();
+                resultat.felt.select();
             }
-        });
-    }
+
+            return;
+        }
+    });
+}
 
     document.querySelectorAll(".konto-felt").forEach(function (felt) {
         felt.addEventListener("input", oppdaterKontonavn);
@@ -428,6 +437,20 @@ document.addEventListener("DOMContentLoaded", function () {
         bilagsbelop.addEventListener("change", function () {
             fyllBelop();
         });
+
+        bilagsbelop.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                event.stopPropagation();
+
+                fyllBelop();
+
+                if (konto1) {
+                    konto1.focus();
+                    konto1.select();
+                }
+            }
+        });
     }
 
     fyllFraBilagsserie();
@@ -439,13 +462,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     oppdaterKontonavn();
     oppdaterDifferanse();
+
 });
 </script>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     BAS.initEsc("/lokaladmin/regnskap/");
-    BAS.initOppslag();
+    BAS.initF2Lagre("bilag-form");
+
+    BASBilag.init(kontonavn);
 });
 </script>
 

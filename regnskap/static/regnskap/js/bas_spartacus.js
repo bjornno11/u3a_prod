@@ -1,5 +1,5 @@
 // BAS Spartacus Framework
-
+console.log("BAS Spartacus lastet");
 window.BAS = window.BAS || {};
 
 // Enter = neste felt
@@ -28,14 +28,28 @@ BAS.initEnterSomTab = function () {
 };
 
 // F2 = lagre skjema
+
 BAS.initF2Lagre = function (formId) {
     document.addEventListener("keydown", function (e) {
         if (e.key === "F2") {
+            console.log("F2 trykket");
             e.preventDefault();
 
             const form = document.getElementById(formId);
+            console.log("Form:", form);
+
             if (form) {
-                form.submit();
+                const submitEvent = new Event("submit", {
+                    cancelable: true,
+                    bubbles: true
+                });
+
+                const ok = form.dispatchEvent(submitEvent);
+                console.log("Submit ok:", ok);
+
+                if (ok) {
+                    form.submit();
+                }
             }
         }
     });
