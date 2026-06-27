@@ -85,3 +85,36 @@ BAS.initEsc = function (url) {
     });
 };
 
+// Statuslinje / funksjonstaster
+
+// BAS Footer / funksjonstaster
+BAS.initFooter = function (valg) {
+    const container = document.getElementById("bas-footer");
+
+    if (!container) {
+        return;
+    }
+
+    const standard = {
+        F1: "Hjelp",
+        F2: "Lagre",
+        F4: "Oppslag",
+        F5: "Ny",
+        F6: "Journal",
+        Esc: "Tilbake"
+    };
+
+    const taster = Object.assign({}, standard, valg || {});
+
+    container.innerHTML =
+        "<strong>BAS Spartacus:</strong> " +
+        Object.entries(taster)
+            .filter(function ([tast, tekst]) {
+                return tekst;
+            })
+            .map(function ([tast, tekst]) {
+                return tast + "=" + tekst;
+            })
+            .join(" &nbsp; ");
+};
+

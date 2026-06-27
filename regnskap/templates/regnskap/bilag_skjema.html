@@ -214,6 +214,9 @@ Nytt bilag
         <button type="submit" class="btn btn-primary">
             Lagre bilag
         </button>
+        <div id="bas-footer"
+             class="mt-3 p-2 rounded bg-light border small text-muted">
+        </div>
 
     </form>
 
@@ -226,6 +229,8 @@ Nytt bilag
 const kontonavn = {{ kontonavn_json|safe }};
 
 document.addEventListener("DOMContentLoaded", function () {
+    BASBilag.init(kontonavn);
+
     const bilagsserie = document.querySelector('[name="bilagsserie"]');
     const bilagsbelop = document.querySelector("#bilagsbelop");
 
@@ -236,56 +241,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const bilagForm = document.querySelector("#bilag-form");
 
+
     function hentValgtBilagsserie() {
-        if (!bilagsserie) {
-            return null;
-        }
-        return bilagsserie.options[bilagsserie.selectedIndex];
+        return BASBilag.hentValgtBilagsserie();
     }
 
     function oppdaterKontonavn() {
-        document.querySelectorAll(".konto-felt").forEach(function (felt) {
-            const navnFelt = felt.parentElement.querySelector(".kontonavn");
-            const konto = felt.value.trim();
-
-            felt.classList.remove("is-invalid");
-
-            if (!navnFelt) {
-                return;
-            }
-
-            if (!konto) {
-                navnFelt.textContent = "";
-                navnFelt.classList.remove("text-danger");
-                navnFelt.classList.add("text-muted");
-                return;
-            }
-
-            if (kontonavn[konto]) {
-                if (kontonavn[konto].samlekonto) {
-                    navnFelt.textContent = kontonavn[konto].navn + " er samlekonto og kan ikke føres på";
-                    navnFelt.classList.remove("text-muted");
-                    navnFelt.classList.add("text-danger");
-                    felt.classList.add("is-invalid");
-                } else {
-                    navnFelt.textContent = kontonavn[konto].navn;
-                    navnFelt.classList.remove("text-danger");
-                    navnFelt.classList.add("text-muted");
-                }
-            } else {
-                navnFelt.textContent = "Konto finnes ikke";
-                navnFelt.classList.remove("text-muted");
-                navnFelt.classList.add("text-danger");
-                felt.classList.add("is-invalid");
-            }
-        });
+        BASBilag.oppdaterKontonavn();
     }
 
     function oppdaterDifferanse() {
         BASBilag.oppdaterDifferanse();
     }
- 
-   function fyllBelop() {
+
+    function fyllBelop() {
         if (!bilagsbelop || !belop1 || !belop2) {
             return;
         }
@@ -310,26 +279,12 @@ document.addEventListener("DOMContentLoaded", function () {
             belop1.value = verdi.toFixed(2);
             belop2.value = (-verdi).toFixed(2);
         }
+
         oppdaterDifferanse();
     }
 
     function fyllFraBilagsserie() {
-        const valgt = hentValgtBilagsserie();
-
-        if (!valgt) {
-            return;
-        }
-
-        const standardKonto = valgt.dataset.standardKonto || "";
-        const standardTekst = valgt.dataset.standardTekst || "";
-
-        if (konto1) {
-            konto1.value = standardKonto;
-        }
-
-        if (bilagstekst) {
-            bilagstekst.value = standardTekst;
-        }
+        BASBilag.fyllFraBilagsserie();
 
         fyllBelop();
         oppdaterKontonavn();
@@ -472,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
     BAS.initEsc("/lokaladmin/regnskap/");
     BAS.initF2Lagre("bilag-form");
 
-    BASBilag.init(kontonavn);
+    BAS.initFooter();
 });
 </script>
 

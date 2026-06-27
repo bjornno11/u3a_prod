@@ -2,6 +2,8 @@
 // Bygger oppå BAS Spartacus
 
 window.BASBilag = window.BASBilag || {};
+BASBilag.dom = BASBilag.dom || {};
+BASBilag.state = BASBilag.state || {};
 
 BASBilag.oppdaterDifferanse = function () {
     let sum = 0;
@@ -34,6 +36,76 @@ BASBilag.oppdaterDifferanse = function () {
         diffFelt.classList.add("text-danger");
     }
 };
+
+BASBilag.oppdaterKontonavn = function () {
+    const kontonavn = BASBilag.kontonavn || {};
+
+    document.querySelectorAll(".konto-felt").forEach(function (felt) {
+        const navnFelt = felt.parentElement.querySelector(".kontonavn");
+        const konto = felt.value.trim();
+
+        felt.classList.remove("is-invalid");
+
+        if (!navnFelt) {
+            return;
+        }
+
+        if (!konto) {
+            navnFelt.textContent = "";
+            navnFelt.classList.remove("text-danger");
+            navnFelt.classList.add("text-muted");
+            return;
+        }
+
+        if (kontonavn[konto]) {
+            if (kontonavn[konto].samlekonto) {
+                navnFelt.textContent = kontonavn[konto].navn + " er samlekonto og kan ikke føres på";
+                navnFelt.classList.remove("text-muted");
+                navnFelt.classList.add("text-danger");
+                felt.classList.add("is-invalid");
+            } else {
+                navnFelt.textContent = kontonavn[konto].navn;
+                navnFelt.classList.remove("text-danger");
+                navnFelt.classList.add("text-muted");
+            }
+        } else {
+            navnFelt.textContent = "Konto finnes ikke";
+            navnFelt.classList.remove("text-muted");
+            navnFelt.classList.add("text-danger");
+            felt.classList.add("is-invalid");
+        }
+    });
+};
+
+BASBilag.hentValgtBilagsserie = function () {
+    const bilagsserie = BASBilag.dom.bilagsserie;
+
+    if (!bilagsserie) {
+        return null;
+    }
+
+    return bilagsserie.options[bilagsserie.selectedIndex];
+};
+
+BASBilag.fyllFraBilagsserie = function () {
+    const valgt = BASBilag.hentValgtBilagsserie();
+
+    if (!valgt) {
+        return;
+    }
+
+    const standardKonto = valgt.dataset.standardKonto || "";
+    const standardTekst = valgt.dataset.standardTekst || "";
+
+    if (BASBilag.dom.konto1) {
+        BASBilag.dom.konto1.value = standardKonto;
+    }
+
+    if (BASBilag.dom.bilagstekst) {
+        BASBilag.dom.bilagstekst.value = standardTekst;
+    }
+};
+
 
 BASBilag.validerBilag = function () {
     const kontonavn = BASBilag.kontonavn || {};
@@ -118,4 +190,28 @@ BASBilag.init = function (kontonavn) {
     console.log("BASBilag.init startet");
 
     BASBilag.kontonavn = kontonavn || {};
+
+    BASBilag.dom.bilagsserie =
+        document.querySelector('[name="bilagsserie"]');
+
+    BASBilag.dom.bilagsbelop =
+        document.querySelector("#bilagsbelop");
+
+    BASBilag.dom.konto1 =
+        document.querySelector('[name="konto_1"]');
+
+    BASBilag.dom.belop1 =
+        document.querySelector('[name="belop_1"]');
+
+    BASBilag.dom.belop2 =
+        document.querySelector('[name="belop_2"]');
+
+    BASBilag.dom.bilagstekst =
+        document.querySelector('[name="bilagstekst"]');
+
+    BASBilag.dom.form =
+        document.querySelector("#bilag-form");
+
+    BASBilag.state.endret = false;
 };
+
