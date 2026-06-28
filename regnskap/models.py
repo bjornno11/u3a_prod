@@ -490,6 +490,16 @@ class Bilag(models.Model):
 
     bilagstekst = models.CharField(max_length=200)
 
+    # Dersom dette bilaget er en tilbakeføring,
+    # peker feltet på bilaget som tilbakeføres.
+    tilbakeforing_av = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="tilbakeforinger",
+    )
+
     registrert_av = models.ForeignKey(
         "auth.User",
         on_delete=models.SET_NULL,

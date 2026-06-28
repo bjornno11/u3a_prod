@@ -125,9 +125,31 @@ urlpatterns = [
 
     path(
         "bilag/ny/",
-        views.bilag_ny,
+        views.bilag_skjema,
         name="bilag_ny",
     ),
+
+    path(
+        "bilag/<int:bilag_id>/endre/",
+        views.bilag_skjema,
+        {"modus": "endre"},
+        name="bilag_endre",
+    ),
+
+    path(
+        "bilag/<int:bilag_id>/tilbakefor/",
+        views.bilag_skjema,
+        {"modus": "tilbakeforing"},
+        name="bilag_tilbakefor",
+    ),
+
+    path(
+        "bilag/<int:bilag_id>/vis/",
+        views.bilag_skjema,
+        {"modus": "vis"},
+        name="bilag_vis",
+    ),
+
     path("bilag/journal/", views.bilagsjournal, name="bilagsjournal"),
 
     path(

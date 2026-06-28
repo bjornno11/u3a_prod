@@ -15,6 +15,434 @@ def konto_kan_foeres_paa(konto):
         return False
     return True
 
+def bilag_kan_endres(bilag):
+    return bilag.h_status == Bilag.STATUS_REGISTRERT
+
+
+def bilag_kan_slettes(bilag):
+    return bilag.h_status == Bilag.STATUS_REGISTRERT
+
+
+def bilag_kan_tilbakefores(bilag):
+    return bilag.h_status >= Bilag.STATUS_REGISTRERT
+
+
+def bygg_bilag_context(
+    organisasjon,
+    bilag,
+    modus,
+    kan_endre,
+    regnskapsaar,
+    bilagsserier,
+    kontoer,
+    kontonavn_json,
+    avdelinger,
+    prosjekter,
+    valgt_serie_id=None,
+    linje1=None,
+    linje2=None,
+    linje3=None,
+    linje4=None,
+    linje5=None,
+    linje6=None,
+    feil_linje=None,
+):
+
+    dagens_dato = timezone.localdate()
+
+    linjer = []
+
+    if bilag and linje1 is None:
+        linjer = list(
+            bilag.linjer.all().order_by("linjenummer")
+        )
+
+        linje1 = linjer[0] if len(linjer) > 0 else None
+        linje2 = linjer[1] if len(linjer) > 1 else None
+        linje3 = linjer[2] if len(linjer) > 2 else None
+        linje4 = linjer[3] if len(linjer) > 3 else None
+        linje5 = linjer[4] if len(linjer) > 4 else None
+        linje6 = linjer[5] if len(linjer) > 5 else None
+
+    return {
+        "organisasjon": organisasjon,
+        "bilag": bilag,
+        "modus": modus,
+        "kan_endre": kan_endre,
+        "regnskapsaar": regnskapsaar,
+        "bilagsserier": bilagsserier,
+        "kontoer": kontoer,
+        "dagens_dato": bilag.bilagsdato if bilag else dagens_dato,
+        "dagens_dato_iso": bilag.bilagsdato.isoformat() if bilag else dagens_dato.isoformat(),
+        "foringsdato_iso": bilag.foringsdato.isoformat() if bilag else dagens_dato.isoformat(),
+        "kontonavn_json": kontonavn_json,
+        "avdelinger": avdelinger,
+        "prosjekter": prosjekter,
+        "valgt_serie_id": valgt_serie_id,
+        "linjer": linjer,
+        "linje1": linje1,
+        "linje2": linje2,
+        "linje3": linje3,
+        "linje4": linje4,
+        "linje5": linje5,
+        "linje6": linje6,
+        "feil_linje": feil_linje,
+    }
+
+@login_required
+
+def tilbakefor_bilag(request, bilag):
+    if bilag.h_status == Bilag.STATUS_REGISTRERT:
+        siste_linje = (
+            bilag.linjer
+            .order_by("-linjenummer")
+            .first()
+        )
+
+        neste_linje = 1
+        if siste_linje:
+            neste_linje = siste_linje.linjenummer + 1
+
+        with transaction.atomic():
+            for linje in bilag.linjer.all().order_by("linjenummer"):
+                Bilagslinje.objects.create(
+                    bilag=bilag,
+                    linjenummer=neste_linje,
+                    kontonummer=linje.kontonummer,
+                    avdeling=linje.avdeling,
+                    prosjekt=linje.prosjekt,
+                    momskode=linje.momskode,
+                    linjetekst=f"Tilbakeføring av linje {linje.linjenummer}",
+                    belop=-linje.belop,
+                )
+                neste_linje += 1
+
+            bilag.h_status = Bilag.STATUS_SLETTET
+            bilag.bilagstekst = f"Tilbakeført: {bilag.bilagstekst}"
+            bilag.save()
+
+        messages.success(
+            request,
+            f"Bilag {bilag} er tilbakeført."
+        )
+
+        return redirect("regnskap:bilag_detalj", bilag_id=bilag.id)
+
+    messages.error(
+        request,
+        "Tilbakeføring av oppdatert bilag kommer i neste steg."
+    )
+    return redirect("regnskap:bilag_detalj", bilag_id=bilag.id)
+
+def bilag_skjema(request, bilag_id=None, modus="ny"):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    bilag = None
+
+    if bilag_id:
+        bilag = get_object_or_404(
+            Bilag,
+            id=bilag_id,
+            organisasjon=organisasjon,
+        )
+
+        if modus == "ny":
+            modus = "endre"
+
+        if modus != "tilbakeforing" and bilag.h_status != Bilag.STATUS_REGISTRERT:
+            modus = "vis"
+
+
+    regnskapsaar_liste = Regnskapsaar.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+        avsluttet=False,
+    ).order_by("aar")
+
+    valgt_aar_id = request.GET.get("aar") or request.POST.get("regnskapsaar_id")
+    valgt_serie_id = request.GET.get("serie")
+
+    if valgt_aar_id:
+        regnskapsaar = regnskapsaar_liste.filter(id=valgt_aar_id).first()
+    else:
+        regnskapsaar = regnskapsaar_liste.first()
+    if bilag:
+        regnskapsaar = bilag.regnskapsaar
+
+    if not regnskapsaar:
+        return redirect("regnskap:bilag_liste")
+
+    bilagsserier = Bilagsserie.objects.filter(
+        organisasjon=organisasjon,
+        regnskapsaar=regnskapsaar,
+        aktiv=True,
+    ).order_by("kode")
+
+    kontoer = Konto.objects.filter(
+        organisasjon=organisasjon
+    ).order_by("kontonummer")
+
+    avdelinger = Avdeling.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("avdelingsnummer")
+
+    prosjekter = Prosjekt.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("prosjektnummer")
+
+    kontonavn_json = json.dumps({
+        str(k.kontonummer): {
+            "navn": k.kontonavn,
+            "samlekonto": k.samlekonto,
+        }
+        for k in kontoer
+    })
+    linjer = []
+    linje1 = linje2 = linje3 = linje4 = linje5 = linje6 = None
+
+    if bilag:
+        linjer = list(
+            bilag.linjer.all().order_by("linjenummer")
+        )
+
+        linje1 = linjer[0] if len(linjer) > 0 else None
+        linje2 = linjer[1] if len(linjer) > 1 else None
+        linje3 = linjer[2] if len(linjer) > 2 else None
+        linje4 = linjer[3] if len(linjer) > 3 else None
+        linje5 = linjer[4] if len(linjer) > 4 else None
+        linje6 = linjer[5] if len(linjer) > 5 else None
+
+    if request.method == "POST" and modus == "tilbakeforing":
+        return tilbakefor_bilag(request, bilag)
+
+    if request.method == "POST" and modus == "endre" and bilag.h_status == Bilag.STATUS_REGISTRERT:
+        nye_linjer = []
+        post_linjer = [None, None, None, None, None, None]
+
+        for linjenr in range(1, 7):
+            konto = request.POST.get(f"konto_{linjenr}", "").strip()
+            tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
+            belop = request.POST.get(f"belop_{linjenr}", "").strip()
+            avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
+            prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
+
+            if konto or belop or tekst:
+                post_linjer[linjenr - 1] = Bilagslinje(
+                    bilag=bilag,
+                    linjenummer=linjenr,
+                    kontonummer=konto or 0,
+                    linjetekst=tekst,
+                    belop=Decimal(belop.replace(",", ".")) if belop else 0,
+                )
+
+            if konto and belop:
+                konto_obj = Konto.objects.filter(
+                    organisasjon=organisasjon,
+                    kontonummer=konto,
+                ).first()
+
+                if not konto_obj:
+                    messages.error(
+                        request,
+                        f"Konto {konto} på linje {linjenr} finnes ikke i kontoplanen."
+                    )
+
+                    return render(
+                        request,
+                        "regnskap/bilag_skjema.html",
+                        bygg_bilag_context(
+                            organisasjon=organisasjon,
+                            bilag=bilag,
+                            modus=modus,
+                            kan_endre=True,
+                            regnskapsaar=regnskapsaar,
+                            bilagsserier=bilagsserier,
+                            kontoer=kontoer,
+                            kontonavn_json=kontonavn_json,
+                            avdelinger=avdelinger,
+                            prosjekter=prosjekter,
+                            valgt_serie_id=valgt_serie_id,
+                        )
+                    )
+
+                if not konto_kan_foeres_paa(konto_obj):
+                    messages.error(
+                        request,
+                        f"Konto {konto_obj.kontonummer} {konto_obj.kontonavn} er samlekonto og kan ikke føres på."
+                    )
+
+                    return render(
+                        request,
+                        "regnskap/bilag_skjema.html",
+                        bygg_bilag_context(
+                            organisasjon=organisasjon,
+                            bilag=bilag,
+                            modus=modus,
+                            kan_endre=True,
+                            regnskapsaar=bilag.regnskapsaar,
+                            bilagsserier=bilagsserier,
+                            kontoer=kontoer,
+                            kontonavn_json=kontonavn_json,
+                            avdelinger=avdelinger,
+                            prosjekter=prosjekter,
+                            valgt_serie_id=valgt_serie_id,
+                            feil_linje=str(linjenr),
+                            linje1=post_linjer[0],
+                            linje2=post_linjer[1],
+                            linje3=post_linjer[2],
+                            linje4=post_linjer[3],
+                            linje5=post_linjer[4],
+                            linje6=post_linjer[5],
+                        )
+                    )
+
+
+                nye_linjer.append(
+                    (
+                        linjenr,
+                        konto,
+                        tekst,
+                        belop,
+                        avdeling_id,
+                        prosjekt_id,
+                    )
+                )
+
+        bilag.bilagsdato = request.POST.get("bilagsdato")
+        bilag.foringsdato = request.POST.get("foringsdato")
+        bilag.bilagstekst = request.POST.get("bilagstekst", "").strip()
+        bilag.save()
+
+        bilag.linjer.all().delete()
+
+        for linjenr, konto, tekst, belop, avdeling_id, prosjekt_id in nye_linjer:
+            Bilagslinje.objects.create(
+                bilag=bilag,
+                linjenummer=linjenr,
+                kontonummer=konto,
+                avdeling_id=avdeling_id,
+                prosjekt_id=prosjekt_id,
+                linjetekst=tekst,
+                belop=Decimal(belop.replace(",", ".")),
+            )
+
+        return redirect("regnskap:bilag_detalj", bilag_id=bilag.id)
+
+    if request.method == "POST":
+        bilagsserie_id = request.POST.get("bilagsserie")
+        bilagsdato = request.POST.get("bilagsdato")
+        foringsdato = request.POST.get("foringsdato")
+        bilagstekst = request.POST.get("bilagstekst", "").strip()
+
+        bilagsserie = get_object_or_404(
+            Bilagsserie,
+            id=bilagsserie_id,
+            organisasjon=organisasjon,
+            regnskapsaar=regnskapsaar,
+        )
+
+        with transaction.atomic():
+            bilagsnummer = bilagsserie.neste_nummer
+            bilagsserie.neste_nummer += 1
+            bilagsserie.save()
+
+            bilag = Bilag.objects.create(
+                organisasjon=organisasjon,
+                regnskapsaar=regnskapsaar,
+                bilagsserie=bilagsserie,
+                bilagsnummer=bilagsnummer,
+                bilagsdato=bilagsdato,
+                foringsdato=foringsdato,
+                bilagstekst=bilagstekst,
+                registrert_av=request.user,
+            )
+
+            for linjenr in range(1, 7):
+                konto = request.POST.get(f"konto_{linjenr}", "").strip()
+                tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
+                belop = request.POST.get(f"belop_{linjenr}", "").strip()
+                avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
+                prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
+
+                if konto and belop:
+                    konto_obj = Konto.objects.filter(
+                        organisasjon=organisasjon,
+                        kontonummer=konto,
+                    ).first()
+
+                    if not konto_obj:
+                        raise ValueError(f"Konto {konto} finnes ikke i kontoplanen.")
+
+                    if not konto_kan_foeres_paa(konto_obj):
+                        messages.error(
+                            request,
+                            f"Konto {konto_obj.kontonummer} {konto_obj.kontonavn} er samlekonto og kan ikke føres på."
+                        )
+                        return render(request, "regnskap/bilag_skjema.html", {
+                            "organisasjon": organisasjon,
+                            "bilag": bilag,
+                            "modus": modus,
+                            "kan_endre": True,
+                            "regnskapsaar": regnskapsaar,
+                            "bilagsserier": bilagsserier,
+                            "kontoer": kontoer,
+                            "dagens_dato": bilag.bilagsdato if bilag else dagens_dato,
+                            "dagens_dato_iso": bilag.bilagsdato.isoformat() if bilag else dagens_dato.isoformat(),
+                            "foringsdato_iso": bilag.foringsdato.isoformat() if bilag else dagens_dato.isoformat(),
+                            "kontonavn_json": kontonavn_json,
+                            "avdelinger": avdelinger,
+                            "prosjekter": prosjekter,
+                            "valgt_serie_id": valgt_serie_id,
+                            "linjer": linjer,
+                            "linje1": linje1,
+                            "linje2": linje2,
+                            "linje3": linje3,
+                            "linje4": linje4,
+                            "linje5": linje5,
+                            "linje6": linje6,
+                        })
+
+                    Bilagslinje.objects.create(
+                        bilag=bilag,
+                        linjenummer=linjenr,
+                        kontonummer=konto,
+                        avdeling_id=avdeling_id,
+                        prosjekt_id=prosjekt_id,
+                        linjetekst=tekst,
+                        belop=Decimal(belop.replace(",", ".")),
+                    )
+
+        messages.success(
+            request,
+            f"Bilag {bilagsserie.kode}{bilagsnummer} er lagret."
+        )
+
+        return redirect(
+            f"{reverse('regnskap:bilag_ny')}?aar={regnskapsaar.id}&serie={bilagsserie.id}"
+        )
+
+
+    return render(
+        request,
+        "regnskap/bilag_skjema.html",
+        bygg_bilag_context(
+            organisasjon=organisasjon,
+            bilag=bilag,
+            modus=modus,
+            kan_endre=True,
+            regnskapsaar=regnskapsaar,
+            bilagsserier=bilagsserier,
+            kontoer=kontoer,
+            kontonavn_json=kontonavn_json,
+            avdelinger=avdelinger,
+            prosjekter=prosjekter,
+            valgt_serie_id=valgt_serie_id,
+        )
+    )
 
 @login_required
 def dashboard(request):
@@ -954,11 +1382,15 @@ def bilag_detalj(request, bilag_id):
 
     for linje in linjer:
         linje.kontonavn = konto_map.get(linje.kontonummer, "")
+
     return render(request, "regnskap/bilag_detalj.html", {
         "organisasjon": organisasjon,
         "bilag": bilag,
         "linjer": linjer,
         "konto_map": konto_map,
+        "bilag_kan_endres": bilag_kan_endres(bilag),
+        "bilag_kan_slettes": bilag_kan_slettes(bilag),
+        "bilag_kan_tilbakefores": bilag_kan_tilbakefores(bilag),
     })
 
 @login_required

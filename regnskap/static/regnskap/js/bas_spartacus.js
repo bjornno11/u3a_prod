@@ -3,12 +3,17 @@ console.log("BAS Spartacus lastet");
 window.BAS = window.BAS || {};
 
 // Enter = neste felt
+
+
 BAS.initEnterSomTab = function () {
     document.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
             const el = document.activeElement;
 
             if (!el || el.tagName === "TEXTAREA" || el.type === "submit") {
+                return;
+            }
+            if (el.closest("#bilag-form")) {
                 return;
             }
 
@@ -116,5 +121,52 @@ BAS.initFooter = function (valg) {
                 return tast + "=" + tekst;
             })
             .join(" &nbsp; ");
+};
+
+BAS.leggTilTabellLinje = function (tbodySelector) {
+
+    const body = document.querySelector(tbodySelector);
+
+    if (!body) {
+        return null;
+    }
+
+    const sisteRad = body.lastElementChild;
+
+    if (!sisteRad) {
+        return null;
+    }
+
+    const nyRad = sisteRad.cloneNode(true);
+
+    const sisteNr =
+        sisteRad.querySelector('[name="linjenummer[]"]');
+
+    const nyttNr =
+        nyRad.querySelector('[name="linjenummer[]"]');
+
+    if (sisteNr && nyttNr) {
+        nyttNr.value = parseInt(sisteNr.value, 10) + 1;
+    }
+
+    nyRad.querySelectorAll("input").forEach(function (felt) {
+
+        if (felt.name !== "linjenummer[]") {
+            felt.value = "";
+        }
+
+    });
+
+    nyRad.querySelectorAll("select").forEach(function (felt) {
+        felt.selectedIndex = 0;
+    });
+
+    nyRad.querySelectorAll(".kontonavn").forEach(function (felt) {
+        felt.textContent = "";
+    });
+
+    body.appendChild(nyRad);
+
+    return nyRad;
 };
 

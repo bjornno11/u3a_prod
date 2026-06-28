@@ -12,10 +12,28 @@
     </a>
 
     <h1>🧾 Bilag {{ bilag }}</h1>
-    <a href="{% url 'regnskap:bilag_endre' bilag.id %}"
-       class="btn btn-primary mb-3">
-        Endre bilag
-    </a>
+
+    {% if bilag_kan_endres %}
+        <a href="{% url 'regnskap:bilag_endre' bilag.id %}"
+           class="btn btn-primary mb-3">
+            Endre bilag
+        </a>
+
+        <a href="{% url 'regnskap:bilag_tilbakefor' bilag.id %}"
+           class="btn btn-warning mb-3">
+            Tilbakefør
+        </a>
+
+        <a href="#"
+           class="btn btn-danger mb-3">
+            Slett
+        </a>
+    {% elif bilag_kan_tilbakefores %}
+        <a href="{% url 'regnskap:bilag_tilbakefor' bilag.id %}"
+           class="btn btn-warning mb-3">
+            Tilbakefør
+        </a>
+    {% endif %}
     <p class="lead">
         {{ organisasjon.organisasjon }} – {{ bilag.regnskapsaar.aar }}
     </p>
