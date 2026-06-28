@@ -198,7 +198,10 @@ BASBilag.validerBilag = function () {
         }
     });
 
-    if (Math.abs(sum) >= 0.005) {
+    const modusFelt = document.querySelector('[name="modus"]');
+    const modus = modusFelt ? modusFelt.value : "";
+
+    if (modus !== "tilbakeforing" && Math.abs(sum) >= 0.005) {
         return {
             ok: false,
             melding: "Bilaget går ikke i null. Differanse: " +

@@ -44,6 +44,14 @@ Nytt bilag
         {% csrf_token %}
 
         <input type="hidden"
+               name="modus"
+               value="{{ modus }}">
+
+        <input type="hidden"
+               name="regnskapsaar_id"
+               value="{{ regnskapsaar.id }}">
+
+        <input type="hidden"
                name="regnskapsaar_id"
                value="{{ regnskapsaar.id }}">
 
@@ -143,18 +151,20 @@ Nytt bilag
                         </td>
 
                         <td>
+
                             <input type="text"
                                    name="konto[]"
-                                   class="form-control form-control-sm konto-felt"
-                                   value="{{ linje.kontonummer }}">
-                            <small class="text-muted kontonavn"></small>
+                                   ...
+                                   value="{{ linje.kontonummer }}"
+                                   {% if modus == "tilbakeforing" %}readonly{% endif %}>                            <small class="text-muted kontonavn"></small>
                         </td>
 
                         <td>
                             <input type="text"
                                    name="belop[]"
                                    class="form-control form-control-sm belop-felt"
-                                   value="{{ linje.belop }}">
+                                   value="{{ linje.belop }}"
+                                   {% if modus == "tilbakeforing" %}readonly{% endif %}>
                         </td>
 
                         <td>
@@ -187,7 +197,9 @@ Nytt bilag
                             <input type="text"
                                    name="tekst[]"
                                    class="form-control form-control-sm"
-                                   value="{{ linje.linjetekst }}">
+                                   value="{{ linje.linjetekst }}"
+                                   {% if modus == "tilbakeforing" %}readonly{% endif %}>
+
                         </td>
                     </tr>
                     {% empty %}
@@ -249,11 +261,13 @@ Nytt bilag
             </table>
         </div>
 
+        {% if modus != "tilbakeforing" %}
         <button type="button"
                 id="legg-til-linje"
                 class="btn btn-outline-secondary btn-sm mb-3">
             + Ny linje
         </button>
+        {% endif %}
 
                 </select>
             </div>

@@ -221,23 +221,29 @@ def bilag_skjema(request, bilag_id=None, modus="ny"):
 
     if request.method == "POST" and modus == "endre" and bilag.h_status == Bilag.STATUS_REGISTRERT:
         nye_linjer = []
-        post_linjer = [None, None, None, None, None, None]
 
-        for linjenr in range(1, 7):
-            konto = request.POST.get(f"konto_{linjenr}", "").strip()
-            tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
-            belop = request.POST.get(f"belop_{linjenr}", "").strip()
-            avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
-            prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
+        konto_liste = request.POST.getlist("konto[]")
+        tekst_liste = request.POST.getlist("tekst[]")
+        belop_liste = request.POST.getlist("belop[]")
+        avdeling_liste = request.POST.getlist("avdeling[]")
+        prosjekt_liste = request.POST.getlist("prosjekt[]")
 
-            if konto or belop or tekst:
-                post_linjer[linjenr - 1] = Bilagslinje(
-                    bilag=bilag,
-                    linjenummer=linjenr,
-                    kontonummer=konto or 0,
-                    linjetekst=tekst,
-                    belop=Decimal(belop.replace(",", ".")) if belop else 0,
-                )
+        antall_linjer = max(
+            len(konto_liste),
+            len(tekst_liste),
+            len(belop_liste),
+            len(avdeling_liste),
+            len(prosjekt_liste),
+        )
+
+        for i in range(antall_linjer):
+            linjenr = i + 1
+
+            konto = konto_liste[i].strip() if i < len(konto_liste) else ""
+            tekst = tekst_liste[i].strip() if i < len(tekst_liste) else ""
+            belop = belop_liste[i].strip() if i < len(belop_liste) else ""
+            avdeling_id = avdeling_liste[i] if i < len(avdeling_liste) and avdeling_liste[i] else None
+            prosjekt_id = prosjekt_liste[i] if i < len(prosjekt_liste) and prosjekt_liste[i] else None
 
             if konto and belop:
                 konto_obj = Konto.objects.filter(
@@ -291,12 +297,6 @@ def bilag_skjema(request, bilag_id=None, modus="ny"):
                             prosjekter=prosjekter,
                             valgt_serie_id=valgt_serie_id,
                             feil_linje=str(linjenr),
-                            linje1=post_linjer[0],
-                            linje2=post_linjer[1],
-                            linje3=post_linjer[2],
-                            linje4=post_linjer[3],
-                            linje5=post_linjer[4],
-                            linje6=post_linjer[5],
                         )
                     )
 
@@ -1593,24 +1593,29 @@ def bilag_endre(request, bilag_id):
     })
     if request.method == "POST":
         nye_linjer = []
-        post_linjer = [None, None, None, None, None, None]
 
-        for linjenr in range(1, 7):
-            konto = request.POST.get(f"konto_{linjenr}", "").strip()
-            tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
-            belop = request.POST.get(f"belop_{linjenr}", "").strip()
-            avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
-            prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
+        konto_liste = request.POST.getlist("konto[]")
+        tekst_liste = request.POST.getlist("linjetekst[]")
+        belop_liste = request.POST.getlist("belop[]")
+        avdeling_liste = request.POST.getlist("avdeling[]")
+        prosjekt_liste = request.POST.getlist("prosjekt[]")
 
-            if konto or belop or tekst:
-                post_linjer[linjenr - 1] = Bilagslinje(
-                    bilag=bilag,
-                    linjenummer=linjenr,
-                    kontonummer=konto or 0,
-                    linjetekst=tekst,
-                    belop=Decimal(belop.replace(",", ".")) if belop else 0,
-                )
+        antall_linjer = max(
+            len(konto_liste),
+            len(tekst_liste),
+            len(belop_liste),
+            len(avdeling_liste),
+            len(prosjekt_liste),
+        )
 
+        for i in range(antall_linjer):
+            linjenr = i + 1
+
+            konto = konto_liste[i].strip() if i < len(konto_liste) else ""
+            tekst = tekst_liste[i].strip() if i < len(tekst_liste) else ""
+            belop = belop_liste[i].strip() if i < len(belop_liste) else ""
+            avdeling_id = avdeling_liste[i] if i < len(avdeling_liste) and avdeling_liste[i] else None
+            prosjekt_id = prosjekt_liste[i] if i < len(prosjekt_liste) and prosjekt_liste[i] else None
             if konto and belop:
                 konto_obj = Konto.objects.filter(
                     organisasjon=organisasjon,
@@ -1622,51 +1627,45 @@ def bilag_endre(request, bilag_id):
                         request,
                         f"Konto {konto} på linje {linjenr} finnes ikke i kontoplanen."
                     )
+
                     return render(request, "regnskap/bilag_skjema.html", {
                         "organisasjon": organisasjon,
                         "regnskapsaar": bilag.regnskapsaar,
                         "bilag": bilag,
+                        "modus": "endre",
                         "linjer": linjer,
                         "dagens_dato": bilag.bilagsdato,
                         "dagens_dato_iso": bilag.bilagsdato.isoformat(),
+                        "bilagsserier": bilagsserier,
+                        "valgt_serie_id": bilag.bilagsserie_id,
                         "kontoer": kontoer,
                         "kontonavn_json": kontonavn_json,
-                        "linje1": post_linjer[0],
-                        "linje2": post_linjer[1],
-                        "linje3": post_linjer[2],
-                        "linje4": post_linjer[3],
-                        "linje5": post_linjer[4],
-                        "linje6": post_linjer[5],
                         "feil_linje": str(linjenr),
                         "avdelinger": avdelinger,
                         "prosjekter": prosjekter,
                     })
-
                 if not konto_kan_foeres_paa(konto_obj):
                     messages.error(
                         request,
                         f"Konto {konto_obj.kontonummer} {konto_obj.kontonavn} er samlekonto og kan ikke føres på."
                     )
+
                     return render(request, "regnskap/bilag_skjema.html", {
                         "organisasjon": organisasjon,
                         "regnskapsaar": bilag.regnskapsaar,
                         "bilag": bilag,
+                        "modus": "endre",
                         "linjer": linjer,
                         "dagens_dato": bilag.bilagsdato,
                         "dagens_dato_iso": bilag.bilagsdato.isoformat(),
+                        "bilagsserier": bilagsserier,
+                        "valgt_serie_id": bilag.bilagsserie_id,
                         "kontoer": kontoer,
                         "kontonavn_json": kontonavn_json,
-                        "linje1": post_linjer[0],
-                        "linje2": post_linjer[1],
-                        "linje3": post_linjer[2],
-                        "linje4": post_linjer[3],
-                        "linje5": post_linjer[4],
-                        "linje6": post_linjer[5],
                         "feil_linje": str(linjenr),
                         "avdelinger": avdelinger,
                         "prosjekter": prosjekter,
                     })
-
                 nye_linjer.append(
                     (
                         linjenr,
