@@ -80,6 +80,16 @@ BAS.initF6Journal = function (url) {
     });
 };
 
+// F8 = skriv ut
+BAS.initF8Print = function () {
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "F8") {
+            e.preventDefault();
+            window.print();
+        }
+    });
+};
+
 // Esc = tilbake
 BAS.initEsc = function (url) {
     document.addEventListener("keydown", function (e) {

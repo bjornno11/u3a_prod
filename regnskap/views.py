@@ -1229,6 +1229,32 @@ def bilagsserie_endre(request, bilagsserie_id):
     })
 
 @login_required
+def bilag_slett(request, bilag_id):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    bilag = get_object_or_404(
+        Bilag,
+        id=bilag_id,
+        organisasjon=organisasjon,
+    )
+
+    if not bilag_kan_slettes(bilag):
+        messages.error(request, "Dette bilaget kan ikke slettes. Det må eventuelt tilbakeføres.")
+        return redirect("regnskap:bilag_detalj", bilag_id=bilag.id)
+
+    bilag.h_status = Bilag.STATUS_SLETTET
+    bilag.save()
+
+    messages.success(request, f"Bilag {bilag.bilagsnummer} er slettet.")
+
+    return redirect(
+        reverse("regnskap:bilag_liste") +
+        f"?aar={bilag.regnskapsaar.id}"
+    )
+
+@login_required
 def bilagsserie_slett(request, bilagsserie_id):
     organisasjon = Organisasjon.objects.filter(
         redaktorer=request.user
@@ -1775,12 +1801,71 @@ def bilagsjournal(request):
         redaktorer=request.user
     ).first()
 
+    regnskapsaar_liste = Regnskapsaar.objects.filter(
+        organisasjon=organisasjon
+    ).order_by("-aar")
+
+    bilagsserier = Bilagsserie.objects.filter(
+        organisasjon=organisasjon
+    ).order_by("kode")
+
+    avdelinger = Avdeling.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("avdelingsnummer")
+
+    prosjekter = Prosjekt.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("prosjektnummer")
+
     bilag_liste = (
         Bilag.objects
         .filter(organisasjon=organisasjon)
-        .select_related("regnskapsaar")
-        .order_by("-bilagsdato", "-bilagsnummer")
+        .select_related("regnskapsaar", "bilagsserie")
+        .prefetch_related("linjer")
+        .order_by("bilagsdato", "bilagsnummer")
     )
+
+    regnskapsaar_id = request.GET.get("regnskapsaar")
+    bilagsserie_id = request.GET.get("bilagsserie")
+    bilag_fra = request.GET.get("bilag_fra")
+    bilag_til = request.GET.get("bilag_til")
+
+    periode_fra = request.GET.get("periode_fra")
+    periode_til = request.GET.get("periode_til")
+    avdeling_id = request.GET.get("avdeling")
+    prosjekt_id = request.GET.get("prosjekt")
+    kun_differanse = request.GET.get("kun_differanse")
+
+    if regnskapsaar_id:
+        bilag_liste = bilag_liste.filter(regnskapsaar_id=regnskapsaar_id)
+
+    if bilagsserie_id:
+        bilag_liste = bilag_liste.filter(bilagsserie_id=bilagsserie_id)
+
+    if bilag_fra:
+        bilag_liste = bilag_liste.filter(bilagsnummer__gte=bilag_fra)
+
+    if bilag_til:
+        bilag_liste = bilag_liste.filter(bilagsnummer__lte=bilag_til)
+
+    if periode_fra:
+        bilag_liste = bilag_liste.filter(h_status__gte=periode_fra)
+
+    if periode_til:
+        bilag_liste = bilag_liste.filter(h_status__lte=periode_til)
+    if avdeling_id:
+        bilag_liste = bilag_liste.filter(linjer__avdeling_id=avdeling_id).distinct()
+
+    if prosjekt_id:
+        bilag_liste = bilag_liste.filter(linjer__prosjekt_id=prosjekt_id).distinct()
+
+    if kun_differanse:
+        bilag_liste = [
+            bilag for bilag in bilag_liste
+            if bilag.har_differanse
+        ]
 
     return render(
         request,
@@ -1788,6 +1873,120 @@ def bilagsjournal(request):
         {
             "organisasjon": organisasjon,
             "bilag_liste": bilag_liste,
+            "regnskapsaar_liste": regnskapsaar_liste,
+            "bilagsserier": bilagsserier,
+            "avdelinger": avdelinger,
+            "prosjekter": prosjekter,
+            "filter": request.GET,
         },
     )
+
+def kontojournal(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    kontoer = Konto.objects.filter(
+        organisasjon=organisasjon,
+        samlekonto=False,
+    ).order_by("kontonummer")
+
+    regnskapsaar_liste = Regnskapsaar.objects.filter(
+        organisasjon=organisasjon
+    ).order_by("-aar")
+
+    bilagsserier = Bilagsserie.objects.filter(
+        organisasjon=organisasjon
+    ).order_by("kode")
+
+    avdelinger = Avdeling.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("avdelingsnummer")
+
+    prosjekter = Prosjekt.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("prosjektnummer")
+
+    linjer = (
+        Bilagslinje.objects
+        .filter(bilag__organisasjon=organisasjon)
+        .select_related("bilag", "bilag__regnskapsaar", "bilag__bilagsserie", "avdeling", "prosjekt")
+        .order_by("kontonummer", "bilag__bilagsdato", "bilag__bilagsnummer", "linjenummer")
+    )
+
+    regnskapsaar_id = request.GET.get("regnskapsaar")
+    periode_fra = request.GET.get("periode_fra")
+    periode_til = request.GET.get("periode_til")
+    bilagsserie_id = request.GET.get("bilagsserie")
+    bilag_fra = request.GET.get("bilag_fra")
+    bilag_til = request.GET.get("bilag_til")
+    konto_fra = request.GET.get("konto_fra")
+    konto_til = request.GET.get("konto_til")
+    avdeling_id = request.GET.get("avdeling")
+    prosjekt_id = request.GET.get("prosjekt")
+
+    if regnskapsaar_id:
+        linjer = linjer.filter(bilag__regnskapsaar_id=regnskapsaar_id)
+
+    if periode_fra:
+        linjer = linjer.filter(bilag__h_status__gte=periode_fra)
+
+    if periode_til:
+        linjer = linjer.filter(bilag__h_status__lte=periode_til)
+
+    if bilagsserie_id:
+        linjer = linjer.filter(bilag__bilagsserie_id=bilagsserie_id)
+
+    if bilag_fra:
+        linjer = linjer.filter(bilag__bilagsnummer__gte=bilag_fra)
+
+    if bilag_til:
+        linjer = linjer.filter(bilag__bilagsnummer__lte=bilag_til)
+
+    if konto_fra:
+        linjer = linjer.filter(kontonummer__gte=konto_fra)
+
+    if konto_til:
+        linjer = linjer.filter(kontonummer__lte=konto_til)
+
+    if avdeling_id:
+        linjer = linjer.filter(avdeling_id=avdeling_id)
+
+    if prosjekt_id:
+        linjer = linjer.filter(prosjekt_id=prosjekt_id)
+
+    konto_grupper = {}
+
+    for linje in linjer:
+        konto_grupper.setdefault(linje.kontonummer, {
+            "kontonummer": linje.kontonummer,
+            "kontonavn": linje.kontonavn,
+            "linjer": [],
+            "sum_debet": 0,
+            "sum_kredit": 0,
+            "saldo": 0,
+        })
+
+        gruppe = konto_grupper[linje.kontonummer]
+        gruppe["linjer"].append(linje)
+
+        if linje.belop >= 0:
+            gruppe["sum_debet"] += linje.belop
+        else:
+            gruppe["sum_kredit"] += -linje.belop
+
+        gruppe["saldo"] = gruppe["sum_debet"] - gruppe["sum_kredit"]
+
+    return render(request, "regnskap/kontojournal.html", {
+        "organisasjon": organisasjon,
+        "kontoer": kontoer,
+        "konto_grupper": konto_grupper.values(),
+        "regnskapsaar_liste": regnskapsaar_liste,
+        "bilagsserier": bilagsserier,
+        "avdelinger": avdelinger,
+        "prosjekter": prosjekter,
+        "filter": request.GET,
+    })
 

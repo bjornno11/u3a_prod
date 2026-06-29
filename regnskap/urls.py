@@ -150,6 +150,11 @@ urlpatterns = [
         name="bilag_vis",
     ),
 
+    path(
+        "bilag/<int:bilag_id>/slett/",
+        views.bilag_slett,
+        name="bilag_slett",
+    ),
     path("bilag/journal/", views.bilagsjournal, name="bilagsjournal"),
 
     path(
@@ -175,5 +180,13 @@ urlpatterns = [
         views.bilagsjournal,
         name="bilagsjournal",
     ),
+
+    path(
+        "journaler/kontojournal/",
+        views.kontojournal,
+        name="kontojournal",
+    ),
+
 ]
+
 

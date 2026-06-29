@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .models import SamlekontoOppsett
 
 from .models import (
     Regnskapsaar,
@@ -8,7 +9,6 @@ from .models import (
     Styrekode,
     Avdeling,
     Prosjekt,
-    ReskontroKonto,
     Momskode,
     Bilag,
     Bilagslinje,
@@ -58,12 +58,6 @@ class ProsjektAdmin(admin.ModelAdmin):
     list_filter = ("organisasjon", "aktiv")
     search_fields = ("prosjektnummer", "navn")
 
-
-@admin.register(ReskontroKonto)
-class ReskontroKontoAdmin(admin.ModelAdmin):
-    list_display = ("organisasjon", "kontonummer", "navn", "reskontrotype", "samlekonto", "medlem", "aktiv")
-    list_filter = ("organisasjon", "reskontrotype", "aktiv")
-    search_fields = ("kontonummer", "navn")
 
 
 @admin.register(Momskode)
@@ -177,4 +171,28 @@ class RegnskapsoppsettAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+@admin.register(SamlekontoOppsett)
+class SamlekontoOppsettAdmin(admin.ModelAdmin):
+    list_display = (
+        "organisasjon",
+        "kode",
+        "navn",
+        "konto",
+        "neste_nummer",
+        "aktiv",
+    )
+
+    list_filter = (
+        "organisasjon",
+        "aktiv",
+    )
+
+    search_fields = (
+        "kode",
+        "navn",
+        "konto__kontonavn",
+        "konto__kontonummer",
+    )
+
 

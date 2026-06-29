@@ -368,72 +368,6 @@ class Prosjekt(models.Model):
         return f"{self.prosjektnummer} {self.navn}"
 
 
-class ReskontroKonto(models.Model):
-    RESKONTROTYPE_VALG = [
-        ("MEDLEM", "Medlem"),
-        ("KUNDE", "Kunde"),
-        ("LEVERANDOR", "Leverandør"),
-    ]
-
-    organisasjon = models.ForeignKey(
-        Organisasjon,
-        on_delete=models.CASCADE,
-        related_name="reskontro_kontoer"
-    )
-
-    samlekonto = models.ForeignKey(
-        Konto,
-        on_delete=models.PROTECT,
-        related_name="reskontro_kontoer"
-    )
-
-    kontonummer = models.PositiveIntegerField()
-
-    navn = models.CharField(
-        max_length=100
-    )
-
-    reskontrotype = models.CharField(
-        max_length=20,
-        choices=RESKONTROTYPE_VALG,
-        default="MEDLEM"
-    )
-
-    medlem = models.ForeignKey(
-        "lag.LagMedlem",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="reskontro_kontoer"
-    )
-
-    aktiv = models.BooleanField(
-        default=True
-    )
-
-    class Meta:
-        verbose_name = "Reskontrokonto"
-        verbose_name_plural = "Reskontrokontoer"
-        ordering = ["kontonummer"]
-        unique_together = (
-            "organisasjon",
-            "kontonummer",
-        )
-
-    def __str__(self):
-        return f"{self.kontonummer} {self.navn}"
-
-    def clean(self):
-        if self.samlekonto and not self.samlekonto.samlekonto:
-            raise ValidationError(
-                "Reskontrokonto må peke til en konto som er merket som samlekonto."
-            )
-
-        if self.medlem and self.medlem.organisasjon_id != self.organisasjon_id:
-            raise ValidationError(
-                "Medlemmet tilhører ikke samme organisasjon som reskontrokontoen."
-            )
-
 class Momskode(models.Model):
     organisasjon = models.ForeignKey(
         Organisasjon,
@@ -525,13 +459,32 @@ class Bilag(models.Model):
         return f"{self.bilagsserie.kode}-{self.bilagsnummer}"
 
     @property
+    def sum_debet(self):
+        return sum(
+            linje.belop
+            for linje in self.linjer.all()
+            if linje.belop > 0
+        )
+
+    @property
+    def sum_kredit(self):
+        return sum(
+            -linje.belop
+            for linje in self.linjer.all()
+            if linje.belop < 0
+        )
+
+    @property
+    def differanse(self):
+        return self.sum_debet - self.sum_kredit
+
+    @property
     def sum_belop(self):
         return sum(linje.belop for linje in self.linjer.all())
 
     @property
     def har_differanse(self):
-        return self.sum_belop != 0
-
+        return self.differanse != 0
 
 class Bilagslinje(models.Model):
     bilag = models.ForeignKey(
@@ -539,6 +492,15 @@ class Bilagslinje(models.Model):
         on_delete=models.CASCADE,
         related_name="linjer"
     )
+
+    @property
+    def kontonavn(self):
+        konto = Konto.objects.filter(
+            organisasjon=self.bilag.organisasjon,
+            kontonummer=self.kontonummer,
+        ).first()
+
+        return konto.kontonavn if konto else ""
 
     linjenummer = models.PositiveIntegerField()
 
@@ -636,5 +598,56 @@ class SystemLogg(models.Model):
 
     def __str__(self):
         return f"{self.tidspunkt} {self.handling} {self.tabellnavn}"
+
+
+
+class SamlekontoOppsett(models.Model):
+    KODE_LEVERANDOR = "LEVERANDOR"
+    KODE_KUNDE = "KUNDE"
+    KODE_MEDLEM = "MEDLEM"
+
+    KODE_CHOICES = [
+        (KODE_LEVERANDOR, "Leverandørsamlekonto"),
+        (KODE_KUNDE, "Kundesamlekonto"),
+        (KODE_MEDLEM, "Medlemssamlekonto"),
+    ]
+
+    organisasjon = models.ForeignKey(
+        "lag.Organisasjon",
+        on_delete=models.CASCADE,
+        related_name="samlekonto_oppsett",
+    )
+
+    kode = models.CharField(max_length=30, choices=KODE_CHOICES)
+    navn = models.CharField(max_length=100)
+
+    konto = models.ForeignKey(
+        Konto,
+        on_delete=models.PROTECT,
+        related_name="samlekonto_oppsett",
+    )
+
+    neste_nummer = models.PositiveIntegerField(
+        default=10000,
+        verbose_name="Neste nummer",
+    )
+
+    aktiv = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("organisasjon", "kode")
+        verbose_name = "Samlekonto-oppsett"
+        verbose_name_plural = "Samlekonto-oppsett"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if self.konto and not self.konto.samlekonto:
+            raise ValidationError(
+                "Valgt konto må være merket som samlekonto/låst konto."
+            )
+
+    def __str__(self):
+        return f"{self.organisasjon} – {self.navn}: {self.konto}"
 
 

@@ -24,10 +24,12 @@
             Tilbakefør
         </a>
 
-        <a href="#"
-           class="btn btn-danger mb-3">
+        <a href="{% url 'regnskap:bilag_slett' bilag.id %}"
+           class="btn btn-danger mb-3"
+           onclick="return confirm('Er du sikker på at du vil slette bilaget?');">
             Slett
         </a>
+
     {% elif bilag_kan_tilbakefores %}
         <a href="{% url 'regnskap:bilag_tilbakefor' bilag.id %}"
            class="btn btn-warning mb-3">

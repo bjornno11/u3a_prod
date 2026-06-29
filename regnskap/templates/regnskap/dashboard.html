@@ -80,14 +80,24 @@
                                 <div id="menyJournaler"
                                      class="accordion-collapse collapse"
                                      data-bs-parent="#regnskapMeny">
-                                    <div class="accordion-body p-2">
-                                        <a href="{% url 'regnskap:bilagsjournal' %}"
-                                           class="d-block text-light text-decoration-none">
-                                            Bilagsjournal
-                                        </a>
-                                    </div>
-                                </div>
+
+                            <div class="accordion-body p-2">
+
+                                <a href="{% url 'regnskap:bilagsjournal' %}"
+                                   class="d-block text-light text-decoration-none">
+                                    Bilagsjournal
+                                </a>
+
+                                <a href="{% url 'regnskap:kontojournal' %}"
+                                   class="d-block text-light text-decoration-none">
+                                    Spesifisert hovedbok
+                                </a>
+
                             </div>
+
+                         </div>
+
+                      </div>
 
                             <div class="accordion-item bg-transparent border-info">
                                 <h2 class="accordion-header">
@@ -271,6 +281,9 @@
                 <p class="text-muted">
                     Bilagsjournal.
                 </p>
+                <a href="{% url 'regnskap:kontojournal' %}">
+                    Spesifisert hovedbok
+                </a>
             </div>
         </a>
     </div>

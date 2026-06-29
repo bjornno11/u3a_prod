@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Bilagsjournal{% endblock %}
+{% block title %}Kontojournal{% endblock %}
 
 {% block content %}
 
 <div class="container mt-4">
 
-    <h1>Bilagsjournal</h1>
+    <h1>Kontojournal</h1>
 
     <p class="lead">
         {{ organisasjon.organisasjon }}
     </p>
 
+
     <div class="mb-3">
-        <a href="/lokaladmin/regnskap/" class="btn btn-secondary">
+
+        <a href="/lokaladmin/regnskap/"
+           class="btn btn-secondary">
             Tilbake til regnskap
         </a>
 
@@ -22,6 +25,9 @@
                 onclick="window.print();">
             Skriv ut
         </button>
+
+    </div>
+
     </div>
 
     <form method="get" class="card card-body mb-4">
@@ -41,27 +47,41 @@
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Bilagsdato fra</label>
-                <input type="date" name="dato_fra" class="form-control"
-                       value="{{ filter.dato_fra }}">
+                <label class="form-label">Periode fra</label>
+                <input type="number" name="periode_fra" class="form-control"
+                       placeholder="Alle" value="{{ filter.periode_fra }}">
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Bilagsdato til</label>
-                <input type="date" name="dato_til" class="form-control"
-                       value="{{ filter.dato_til }}">
+                <label class="form-label">Periode til</label>
+                <input type="number" name="periode_til" class="form-control"
+                       placeholder="Alle" value="{{ filter.periode_til }}">
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Ført dato fra</label>
-                <input type="date" name="foring_fra" class="form-control"
-                       value="{{ filter.foring_fra }}">
+                <label class="form-label">Konto fra</label>
+                <select name="konto_fra" class="form-select">
+                    <option value="">Alle</option>
+                    {% for konto in kontoer %}
+                        <option value="{{ konto.kontonummer }}"
+                            {% if filter.konto_fra == konto.kontonummer|stringformat:"s" %}selected{% endif %}>
+                            {{ konto.kontonummer }} {{ konto.kontonavn }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Ført dato til</label>
-                <input type="date" name="foring_til" class="form-control"
-                       value="{{ filter.foring_til }}">
+                <label class="form-label">Konto til</label>
+                <select name="konto_til" class="form-select">
+                    <option value="">Alle</option>
+                    {% for konto in kontoer %}
+                        <option value="{{ konto.kontonummer }}"
+                            {% if filter.konto_til == konto.kontonummer|stringformat:"s" %}selected{% endif %}>
+                            {{ konto.kontonummer }} {{ konto.kontonavn }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="col-md-2">
@@ -80,32 +100,15 @@
             <div class="col-md-2">
                 <label class="form-label">Bilag fra</label>
                 <input type="number" name="bilag_fra" class="form-control"
-                       value="{{ filter.bilag_fra }}">
+                       placeholder="Alle" value="{{ filter.bilag_fra }}">
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Bilag til</label>
                 <input type="number" name="bilag_til" class="form-control"
-                       value="{{ filter.bilag_til }}">
+                       placeholder="Alle" value="{{ filter.bilag_til }}">
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Oppdateringsperiode fra</label>
-                <input type="number"
-                       name="periode_fra"
-                       class="form-control"
-                       placeholder="Alle"
-                       value="{{ filter.periode_fra }}">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Oppdateringsperiode til</label>
-                <input type="number"
-                       name="periode_til"
-                       class="form-control"
-                       placeholder="Alle"
-                       value="{{ filter.periode_til }}">
-            </div>
             <div class="col-md-2">
                 <label class="form-label">Avdeling</label>
                 <select name="avdeling" class="form-select">
@@ -132,22 +135,11 @@
                 </select>
             </div>
 
-            <div class="col-md-3 d-flex align-items-end">
-                <div class="form-check">
-                    <input type="checkbox" name="kun_differanse" value="1"
-                           class="form-check-input"
-                           {% if filter.kun_differanse %}checked{% endif %}>
-                    <label class="form-check-label">
-                        Kun bilag med differanse
-                    </label>
-                </div>
-            </div>
-
             <div class="col-md-3 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary">
-                    Vis journal
+                    Vis kontojournal
                 </button>
-                <a href="{% url 'regnskap:bilagsjournal' %}" class="btn btn-outline-secondary">
+                <a href="{% url 'regnskap:kontojournal' %}" class="btn btn-outline-secondary">
                     Nullstill
                 </a>
             </div>
@@ -155,38 +147,38 @@
         </div>
     </form>
 
-    {% for bilag in bilag_liste %}
+    {% for konto in konto_grupper %}
         <div class="card mb-3">
             <div class="card-header">
-                <strong>Bilag {{ bilag.bilagsnummer }}</strong>
-                &nbsp; Bilagsdato: {{ bilag.bilagsdato|date:"d.m.Y" }}
-                &nbsp; Tekst: {{ bilag.bilagstekst }}
-                <br>
-                Ført dato: {{ bilag.foringsdato|date:"d.m.Y" }}
-                &nbsp; Ført av: {{ bilag.registrert_av|default:"-" }}
-                &nbsp; Endret av: {{ bilag.endret_av|default:"-" }}
-                &nbsp; h_status: {{ bilag.h_status }}
+                <strong>Konto {{ konto.kontonummer }}</strong>
+                &nbsp; {{ konto.kontonavn }}
             </div>
 
             <div class="card-body p-0">
                 <table class="table table-sm mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 90px;">Konto</th>
-                            <th>Navn</th>
+                            <th>Bilagsdato</th>
+                            <th>Bilag</th>
+                            <th>Bilagstekst</th>
                             <th class="text-end">Debet</th>
                             <th class="text-end">Kredit</th>
-                            <th>Moms</th>
+                            <th>Momskode</th>
                             <th>Avdeling</th>
                             <th>Prosjekt</th>
-                            <th>Tekst</th>
+                            <th>Linjetekst</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for linje in bilag.linjer.all %}
+                        {% for linje in konto.linjer %}
                             <tr>
-                                <td>{{ linje.kontonummer }}</td>
-                                <td>{{ linje.kontonavn|default:"" }}</td>
+                                <td>{{ linje.bilag.bilagsdato|date:"d.m.Y" }}</td>
+                                <td>
+                                    <a href="{% url 'regnskap:bilag_detalj' linje.bilag.id %}">
+                                        {{ linje.bilag.bilagsnummer }}
+                                    </a>
+                                </td>
+                                <td>{{ linje.bilag.bilagstekst }}</td>
 
                                 {% if linje.belop >= 0 %}
                                     <td class="text-end">{{ linje.belop }}</td>
@@ -208,23 +200,22 @@
 
             <div class="card-footer text-end">
                 Sum debet:
-                <strong>{{ bilag.sum_debet }}</strong>
+                <strong>{{ konto.sum_debet }}</strong>
                 &nbsp;
                 Sum kredit:
-                <strong>{{ bilag.sum_kredit }}</strong>
+                <strong>{{ konto.sum_kredit }}</strong>
                 &nbsp;
-                Differanse:
-                <strong>{{ bilag.differanse }}</strong>
+                Saldo:
+                <strong>{{ konto.saldo }}</strong>
             </div>
         </div>
     {% empty %}
         <p class="text-muted">
-            Ingen bilag funnet.
+            Ingen bilagslinjer funnet.
         </p>
     {% endfor %}
 
 </div>
-
 
 <script src="{% static 'regnskap/js/bas_spartacus.js' %}"></script>
 
@@ -237,4 +228,3 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 {% endblock %}
-
