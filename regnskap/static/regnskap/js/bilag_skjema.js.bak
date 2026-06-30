@@ -153,19 +153,14 @@ BASBilag.fyllFraBilagsserie = function () {
 BASBilag.validerBilag = function () {
     const kontonavn = BASBilag.kontonavn || {};
 
-    const kontoFelter = document.querySelectorAll('[name="konto[]"]');
-    const belopFelter = document.querySelectorAll('[name="belop[]"]');
-    const avdelingFelter = document.querySelectorAll('[name="avdeling[]"]');
-    const prosjektFelter = document.querySelectorAll('[name="prosjekt[]"]');
-
+        const kontoFelter = document.querySelectorAll('[name="konto[]"]');
+        const belopFelter = document.querySelectorAll('[name="belop[]"]');
+        const avdelingFelter = document.querySelectorAll('[name="avdeling[]"]');
+        const prosjektFelter = document.querySelectorAll('[name="prosjekt[]"]');
     for (let i = 0; i < belopFelter.length; i++) {
-
         const linjeNr = i + 1;
-
         const kontoFelt = kontoFelter[i];
         const belopFelt = belopFelter[i];
-        const avdelingFelt = avdelingFelter[i];
-        const prosjektFelt = prosjektFelter[i];
 
         const konto = kontoFelt ? kontoFelt.value.trim() : "";
         const belop = parseFloat((belopFelt.value || "").replace(",", "."));
@@ -174,27 +169,15 @@ BASBilag.validerBilag = function () {
         const harBelop = !isNaN(belop) && Math.abs(belop) >= 0.005;
 
         if (harBelop && !harKonto) {
-            return {
-                ok: false,
-                felt: kontoFelt,
-                melding: "Linje " + linjeNr + " har beløp, men mangler konto."
-            };
+            return { ok: false, felt: kontoFelt, melding: "Linje " + linjeNr + " har beløp, men mangler konto." };
         }
 
         if (harKonto && !harBelop) {
-            return {
-                ok: false,
-                felt: belopFelt,
-                melding: "Linje " + linjeNr + " har konto, men mangler beløp."
-            };
+            return { ok: false, felt: belopFelt, melding: "Linje " + linjeNr + " har konto, men mangler beløp." };
         }
 
         if (harKonto && !kontonavn[konto]) {
-            return {
-                ok: false,
-                felt: kontoFelt,
-                melding: "Linje " + linjeNr + " har ugyldig konto: " + konto
-            };
+            return { ok: false, felt: kontoFelt, melding: "Linje " + linjeNr + " har ugyldig konto: " + konto };
         }
 
         if (harKonto && kontonavn[konto].samlekonto) {
@@ -204,31 +187,33 @@ BASBilag.validerBilag = function () {
                 melding: "Linje " + linjeNr + " bruker samlekonto og kan ikke føres på."
             };
         }
-
-        if (
-            harKonto &&
-            kontonavn[konto].krever_avdeling &&
-            (!avdelingFelt || !avdelingFelt.value.trim())
-        ) {
-            return {
-                ok: false,
-                felt: avdelingFelt,
-                melding: "Linje " + linjeNr + " krever avdeling."
-            };
-        }
-
-        if (
-            harKonto &&
-            kontonavn[konto].krever_prosjekt &&
-            (!prosjektFelt || !prosjektFelt.value.trim())
-        ) {
-            return {
-                ok: false,
-                felt: prosjektFelt,
-                melding: "Linje " + linjeNr + " krever prosjekt."
-            };
-        }
     }
+
+        if (harKonto && kontonavn[konto].krever_avdeling) {
+            const avdelingFelt = avdelingFelter[i];
+            const avdeling = avdelingFelt ? avdelingFelt.value.trim() : "";
+
+            if (!avdeling) {
+                return {
+                    ok: false,
+                    felt: avdelingFelt,
+                    melding: "Linje " + linjeNr + " krever avdeling."
+                };
+            }
+        }
+
+        if (harKonto && kontonavn[konto].krever_prosjekt) {
+            const prosjektFelt = prosjektFelter[i];
+            const prosjekt = prosjektFelt ? prosjektFelt.value.trim() : "";
+
+            if (!prosjekt) {
+                return {
+                    ok: false,
+                    felt: prosjektFelt,
+                    melding: "Linje " + linjeNr + " krever prosjekt."
+                };
+            }
+        }
 
     let sum = 0;
 
@@ -251,11 +236,8 @@ BASBilag.validerBilag = function () {
         };
     }
 
-    return {
-        ok: true
-    };
+    return { ok: true };
 };
-
 
 BASBilag.initEnterMotor = function () {
     const bilagsbelop = BASBilag.dom.bilagsbelop;
@@ -265,26 +247,40 @@ BASBilag.initEnterMotor = function () {
     function hentKonto(index) {
         const kontoFelt = BASBilag.hentFelt(index, "konto");
         if (!kontoFelt) return null;
-
-        const kontonummer = kontoFelt.value.trim();
-        if (!kontonummer) return null;
-
-        return BASBilag.kontonavn[kontonummer] || null;
+        return BASBilag.kontonavn[kontoFelt.value.trim()] || null;
     }
 
-    function stoppEnter(event) {
-        if (event.key !== "Enter") return false;
+    function fokusEtterKonto(index) {
+        const konto = hentKonto(index);
 
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
+        if (konto && konto.krever_avdeling) {
+            BASBilag.fokus(BASBilag.hentFelt(index, "avdeling"));
+            return;
+        }
+
+        if (konto && konto.krever_prosjekt) {
+            BASBilag.fokus(BASBilag.hentFelt(index, "prosjekt"));
+            return;
+        }
+
+        BASBilag.fokus(BASBilag.hentFelt(index, "belop"));
     }
 
-    function feltHarVerdi(felt) {
-        return felt && felt.value && felt.value.trim();
-    }
+    function fokusEtterAvdeling(index) {
+        const avdelingFelt = BASBilag.hentFelt(index, "avdeling");
 
-    function fokusBelop(index) {
+        if (avdelingFelt && !avdelingFelt.value.trim()) {
+            BASBilag.fokus(avdelingFelt);
+            return;
+        }
+
+        const konto = hentKonto(index);
+
+        if (konto && konto.krever_prosjekt) {
+            BASBilag.fokus(BASBilag.hentFelt(index, "prosjekt"));
+            return;
+        }
+
         BASBilag.fokus(BASBilag.hentFelt(index, "belop"));
     }
 
@@ -301,126 +297,71 @@ BASBilag.initEnterMotor = function () {
         }
     }
 
-    function fraBilagsbelop() {
-        BASBilag.fyllBelop();
-        BASBilag.fokus(bilagstekst);
-    }
-
-    function fraBilagstekst() {
-        BASBilag.fokus(BASBilag.hentFelt(0, "konto"));
-    }
-
-    function fraKonto(index) {
-        BASBilag.oppdaterKontonavn();
-
-        const konto = hentKonto(index);
-
-        if (!konto) {
-            BASBilag.fokus(BASBilag.hentFelt(index, "konto"));
-            return;
-        }
-
-        fokusBelop(index);
-
-    }
-
-    function fraAvdeling(index) {
-        const konto = hentKonto(index);
-        const avdelingFelt = BASBilag.hentFelt(index, "avdeling");
-
-        if (konto && konto.krever_avdeling && !feltHarVerdi(avdelingFelt)) {
-            BASBilag.fokus(avdelingFelt);
-            return;
-        }
-
-        if (konto && konto.krever_prosjekt) {
-            BASBilag.fokus(BASBilag.hentFelt(index, "prosjekt"));
-            return;
-        }
-
-        fokusNesteLinje(index);
-
-    }
-
-    function fraProsjekt(index) {
-        const konto = hentKonto(index);
-        const prosjektFelt = BASBilag.hentFelt(index, "prosjekt");
-
-        if (konto && konto.krever_prosjekt && !feltHarVerdi(prosjektFelt)) {
-            BASBilag.fokus(prosjektFelt);
-            return;
-        }
-
-        fokusNesteLinje(index);
-    }
-
-    function fraBelop(index) {
-        BASBilag.oppdaterDifferanse();
-
-        const konto = hentKonto(index);
-
-        if (konto && konto.krever_avdeling) {
-            BASBilag.fokus(BASBilag.hentFelt(index, "avdeling"));
-            return;
-        }
-
-        if (konto && konto.krever_prosjekt) {
-            BASBilag.fokus(BASBilag.hentFelt(index, "prosjekt"));
-            return;
-        }
-
-        fokusNesteLinje(index);
-    }
-
     if (bilagsbelop) {
         bilagsbelop.addEventListener("keydown", function (event) {
-            if (stoppEnter(event)) {
-                fraBilagsbelop();
+            if (event.key !== "Enter") return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            BASBilag.fyllBelop();
+
+            if (bilagstekst) {
+                BASBilag.fokus(bilagstekst);
             }
         });
     }
 
     if (bilagstekst) {
         bilagstekst.addEventListener("keydown", function (event) {
-            if (stoppEnter(event)) {
-                fraBilagstekst();
-            }
+            if (event.key !== "Enter") return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            BASBilag.fokus(BASBilag.hentFelt(0, "konto"));
         });
     }
 
     if (!body) return;
 
     body.addEventListener("keydown", function (event) {
-        if (!stoppEnter(event)) return;
+        if (event.key !== "Enter") return;
 
         const felt = event.target;
         const linje = felt.closest("tr.bilagslinje");
         if (!linje) return;
 
+        event.preventDefault();
+        event.stopPropagation();
+
         const linjer = Array.from(BASBilag.hentLinjer());
         const index = linjer.indexOf(linje);
 
         if (felt.name === "konto[]") {
-            fraKonto(index);
+            BASBilag.oppdaterKontonavn();
+            fokusEtterKonto(index);
             return;
         }
 
         if (felt.name === "avdeling[]") {
-            fraAvdeling(index);
+            fokusEtterAvdeling(index);
             return;
         }
 
         if (felt.name === "prosjekt[]") {
-            fraProsjekt(index);
+            BASBilag.fokus(BASBilag.hentFelt(index, "belop"));
             return;
         }
 
         if (felt.name === "belop[]") {
-            fraBelop(index);
+            BASBilag.oppdaterDifferanse();
+            fokusNesteLinje(index);
             return;
         }
     });
 };
+
 
 
 BASBilag.initKontoLookup = function () {

@@ -46,6 +46,31 @@ urlpatterns = [
         views.styrekode_slett,
         name="styrekode_slett",
     ),
+
+    path(
+        "samlekonto-definisjoner/",
+        views.samlekontotyper,
+        name="samlekontotyper",
+    ),
+
+    path(
+        "samlekonto-definisjoner/ny/",
+        views.samlekontotype_ny,
+        name="samlekontotype_ny",
+    ),
+
+    path(
+        "samlekontotyper/<int:samlekontotype_id>/endre/",
+        views.samlekontotype_endre,
+        name="samlekontotype_endre",
+    ),
+
+    path(
+        "samlekontotyper/<int:samlekontotype_id>/slett/",
+        views.samlekontotype_slett,
+        name="samlekontotype_slett",
+    ),
+
     path(
         "faste-data/avdelinger/",
         views.avdelinger,

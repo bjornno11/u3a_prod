@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SamlekontoOppsett
+
 
 from .models import (
     Regnskapsaar,
@@ -14,7 +14,7 @@ from .models import (
     Bilagslinje,
     SystemLogg,
     Regnskapsoppsett,
-
+    SamlekontoType,
 )
 
 
@@ -172,27 +172,25 @@ class RegnskapsoppsettAdmin(admin.ModelAdmin):
         }),
     )
 
-@admin.register(SamlekontoOppsett)
-class SamlekontoOppsettAdmin(admin.ModelAdmin):
+@admin.register(SamlekontoType)
+class SamlekontoTypeAdmin(admin.ModelAdmin):
     list_display = (
-        "organisasjon",
-        "kode",
+        "hovedbokskonto",
         "navn",
-        "konto",
         "neste_nummer",
+        "bruker_lopende_nummer",
         "aktiv",
     )
 
     list_filter = (
-        "organisasjon",
         "aktiv",
+        "bruker_lopende_nummer",
     )
 
     search_fields = (
-        "kode",
         "navn",
-        "konto__kontonavn",
-        "konto__kontonummer",
+        "hovedbokskonto__kontonummer",
+        "hovedbokskonto__kontonavn",
     )
 
 

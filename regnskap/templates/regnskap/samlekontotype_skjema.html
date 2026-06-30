@@ -1,0 +1,150 @@
+{% extends "base.html" %}<form
+
+{% block content %}
+<div class="container mt-4">
+
+    <h1>
+        {% if samlekontotype %}
+            Endre samlekontotype
+        {% else %}
+            Ny samlekontotype
+        {% endif %}
+    </h1>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-secondary">
+            Tilbake til regnskap
+        </a>
+    </div>
+
+    {% if feilmelding %}
+        <div class="alert alert-danger">
+            {{ feilmelding }}
+        </div>
+    {% endif %}
+
+    <form method="post" id="bas-skjema">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Hovedbokskonto</label>
+
+            <select name="hovedbokskonto"
+                    class="form-select"
+                    {% if samlekontotype %}disabled{% endif %}
+                    required>
+
+                <option value="">Velg hovedbokskonto</option>
+
+                {% for konto in kontoer %}
+                    <option value="{{ konto.id }}"
+                        {% if skjema and skjema.hovedbokskonto_id == konto.id %}
+                            selected
+                        {% elif samlekontotype and samlekontotype.hovedbokskonto_id == konto.id %}
+                            selected
+                        {% endif %}>
+                        {{ konto.kontonummer }} – {{ konto.kontonavn }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            {% if samlekontotype %}
+                <input type="hidden"
+                       name="hovedbokskonto"
+                       value="{{ samlekontotype.hovedbokskonto_id }}">
+            {% endif %}
+
+        </div>
+
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{% if skjema %}{{ skjema.navn }}{% else %}{{ samlekontotype.navn|default:'' }}{% endif %}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Neste nummer</label>
+            <input type="number"
+                   name="neste_nummer"
+                   class="form-control"
+                   value="{% if skjema %}{{ skjema.neste_nummer }}{% else %}{{ samlekontotype.neste_nummer|default:'1' }}{% endif %}"
+                   min="1"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Beskrivelse</label>
+            <textarea name="beskrivelse"
+                      class="form-control"
+                      rows="4">{% if skjema %}{{ skjema.beskrivelse }}{% else %}{{ samlekontotype.beskrivelse|default:'' }}{% endif %}</textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="bruker_lopende_nummer"
+                   class="form-check-input"
+                   id="bruker_lopende_nummer"
+                   {% if skjema %}
+                       {% if skjema.bruker_lopende_nummer %}checked{% endif %}
+                   {% elif not samlekontotype or samlekontotype.bruker_lopende_nummer %}
+                       checked
+                   {% endif %}>
+            <label class="form-check-label" for="bruker_lopende_nummer">
+                Bruker løpende nummer
+            </label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   id="aktiv"
+                   {% if skjema %}
+                       {% if skjema.aktiv %}checked{% endif %}
+                   {% elif not samlekontotype or samlekontotype.aktiv %}
+                       checked
+                   {% endif %}>
+            <label class="form-check-label" for="aktiv">
+                Aktiv
+            </label>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary"
+                id="bas-lagre">
+            F2 Lagre
+        </button>
+
+        <a href="{% url 'regnskap:samlekontotyper' %}"
+           class="btn btn-secondary"
+           id="bas-avbryt">
+            Esc Avbryt
+        </a>
+    </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    BAS.initEnterSomTab();
+    BAS.initF2Lagre("bas-skjema");
+    BAS.initEsc("{% url 'regnskap:samlekontotyper' %}");
+    BAS.initFooter({
+        F1: null,
+        F2: "Lagre",
+        F4: null,
+        F5: null,
+        F6: null,
+        F8: null,
+        Esc: "Avbryt"
+    });
+</script>
+{% endblock %}
+

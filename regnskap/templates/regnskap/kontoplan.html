@@ -24,13 +24,22 @@
     </p>
 
     <div class="mb-3">
+
         {% if not oppslag %}
         <a href="{% url 'regnskap:konto_ny' %}"
            class="btn btn-primary">
             Ny konto
         </a>
+
+        <button type="button"
+                class="btn btn-secondary"
+                onclick="window.print();">
+            Print
+        </button>
         {% endif %}
+
     </div>
+
 
     <table class="table table-striped">
 
@@ -100,5 +109,19 @@
 
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'regnskap/js/bas_spartacus.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    BAS.initF8Print();
+
+    {% if not oppslag %}
+    BAS.initEsc("{% url 'regnskap:faste_data' %}");
+    {% endif %}
+});
+</script>
 {% endblock %}
 

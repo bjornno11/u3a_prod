@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 
 from lag.models import Organisasjon
@@ -599,55 +599,30 @@ class SystemLogg(models.Model):
     def __str__(self):
         return f"{self.tidspunkt} {self.handling} {self.tabellnavn}"
 
-
-
-class SamlekontoOppsett(models.Model):
-    KODE_LEVERANDOR = "LEVERANDOR"
-    KODE_KUNDE = "KUNDE"
-    KODE_MEDLEM = "MEDLEM"
-
-    KODE_CHOICES = [
-        (KODE_LEVERANDOR, "Leverandørsamlekonto"),
-        (KODE_KUNDE, "Kundesamlekonto"),
-        (KODE_MEDLEM, "Medlemssamlekonto"),
-    ]
-
-    organisasjon = models.ForeignKey(
-        "lag.Organisasjon",
-        on_delete=models.CASCADE,
-        related_name="samlekonto_oppsett",
-    )
-
-    kode = models.CharField(max_length=30, choices=KODE_CHOICES)
-    navn = models.CharField(max_length=100)
-
-    konto = models.ForeignKey(
+class SamlekontoType(models.Model):
+    hovedbokskonto = models.OneToOneField(
         Konto,
         on_delete=models.PROTECT,
-        related_name="samlekonto_oppsett",
+        related_name="samlekontotype",
+        verbose_name="Hovedbokskonto",
     )
 
-    neste_nummer = models.PositiveIntegerField(
-        default=10000,
-        verbose_name="Neste nummer",
-    )
+    navn = models.CharField(max_length=100)
+    neste_nummer = models.PositiveIntegerField(default=1)
+    bruker_lopende_nummer = models.BooleanField(default=True)
 
+    beskrivelse = models.TextField(blank=True)
     aktiv = models.BooleanField(default=True)
 
-    class Meta:
-        unique_together = ("organisasjon", "kode")
-        verbose_name = "Samlekonto-oppsett"
-        verbose_name_plural = "Samlekonto-oppsett"
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super().save(*args, **kwargs)
 
-    def clean(self):
-        from django.core.exceptions import ValidationError
-
-        if self.konto and not self.konto.samlekonto:
-            raise ValidationError(
-                "Valgt konto må være merket som samlekonto/låst konto."
-            )
+            if self.hovedbokskonto and not self.hovedbokskonto.samlekonto:
+                self.hovedbokskonto.samlekonto = True
+                self.hovedbokskonto.save(update_fields=["samlekonto"])
 
     def __str__(self):
-        return f"{self.organisasjon} – {self.navn}: {self.konto}"
+        return f"{self.hovedbokskonto.kontonummer} – {self.navn}"
 
 

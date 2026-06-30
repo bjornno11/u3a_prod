@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from lag.models import Organisasjon
-from .models import Konto, Bilag, Bilagslinje, Avdeling, Prosjekt, Styrekode, Regnskapsaar, Bilagsserie
+from .models import Konto, Bilag, Bilagslinje, Avdeling, Prosjekt, Styrekode, Regnskapsaar, SamlekontoType, Bilagsserie
 from .services import opprett_standard_regnskap
 from django.urls import reverse
 from django.db import transaction
@@ -198,9 +198,12 @@ def bilag_skjema(request, bilag_id=None, modus="ny"):
         str(k.kontonummer): {
             "navn": k.kontonavn,
             "samlekonto": k.samlekonto,
+            "krever_avdeling": k.krever_avdeling,
+            "krever_prosjekt": k.krever_prosjekt,
         }
         for k in kontoer
     })
+
     linjer = []
     linje1 = linje2 = linje3 = linje4 = linje5 = linje6 = None
 
@@ -811,6 +814,172 @@ def styrekode_slett(request, styrekode_id):
             "styrekode": styrekode,
         }
     )
+
+@login_required
+def samlekontotyper(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    samlekontotyper = SamlekontoType.objects.filter(
+        hovedbokskonto__organisasjon=organisasjon
+    ).select_related("hovedbokskonto").order_by(
+        "hovedbokskonto__kontonummer"
+    )
+
+    return render(
+        request,
+        "regnskap/samlekontotyper.html",
+        {
+            "organisasjon": organisasjon,
+            "samlekontotyper": samlekontotyper,
+        }
+    )
+
+
+@login_required
+def samlekontotype_ny(request):
+
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    kontoer = Konto.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("kontonummer")
+
+    if request.method == "POST":
+        hovedbokskonto_id = request.POST.get("hovedbokskonto")
+        navn = request.POST.get("navn", "").strip()
+        beskrivelse = request.POST.get("beskrivelse", "").strip()
+        neste_nummer = request.POST.get("neste_nummer") or 1
+        bruker_lopende_nummer = request.POST.get("bruker_lopende_nummer") == "on"
+        aktiv = request.POST.get("aktiv") == "on"
+
+        if hovedbokskonto_id and navn:
+            hovedbokskonto = get_object_or_404(
+                Konto,
+                id=hovedbokskonto_id,
+                organisasjon=organisasjon,
+            )
+
+            if SamlekontoType.objects.filter(
+                hovedbokskonto=hovedbokskonto
+            ).exists():
+                return render(
+                    request,
+                    "regnskap/samlekontotype_skjema.html",
+                    {
+                        "organisasjon": organisasjon,
+                        "samlekontotype": None,
+                        "kontoer": kontoer,
+                        "feilmelding": "Denne hovedbokskontoen er allerede brukt som samlekontotype.",
+                        "skjema": {
+                            "hovedbokskonto_id": hovedbokskonto.id,
+                            "navn": navn,
+                            "neste_nummer": neste_nummer,
+                            "beskrivelse": beskrivelse,
+                            "bruker_lopende_nummer": bruker_lopende_nummer,
+                            "aktiv": aktiv,
+                        },
+                    },
+                )
+
+            SamlekontoType.objects.create(
+                hovedbokskonto=hovedbokskonto,
+                navn=navn,
+                neste_nummer=neste_nummer,
+                bruker_lopende_nummer=bruker_lopende_nummer,
+                beskrivelse=beskrivelse,
+                aktiv=aktiv,
+            )
+
+            return redirect("regnskap:samlekontotyper")
+
+
+    return render(
+        request,
+        "regnskap/samlekontotype_skjema.html",
+        {
+            "organisasjon": organisasjon,
+            "samlekontotype": None,
+            "kontoer": kontoer,
+        }
+    )
+
+
+@login_required
+def samlekontotype_endre(request, samlekontotype_id):
+
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    samlekontotype = get_object_or_404(
+        SamlekontoType,
+        id=samlekontotype_id,
+        hovedbokskonto__organisasjon=organisasjon
+    )
+    kontoer = Konto.objects.filter(
+        organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("kontonummer")
+
+    if request.method == "POST":
+        hovedbokskonto_id = request.POST.get("hovedbokskonto")
+
+        hovedbokskonto = get_object_or_404(
+            Konto,
+            id=hovedbokskonto_id,
+            organisasjon=organisasjon,
+        )
+
+        samlekontotype.hovedbokskonto = hovedbokskonto
+        samlekontotype.navn = request.POST.get("navn", "").strip()
+        samlekontotype.neste_nummer = request.POST.get("neste_nummer") or 1
+        samlekontotype.beskrivelse = request.POST.get("beskrivelse", "").strip()
+        samlekontotype.bruker_lopende_nummer = (
+            request.POST.get("bruker_lopende_nummer") == "on"
+        )
+        samlekontotype.aktiv = request.POST.get("aktiv") == "on"
+
+        samlekontotype.save()
+
+        return redirect("regnskap:samlekontotyper")
+    return render(
+        request,
+        "regnskap/samlekontotype_skjema.html",
+        {
+            "organisasjon": organisasjon,
+            "samlekontotype": samlekontotype,
+            "kontoer": kontoer,
+        }
+    )
+
+@login_required
+def samlekontotype_slett(request, samlekontotype_id):
+
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    samlekontotype = get_object_or_404(
+        SamlekontoType,
+        id=samlekontotype_id,
+        hovedbokskonto__organisasjon=organisasjon,
+    )
+
+    if request.method == "POST":
+        konto = samlekontotype.hovedbokskonto
+
+        samlekontotype.delete()
+
+        konto.samlekonto = False
+        konto.save(update_fields=["samlekonto"])
+
+    return redirect("regnskap:samlekontotyper")
+
 
 @login_required
 def avdeling_ny(request):

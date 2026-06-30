@@ -154,10 +154,10 @@ Nytt bilag
 
                             <input type="text"
                                    name="konto[]"
-                                   ...
+                                   class="form-control form-control-sm konto-felt bas-konto-lookup"
                                    value="{{ linje.kontonummer }}"
-                                   {% if modus == "tilbakeforing" %}readonly{% endif %}>                            <small class="text-muted kontonavn"></small>
-                        </td>
+                                   autocomplete="off"
+                                   {% if modus == "tilbakeforing" %}readonly{% endif %}>                        </td>
 
                         <td>
                             <input type="text"
@@ -213,9 +213,11 @@ Nytt bilag
                         </td>
 
                         <td>
+
                             <input type="text"
                                    name="konto[]"
-                                   class="form-control form-control-sm konto-felt">
+                                   class="form-control form-control-sm konto-felt bas-konto-lookup"
+                                   autocomplete="off">
                             <small class="text-muted kontonavn"></small>
                         </td>
 
@@ -294,6 +296,17 @@ Nytt bilag
     </form>
 
 </div>
+
+<script>
+window.BAS_KONTOER = [
+    {% for konto in kontoer %}
+    {
+        nr: "{{ konto.kontonummer }}",
+        navn: "{{ konto.kontonavn|escapejs }}"
+    },
+    {% endfor %}
+];
+</script>
 
 <script src="{% static 'regnskap/js/bas_spartacus.js' %}"></script>
 <script src="{% static 'regnskap/js/bilag_skjema.js' %}"></script>
