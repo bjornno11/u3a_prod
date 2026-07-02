@@ -1,14 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from lag.models import Organisasjon
-from .models import Konto, Bilag, Bilagslinje, Avdeling, Prosjekt, Styrekode, Regnskapsaar, SamlekontoType, Bilagsserie
+from lag.models import Organisasjon, LagMedlem
+from .models import Konto, Bilag, Bilagslinje, Avdeling, Prosjekt, Styrekode, Regnskapsaar, SamlekontoType, Bilagsserie, Leverandor, Kunde
 from .services import opprett_standard_regnskap
 from django.urls import reverse
 from django.db import transaction
 from decimal import Decimal
 from django.utils import timezone
 import json
+import requests
+from .medlem_synkronisering import (
+    analyser_medlemssynkronisering,
+    tildel_medlemsnummer,
+    opprett_medlemskontoer,
+)
 
 def konto_kan_foeres_paa(konto):
     if konto.samlekonto:
@@ -364,12 +370,30 @@ def bilag_skjema(request, bilag_id=None, modus="ny"):
                 registrert_av=request.user,
             )
 
-            for linjenr in range(1, 7):
-                konto = request.POST.get(f"konto_{linjenr}", "").strip()
-                tekst = request.POST.get(f"tekst_{linjenr}", "").strip()
-                belop = request.POST.get(f"belop_{linjenr}", "").strip()
-                avdeling_id = request.POST.get(f"avdeling_{linjenr}") or None
-                prosjekt_id = request.POST.get(f"prosjekt_{linjenr}") or None
+            konto_liste = request.POST.getlist("konto[]")
+            tekst_liste = request.POST.getlist("tekst[]")
+            belop_liste = request.POST.getlist("belop[]")
+            avdeling_liste = request.POST.getlist("avdeling[]")
+            prosjekt_liste = request.POST.getlist("prosjekt[]")
+
+            antall_linjer = max(
+                len(konto_liste),
+                len(tekst_liste),
+                len(belop_liste),
+                len(avdeling_liste),
+                len(prosjekt_liste),
+            )
+
+            lagrede_linjer = 0
+
+            for i in range(antall_linjer):
+                linjenr = i + 1
+
+                konto = konto_liste[i].strip() if i < len(konto_liste) else ""
+                tekst = tekst_liste[i].strip() if i < len(tekst_liste) else ""
+                belop = belop_liste[i].strip() if i < len(belop_liste) else ""
+                avdeling_id = avdeling_liste[i] if i < len(avdeling_liste) and avdeling_liste[i] else None
+                prosjekt_id = prosjekt_liste[i] if i < len(prosjekt_liste) and prosjekt_liste[i] else None
 
                 if konto and belop:
                     konto_obj = Konto.objects.filter(
@@ -418,7 +442,12 @@ def bilag_skjema(request, bilag_id=None, modus="ny"):
                         linjetekst=tekst,
                         belop=Decimal(belop.replace(",", ".")),
                     )
+                    lagrede_linjer += 1
 
+            if lagrede_linjer == 0:
+                raise ValueError(
+                    "Bilaget har ingen bilagslinjer og kan ikke lagres."
+                )
         messages.success(
             request,
             f"Bilag {bilagsserie.kode}{bilagsnummer} er lagret."
@@ -535,8 +564,23 @@ def kontoplan(request):
 
     oppslag = request.GET.get("oppslag") == "1"
 
+    fra = request.GET.get("fra", "0")
+    til = request.GET.get("til", "10000")
+
+    try:
+        fra_int = int(fra)
+    except ValueError:
+        fra_int = 0
+
+    try:
+        til_int = int(til)
+    except ValueError:
+        til_int = 10000
+
     kontoer = Konto.objects.filter(
-        organisasjon=organisasjon
+        organisasjon=organisasjon,
+        kontonummer__gte=fra_int,
+        kontonummer__lte=til_int,
     ).order_by("kontonummer")
 
     return render(
@@ -546,6 +590,8 @@ def kontoplan(request):
             "organisasjon": organisasjon,
             "kontoer": kontoer,
             "oppslag": oppslag,
+            "fra": fra_int,
+            "til": til_int,
         }
     )
 
@@ -853,11 +899,23 @@ def samlekontotype_ny(request):
         hovedbokskonto_id = request.POST.get("hovedbokskonto")
         navn = request.POST.get("navn", "").strip()
         beskrivelse = request.POST.get("beskrivelse", "").strip()
-        neste_nummer = request.POST.get("neste_nummer") or 1
         bruker_lopende_nummer = request.POST.get("bruker_lopende_nummer") == "on"
         aktiv = request.POST.get("aktiv") == "on"
 
-        if hovedbokskonto_id and navn:
+        nummer_fra = int(request.POST.get("nummer_fra") or 1)
+        nummer_til = int(request.POST.get("nummer_til") or 999999)
+        neste_nummer = int(request.POST.get("neste_nummer") or nummer_fra)
+
+        feilmelding = None
+        hovedbokskonto = None
+
+        if not hovedbokskonto_id:
+            feilmelding = "Du må velge hovedbokskonto."
+
+        elif not navn:
+            feilmelding = "Du må registrere navn."
+
+        else:
             hovedbokskonto = get_object_or_404(
                 Konto,
                 id=hovedbokskonto_id,
@@ -867,36 +925,55 @@ def samlekontotype_ny(request):
             if SamlekontoType.objects.filter(
                 hovedbokskonto=hovedbokskonto
             ).exists():
-                return render(
-                    request,
-                    "regnskap/samlekontotype_skjema.html",
-                    {
-                        "organisasjon": organisasjon,
-                        "samlekontotype": None,
-                        "kontoer": kontoer,
-                        "feilmelding": "Denne hovedbokskontoen er allerede brukt som samlekontotype.",
-                        "skjema": {
-                            "hovedbokskonto_id": hovedbokskonto.id,
-                            "navn": navn,
-                            "neste_nummer": neste_nummer,
-                            "beskrivelse": beskrivelse,
-                            "bruker_lopende_nummer": bruker_lopende_nummer,
-                            "aktiv": aktiv,
-                        },
-                    },
-                )
+                feilmelding = "Denne hovedbokskontoen er allerede brukt som samlekontotype."
 
-            SamlekontoType.objects.create(
-                hovedbokskonto=hovedbokskonto,
-                navn=navn,
-                neste_nummer=neste_nummer,
-                bruker_lopende_nummer=bruker_lopende_nummer,
-                beskrivelse=beskrivelse,
-                aktiv=aktiv,
+            elif nummer_fra > nummer_til:
+                feilmelding = "Nummer fra kan ikke være høyere enn nummer til."
+
+            elif neste_nummer < nummer_fra or neste_nummer > nummer_til:
+                feilmelding = "Neste nummer må ligge innenfor nummerintervallet."
+
+            elif SamlekontoType.objects.filter(
+                hovedbokskonto__organisasjon=organisasjon,
+                nummer_fra__lte=nummer_til,
+                nummer_til__gte=nummer_fra,
+            ).exists():
+                feilmelding = "Nummerintervallet kolliderer med en annen samlekontotype."
+
+        if feilmelding:
+            return render(
+                request,
+                "regnskap/samlekontotype_skjema.html",
+                {
+                    "organisasjon": organisasjon,
+                    "samlekontotype": None,
+                    "kontoer": kontoer,
+                    "feilmelding": feilmelding,
+                    "skjema": {
+                        "hovedbokskonto_id": int(hovedbokskonto_id) if hovedbokskonto_id else "",
+                        "navn": navn,
+                        "nummer_fra": nummer_fra,
+                        "nummer_til": nummer_til,
+                        "neste_nummer": neste_nummer,
+                        "beskrivelse": beskrivelse,
+                        "bruker_lopende_nummer": bruker_lopende_nummer,
+                        "aktiv": aktiv,
+                    },
+                },
             )
 
-            return redirect("regnskap:samlekontotyper")
+        SamlekontoType.objects.create(
+            hovedbokskonto=hovedbokskonto,
+            navn=navn,
+            nummer_fra=nummer_fra,
+            nummer_til=nummer_til,
+            neste_nummer=neste_nummer,
+            bruker_lopende_nummer=bruker_lopende_nummer,
+            beskrivelse=beskrivelse,
+            aktiv=aktiv,
+        )
 
+        return redirect("regnskap:samlekontotyper")
 
     return render(
         request,
@@ -935,18 +1012,70 @@ def samlekontotype_endre(request, samlekontotype_id):
             organisasjon=organisasjon,
         )
 
-        samlekontotype.hovedbokskonto = hovedbokskonto
-        samlekontotype.navn = request.POST.get("navn", "").strip()
-        samlekontotype.neste_nummer = request.POST.get("neste_nummer") or 1
-        samlekontotype.beskrivelse = request.POST.get("beskrivelse", "").strip()
-        samlekontotype.bruker_lopende_nummer = (
+        navn = request.POST.get("navn", "").strip()
+        nummer_fra = int(request.POST.get("nummer_fra") or 1)
+        nummer_til = int(request.POST.get("nummer_til") or 999999)
+        neste_nummer = int(request.POST.get("neste_nummer") or nummer_fra)
+        beskrivelse = request.POST.get("beskrivelse", "").strip()
+        bruker_lopende_nummer = (
             request.POST.get("bruker_lopende_nummer") == "on"
         )
-        samlekontotype.aktiv = request.POST.get("aktiv") == "on"
+        aktiv = request.POST.get("aktiv") == "on"
 
+        feilmelding = None
+
+        if not navn:
+            feilmelding = "Du må registrere navn."
+
+        elif nummer_fra > nummer_til:
+            feilmelding = "Nummer fra kan ikke være høyere enn nummer til."
+
+        elif neste_nummer < nummer_fra or neste_nummer > nummer_til:
+            feilmelding = "Neste nummer må ligge innenfor nummerintervallet."
+
+        elif SamlekontoType.objects.filter(
+            hovedbokskonto__organisasjon=organisasjon,
+            nummer_fra__lte=nummer_til,
+            nummer_til__gte=nummer_fra,
+        ).exclude(
+            id=samlekontotype.id
+        ).exists():
+            feilmelding = "Nummerintervallet kolliderer med en annen samlekontotype."
+
+        if feilmelding:
+            return render(
+                request,
+                "regnskap/samlekontotype_skjema.html",
+                {
+                    "organisasjon": organisasjon,
+                    "samlekontotype": samlekontotype,
+                    "kontoer": kontoer,
+                    "feilmelding": feilmelding,
+                    "skjema": {
+                        "hovedbokskonto_id": hovedbokskonto.id,
+                        "navn": navn,
+                        "nummer_fra": nummer_fra,
+                        "nummer_til": nummer_til,
+                        "neste_nummer": neste_nummer,
+                        "beskrivelse": beskrivelse,
+                        "bruker_lopende_nummer": bruker_lopende_nummer,
+                        "aktiv": aktiv,
+                    },
+                },
+            )
+
+        samlekontotype.hovedbokskonto = hovedbokskonto
+        samlekontotype.navn = navn
+        samlekontotype.nummer_fra = nummer_fra
+        samlekontotype.nummer_til = nummer_til
+        samlekontotype.neste_nummer = neste_nummer
+        samlekontotype.beskrivelse = beskrivelse
+        samlekontotype.bruker_lopende_nummer = bruker_lopende_nummer
+        samlekontotype.aktiv = aktiv
         samlekontotype.save()
-
         return redirect("regnskap:samlekontotyper")
+
+
     return render(
         request,
         "regnskap/samlekontotype_skjema.html",
@@ -979,6 +1108,309 @@ def samlekontotype_slett(request, samlekontotype_id):
         konto.save(update_fields=["samlekonto"])
 
     return redirect("regnskap:samlekontotyper")
+
+
+@login_required
+def leverandorer(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    leverandorer = Leverandor.objects.filter(
+        organisasjon=organisasjon
+    ).select_related(
+        "konto"
+    ).order_by(
+        "konto__kontonummer"
+    )
+
+    return render(
+        request,
+        "regnskap/leverandorer.html",
+        {
+            "organisasjon": organisasjon,
+            "leverandorer": leverandorer,
+        }
+    )
+
+@login_required
+def leverandor_ny(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    samlekontotyper = SamlekontoType.objects.filter(
+        hovedbokskonto__organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("navn")
+
+    if request.method == "POST":
+        samlekontotype_id = request.POST.get("samlekontotype")
+        navn = request.POST.get("navn", "").strip()
+
+        samlekontotype = get_object_or_404(
+            SamlekontoType,
+            id=samlekontotype_id,
+            hovedbokskonto__organisasjon=organisasjon,
+        )
+
+        kontonummer = samlekontotype.neste_nummer
+
+        with transaction.atomic():
+            konto = Konto.objects.create(
+                organisasjon=organisasjon,
+                kontonummer=kontonummer,
+                kontonavn=navn,
+                styrekode=samlekontotype.hovedbokskonto.styrekode,
+                samlekonto=False,
+                aktiv=True,
+            )
+
+            Leverandor.objects.create(
+                organisasjon=organisasjon,
+                konto=konto,
+                navn=navn,
+                orgnummer=request.POST.get("orgnummer", "").strip(),
+                adresse=request.POST.get("adresse", "").strip(),
+                postnummer=request.POST.get("postnummer", "").strip(),
+                poststed=request.POST.get("poststed", "").strip(),
+                land=request.POST.get("land", "").strip() or "Norge",
+                kontaktperson=request.POST.get("kontaktperson", "").strip(),
+                epost=request.POST.get("epost", "").strip(),
+                url=request.POST.get("url", "").strip(),
+                telefon=request.POST.get("telefon", "").strip(),
+                bankkonto=request.POST.get("bankkonto", "").strip(),
+                iban=request.POST.get("iban", "").strip(),
+                bic=request.POST.get("bic", "").strip(),
+                aktiv=request.POST.get("aktiv") == "on",
+                notat=request.POST.get("notat", "").strip(),
+            )
+
+            samlekontotype.neste_nummer += 1
+            samlekontotype.save(update_fields=["neste_nummer"])
+
+        return redirect("regnskap:leverandorer")
+
+    return render(
+        request,
+        "regnskap/leverandor_skjema.html",
+
+        {
+            "organisasjon": organisasjon,
+            "leverandor": None,
+            "samlekontotyper": samlekontotyper,
+            "skjema": {
+                "navn": request.GET.get("navn", ""),
+                "orgnummer": request.GET.get("orgnummer", ""),
+                "adresse": request.GET.get("adresse", ""),
+                "postnummer": request.GET.get("postnummer", ""),
+                "poststed": request.GET.get("poststed", ""),
+                "land": request.GET.get("land", "Norge"),
+            },
+        }
+    )
+
+@login_required
+def leverandor_endre(request, leverandor_id):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    leverandor = get_object_or_404(
+        Leverandor,
+        id=leverandor_id,
+        organisasjon=organisasjon,
+    )
+
+    if request.method == "POST":
+        leverandor.navn = request.POST.get("navn", "").strip()
+        leverandor.orgnummer = request.POST.get("orgnummer", "").strip()
+        leverandor.adresse = request.POST.get("adresse", "").strip()
+        leverandor.postnummer = request.POST.get("postnummer", "").strip()
+        leverandor.poststed = request.POST.get("poststed", "").strip()
+        leverandor.land = request.POST.get("land", "").strip() or "Norge"
+        leverandor.kontaktperson = request.POST.get("kontaktperson", "").strip()
+        leverandor.epost = request.POST.get("epost", "").strip()
+        leverandor.url = request.POST.get("url", "").strip()
+        leverandor.telefon = request.POST.get("telefon", "").strip()
+        leverandor.bankkonto = request.POST.get("bankkonto", "").strip()
+        leverandor.iban = request.POST.get("iban", "").strip()
+        leverandor.bic = request.POST.get("bic", "").strip()
+        leverandor.aktiv = request.POST.get("aktiv") == "on"
+        leverandor.notat = request.POST.get("notat", "").strip()
+        leverandor.save()
+
+        leverandor.konto.kontonavn = leverandor.navn
+        leverandor.konto.aktiv = leverandor.aktiv
+        leverandor.konto.save(update_fields=["kontonavn", "aktiv"])
+
+        return redirect("regnskap:leverandorer")
+
+    return render(
+        request,
+        "regnskap/leverandor_skjema.html",
+        {
+            "organisasjon": organisasjon,
+            "leverandor": leverandor,
+            "samlekontotyper": None,
+            "skjema": {
+                "navn": leverandor.navn,
+                "orgnummer": leverandor.orgnummer,
+                "adresse": leverandor.adresse,
+                "postnummer": leverandor.postnummer,
+                "poststed": leverandor.poststed,
+                "land": leverandor.land,
+                "kontaktperson": leverandor.kontaktperson,
+                "epost": leverandor.epost,
+                "url": leverandor.url,
+                "telefon": leverandor.telefon,
+                "bankkonto": leverandor.bankkonto,
+                "iban": leverandor.iban,
+                "bic": leverandor.bic,
+                "aktiv": leverandor.aktiv,
+                "notat": leverandor.notat,
+            },
+        }
+    )
+
+
+@login_required
+def leverandor_slett(request, leverandor_id):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    leverandor = get_object_or_404(
+        Leverandor,
+        id=leverandor_id,
+        organisasjon=organisasjon,
+    )
+
+    if request.method == "POST":
+        leverandor.aktiv = False
+        leverandor.save(update_fields=["aktiv"])
+
+        leverandor.konto.aktiv = False
+        leverandor.konto.save(update_fields=["aktiv"])
+
+        return redirect("regnskap:leverandorer")
+
+    return render(
+        request,
+        "regnskap/leverandor_slett.html",
+        {
+            "organisasjon": organisasjon,
+            "leverandor": leverandor,
+        }
+    )
+
+@login_required
+def kunder(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    kunder = Kunde.objects.filter(
+        organisasjon=organisasjon
+    ).select_related(
+        "konto"
+    ).order_by(
+        "konto__kontonummer"
+    )
+
+    return render(
+        request,
+        "regnskap/kunder.html",
+        {
+            "organisasjon": organisasjon,
+            "kunder": kunder,
+        }
+    )
+
+@login_required
+def kunde_ny(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    samlekontotyper = SamlekontoType.objects.filter(
+        hovedbokskonto__organisasjon=organisasjon,
+        aktiv=True,
+    ).order_by("navn")
+
+    if request.method == "POST":
+        samlekontotype_id = request.POST.get("samlekontotype")
+        navn = request.POST.get("navn", "").strip()
+
+        samlekontotype = get_object_or_404(
+            SamlekontoType,
+            id=samlekontotype_id,
+            hovedbokskonto__organisasjon=organisasjon,
+        )
+
+        kontonummer = samlekontotype.neste_nummer
+
+        with transaction.atomic():
+            konto = Konto.objects.create(
+                organisasjon=organisasjon,
+                kontonummer=kontonummer,
+                kontonavn=navn,
+                styrekode=samlekontotype.hovedbokskonto.styrekode,
+                samlekonto=False,
+                aktiv=True,
+            )
+
+            Kunde.objects.create(
+                organisasjon=organisasjon,
+                konto=konto,
+                navn=navn,
+                orgnummer=request.POST.get("orgnummer", "").strip(),
+                adresse=request.POST.get("adresse", "").strip(),
+                postnummer=request.POST.get("postnummer", "").strip(),
+                poststed=request.POST.get("poststed", "").strip(),
+                land=request.POST.get("land", "").strip() or "Norge",
+                kontaktperson=request.POST.get("kontaktperson", "").strip(),
+                epost=request.POST.get("epost", "").strip(),
+                url=request.POST.get("url", "").strip(),
+                telefon=request.POST.get("telefon", "").strip(),
+                aktiv=request.POST.get("aktiv") == "on",
+                notat=request.POST.get("notat", "").strip(),
+            )
+
+            samlekontotype.neste_nummer += 1
+            samlekontotype.save(update_fields=["neste_nummer"])
+
+        return redirect("regnskap:kunder")
+
+    return render(
+        request,
+        "regnskap/kunde_skjema.html",
+
+        {
+            "organisasjon": organisasjon,
+            "kunde": None,
+            "samlekontotyper": samlekontotyper,
+            "skjema": {
+                "navn": request.GET.get("navn", ""),
+                "orgnummer": request.GET.get("orgnummer", ""),
+                "adresse": request.GET.get("adresse", ""),
+                "postnummer": request.GET.get("postnummer", ""),
+                "poststed": request.GET.get("poststed", ""),
+                "land": request.GET.get("land", "Norge"),
+            },
+        }
+    )
+
+@login_required
+def kunde_endre(request, kunde_id):
+    return redirect("regnskap:kunder")
+
+
+@login_required
+def kunde_slett(request, kunde_id):
+    return redirect("regnskap:kunder")
+
+
 
 
 @login_required
@@ -1575,8 +2007,6 @@ def bilag_detalj(request, bilag_id):
         )
     }
 
-    for linje in linjer:
-        linje.kontonavn = konto_map.get(linje.kontonummer, "")
 
     return render(request, "regnskap/bilag_detalj.html", {
         "organisasjon": organisasjon,
@@ -1921,33 +2351,46 @@ def kontosporring(request):
         organisasjon=organisasjon
     ).order_by("kontonummer")
 
-    valgt_konto = request.GET.get("konto")
+    sok = request.GET.get("konto", "").strip()
 
     posteringer = []
+    konto_treff = []
+    valgt_konto = ""
     valgt_kontonavn = ""
-
     sum_belop = 0
 
-    if valgt_konto:
-        konto_obj = Konto.objects.filter(
-            organisasjon=organisasjon,
-            kontonummer=valgt_konto,
-        ).first()
+    if sok:
+        if sok.isdigit():
+            konto_obj = Konto.objects.filter(
+                organisasjon=organisasjon,
+                kontonummer=sok,
+            ).first()
+        else:
+            konto_obj = None
 
         if konto_obj:
+            valgt_konto = konto_obj.kontonummer
             valgt_kontonavn = konto_obj.kontonavn
 
-        posteringer = Bilagslinje.objects.filter(
-            bilag__organisasjon=organisasjon,
-            kontonummer=valgt_konto,
-        ).select_related(
-            "bilag",
-            "avdeling",
-            "prosjekt",
-        ).order_by(
-            "bilag__bilagsdato",
-            "bilag__bilagsnummer",
-        )
+            posteringer = Bilagslinje.objects.filter(
+                bilag__organisasjon=organisasjon,
+                kontonummer=konto_obj.kontonummer,
+            ).select_related(
+                "bilag",
+                "avdeling",
+                "prosjekt",
+            ).order_by(
+                "bilag__bilagsdato",
+                "bilag__bilagsnummer",
+            )
+
+        else:
+            konto_treff = Konto.objects.filter(
+                organisasjon=organisasjon,
+                aktiv=True,
+                kontonavn__icontains=sok,
+            ).order_by("kontonummer")[:50]
+
     sum_belop = sum(p.belop for p in posteringer)
 
     return render(
@@ -1956,13 +2399,14 @@ def kontosporring(request):
         {
             "organisasjon": organisasjon,
             "kontoer": kontoer,
+            "sok": sok,
+            "konto_treff": konto_treff,
             "valgt_konto": valgt_konto,
             "posteringer": posteringer,
             "sum_belop": sum_belop,
             "valgt_kontonavn": valgt_kontonavn,
         }
     )
-
 
 @login_required
 def bilagsjournal(request):
@@ -2158,4 +2602,99 @@ def kontojournal(request):
         "prosjekter": prosjekter,
         "filter": request.GET,
     })
+
+@login_required
+def leverandor_brreg_sok(request):
+    query = request.GET.get("q", "").strip()
+    treff = []
+
+    if query:
+        url = "https://data.brreg.no/enhetsregisteret/api/enheter"
+
+        response = requests.get(
+            url,
+            params={
+                "navn": query,
+                "size": 10,
+            },
+            timeout=10,
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            treff = data.get("_embedded", {}).get("enheter", [])
+
+    return render(
+        request,
+        "regnskap/leverandor_brreg_sok.html",
+        {
+            "query": query,
+            "treff": treff,
+        },
+    )
+
+@login_required
+def kunde_brreg_sok(request):
+    return leverandor_brreg_sok(request)
+
+@login_required
+def medlemmer(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    medlemmer = LagMedlem.objects.filter(
+        organisasjon=organisasjon,
+    ).order_by(
+        "etternavn",
+        "fornavn",
+    )
+
+    return render(
+        request,
+        "regnskap/medlemmer.html",
+        {
+            "organisasjon": organisasjon,
+            "medlemmer": medlemmer,
+        },
+    )
+
+@login_required
+def medlemmer_synkroniser(request):
+    organisasjon = Organisasjon.objects.filter(
+        redaktorer=request.user
+    ).first()
+
+    melding = None
+
+    if request.method == "POST":
+
+        if request.POST.get("handling") == "tildel_medlemsnummer":
+            resultat = tildel_medlemsnummer(organisasjon)
+            melding = (
+                f"Tildelte medlemsnummer til "
+                f"{resultat['tildelt_medlemsnummer']} medlemmer."
+            )
+
+        elif request.POST.get("handling") == "opprett_medlemskontoer":
+            resultat = opprett_medlemskontoer(organisasjon)
+            melding = (
+                f"Opprettet "
+                f"{resultat['opprettet_medlemskontoer']} medlemskontoer."
+            )
+
+    analyse = analyser_medlemssynkronisering(organisasjon)
+
+    return render(
+        request,
+        "regnskap/medlemmer_synkroniser.html",
+        {
+            "organisasjon": organisasjon,
+            "rapport": analyse["rapport"],
+            "mangler_medlemsnummer_liste": analyse["mangler_medlemsnummer_liste"],
+            "mangler_konto_liste": analyse["mangler_konto_liste"],
+            "melding": melding,
+        },
+    )
+
 

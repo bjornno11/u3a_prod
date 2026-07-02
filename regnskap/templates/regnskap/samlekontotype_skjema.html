@@ -1,4 +1,4 @@
-{% extends "base.html" %}<form
+{% extends "base.html" %}
 
 {% block content %}
 <div class="container mt-4">
@@ -58,7 +58,6 @@
 
         </div>
 
-
         <div class="mb-3">
             <label class="form-label">Navn</label>
             <input type="text"
@@ -68,6 +67,25 @@
                    required>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Nummer fra</label>
+            <input type="number"
+                   name="nummer_fra"
+                   class="form-control"
+                   value="{% if skjema %}{{ skjema.nummer_fra }}{% else %}{{ samlekontotype.nummer_fra|default:'1' }}{% endif %}"
+                   min="1"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nummer til</label>
+            <input type="number"
+                   name="nummer_til"
+                   class="form-control"
+                   value="{% if skjema %}{{ skjema.nummer_til }}{% else %}{{ samlekontotype.nummer_til|default:'999999' }}{% endif %}"
+                   min="1"
+                   required>
+        </div>
         <div class="mb-3">
             <label class="form-label">Neste nummer</label>
             <input type="number"

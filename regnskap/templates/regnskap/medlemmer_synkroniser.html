@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>Synkroniser medlemmer</h1>
+
+    <p class="lead">
+        {{ organisasjon.organisasjon }}
+    </p>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:medlemmer' %}"
+           class="btn btn-secondary">
+            Esc Tilbake
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        Her skal vi opprette eller kontrollere medlemskontoer i regnskapet.
+    </div>
+
+    {% if melding %}
+        <div class="alert alert-success">
+            {{ melding }}
+        </div>
+    {% endif %}
+
+    <div class="card border-danger shadow-sm mt-4">
+        <div class="card-header bg-danger-subtle">
+            <strong>Analyse</strong>
+        </div>
+
+        <table class="table table-hover mb-0">
+            <tbody>
+                <tr>
+                    <th>Aktive medlemmer</th>
+                    <td class="text-end">{{ rapport.aktive_medlemmer }}</td>
+                </tr>
+                <tr>
+                    <th>Godkjente medlemmer</th>
+                    <td class="text-end">{{ rapport.godkjente }}</td>
+                </tr>
+                <tr>
+                    <th>Registrerte medlemmer</th>
+                    <td class="text-end">{{ rapport.registrerte }}</td>
+                </tr>
+                <tr>
+                    <th>Godkjente med medlemsnummer</th>
+                    <td class="text-end">{{ rapport.har_medlemsnummer }}</td>
+                </tr>
+                <tr>
+                    <th>Godkjente uten medlemsnummer</th>
+                    <td class="text-end">{{ rapport.mangler_medlemsnummer }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card border-danger shadow-sm mt-4">
+        <div class="card-header bg-danger-subtle">
+            <strong>Avvik</strong>
+        </div>
+
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Avvik</th>
+                    <th class="text-end">Antall</th>
+                    <th class="text-end">Handling</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th>Godkjente uten medlemsnummer</th>
+                    <td class="text-end">{{ rapport.mangler_medlemsnummer }}</td>
+                    <td class="text-end">
+                        {% if rapport.mangler_medlemsnummer %}
+                            <a href="?vis=mangler_medlemsnummer"
+                               class="btn btn-sm btn-outline-danger">
+                                Vis
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Medlemmer som mangler konto</th>
+                    <td class="text-end">{{ rapport.mangler_konto }}</td>
+                    <td class="text-end">
+                        {% if rapport.mangler_konto %}
+                            <a href="?vis=mangler_konto"
+                               class="btn btn-sm btn-outline-danger">
+                                Vis
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Kontoer uten tilhørende medlem</th>
+                    <td class="text-end">{{ rapport.konto_uten_medlem }}</td>
+                    <td class="text-end">
+                        {% if rapport.konto_uten_medlem %}
+                            <a href="?vis=konto_uten_medlem"
+                               class="btn btn-sm btn-outline-danger">
+                                Vis
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Kontoer som må oppdateres</th>
+                    <td class="text-end">{{ rapport.konto_maa_oppdateres }}</td>
+                    <td class="text-end">
+                        {% if rapport.konto_maa_oppdateres %}
+                            <a href="?vis=konto_maa_oppdateres"
+                               class="btn btn-sm btn-outline-danger">
+                                Vis
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if request.GET.vis == "mangler_medlemsnummer" and mangler_medlemsnummer_liste %}
+
+        <div class="card border-danger shadow-sm mt-4">
+            <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                <strong>
+                    Godkjente medlemmer uten medlemsnummer
+                    ({{ rapport.mangler_medlemsnummer }})
+                </strong>
+
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden"
+                           name="handling"
+                           value="tildel_medlemsnummer">
+
+                    <button type="submit"
+                            class="btn btn-sm btn-success">
+                        Utfør
+                    </button>
+                </form>
+            </div>
+
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Medlemsnr.</th>
+                        <th>Navn</th>
+                        <th>E-post</th>
+                        <th>Telefon</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for medlem in mangler_medlemsnummer_liste %}
+                        <tr>
+                            <td class="text-end">
+                                {{ medlem.medlemsnummer|default:"-" }}
+                            </td>
+                            <td>{{ medlem.navn }}</td>
+                            <td>{{ medlem.epost }}</td>
+                            <td>{{ medlem.telefon }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% endif %}
+
+{% if request.GET.vis == "mangler_konto" and mangler_konto_liste %}
+
+    <div class="card border-danger shadow-sm mt-4">
+        <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+            <strong>
+                Medlemmer som mangler konto
+                ({{ rapport.mangler_konto }})
+            </strong>
+
+            <form method="post" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="handling"
+                       value="opprett_medlemskontoer">
+
+                <button type="submit"
+                        class="btn btn-sm btn-success">
+                    Utfør
+                </button>
+            </form>
+        </div>
+
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Medlemsnr.</th>
+                    <th>Navn</th>
+                    <th>E-post</th>
+                    <th>Telefon</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for medlem in mangler_konto_liste %}
+                    <tr>
+                        <td class="text-end">{{ medlem.medlemsnummer|default:"-" }}</td>
+                        <td>{{ medlem.navn }}</td>
+                        <td>{{ medlem.epost }}</td>
+                        <td>{{ medlem.telefon }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    BAS.initEsc("{% url 'regnskap:medlemmer' %}");
+
+    BAS.initFooter({
+        F1: null,
+        F2: null,
+        F4: null,
+        F5: null,
+        F6: null,
+        F8: null,
+        Esc: "Tilbake"
+    });
+</script>
+{% endblock %}
+

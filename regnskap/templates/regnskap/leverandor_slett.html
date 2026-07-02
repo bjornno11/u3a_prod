@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h1>Sett leverandør inaktiv</h1>
+
+    <div class="alert alert-warning">
+        Vil du sette leverandøren
+        <strong>{{ leverandor.konto.kontonummer }} {{ leverandor.navn }}</strong>
+        inaktiv?
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-warning">
+            Sett inaktiv
+        </button>
+
+        <a href="{% url 'regnskap:leverandorer' %}"
+           class="btn btn-secondary">
+            Avbryt
+        </a>
+    </form>
+
+</div>
+{% endblock %}
+

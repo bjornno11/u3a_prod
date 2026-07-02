@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>Kunder</h1>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-secondary">
+            Tilbake til regnskap
+        </a>
+
+        <a href="{% url 'regnskap:kunde_ny' %}"
+           class="btn btn-primary">
+            Ny kunde
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Navn</th>
+                <th>Org.nr.</th>
+                <th>E-post</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for kunde in kunder %}
+            <tr>
+                <td>{{ kunde.konto.kontonummer }}</td>
+                <td>{{ kunde.navn }}</td>
+                <td>{{ kunde.orgnummer }}</td>
+                <td>{{ kunde.epost }}</td>
+                <td>
+                    {% if kunde.aktiv %}
+                        Aktiv
+                    {% else %}
+                        Inaktiv
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'regnskap:kunde_endre' kunde.id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        Endre
+                    </a>
+
+                    {% if kunde.aktiv %}
+                        <a href="{% url 'regnskap:kunde_slett' kunde.id %}"
+                           class="btn btn-sm btn-outline-warning">
+                            Sett inaktiv
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">
+                    Ingen kunder registrert.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
+

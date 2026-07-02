@@ -607,10 +607,16 @@ class SamlekontoType(models.Model):
         verbose_name="Hovedbokskonto",
     )
 
-    navn = models.CharField(max_length=100)
-    neste_nummer = models.PositiveIntegerField(default=1)
-    bruker_lopende_nummer = models.BooleanField(default=True)
 
+    navn = models.CharField(max_length=100)
+
+    nummer_fra = models.PositiveIntegerField(default=1)
+
+    nummer_til = models.PositiveIntegerField(default=999999)
+
+    neste_nummer = models.PositiveIntegerField(default=1)
+
+    bruker_lopende_nummer = models.BooleanField(default=True)
     beskrivelse = models.TextField(blank=True)
     aktiv = models.BooleanField(default=True)
 
@@ -622,7 +628,101 @@ class SamlekontoType(models.Model):
                 self.hovedbokskonto.samlekonto = True
                 self.hovedbokskonto.save(update_fields=["samlekonto"])
 
+    def clean(self):
+        super().clean()
+
+        if self.nummer_fra > self.nummer_til:
+            raise ValidationError(
+                "Nummer fra kan ikke være høyere enn nummer til."
+            )
+
+        if self.neste_nummer < self.nummer_fra or self.neste_nummer > self.nummer_til:
+            raise ValidationError(
+                "Neste nummer må ligge innenfor nummerintervallet."
+            )
+
     def __str__(self):
         return f"{self.hovedbokskonto.kontonummer} – {self.navn}"
 
+class Leverandor(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="leverandorer",
+    )
+
+    konto = models.OneToOneField(
+        Konto,
+        on_delete=models.PROTECT,
+        related_name="leverandor",
+    )
+
+    navn = models.CharField(max_length=150)
+
+    orgnummer = models.CharField(max_length=20, blank=True)
+    adresse = models.CharField(max_length=150, blank=True)
+    postnummer = models.CharField(max_length=20, blank=True)
+    poststed = models.CharField(max_length=100, blank=True)
+    land = models.CharField(max_length=100, blank=True, default="Norge")
+
+    kontaktperson = models.CharField(max_length=100, blank=True)
+    epost = models.EmailField(blank=True)
+    url = models.URLField(blank=True, verbose_name="Nettside")
+    telefon = models.CharField(max_length=30, blank=True)
+
+    bankkonto = models.CharField(max_length=30, blank=True)
+    iban = models.CharField(max_length=40, blank=True)
+    bic = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="BIC/SWIFT",
+    )
+
+    aktiv = models.BooleanField(default=True)
+    notat = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Leverandør"
+        verbose_name_plural = "Leverandører"
+        ordering = ["navn"]
+
+    def __str__(self):
+        return f"{self.konto.kontonummer} {self.navn}"
+
+class Kunde(models.Model):
+    organisasjon = models.ForeignKey(
+        Organisasjon,
+        on_delete=models.CASCADE,
+        related_name="kunder",
+    )
+
+    konto = models.OneToOneField(
+        Konto,
+        on_delete=models.PROTECT,
+        related_name="kunde",
+    )
+
+    navn = models.CharField(max_length=150)
+
+    orgnummer = models.CharField(max_length=20, blank=True)
+    adresse = models.CharField(max_length=150, blank=True)
+    postnummer = models.CharField(max_length=20, blank=True)
+    poststed = models.CharField(max_length=100, blank=True)
+    land = models.CharField(max_length=100, blank=True, default="Norge")
+
+    kontaktperson = models.CharField(max_length=100, blank=True)
+    epost = models.EmailField(blank=True)
+    url = models.URLField(blank=True, verbose_name="Nettside")
+    telefon = models.CharField(max_length=30, blank=True)
+
+    aktiv = models.BooleanField(default=True)
+    notat = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Kunde"
+        verbose_name_plural = "Kunder"
+        ordering = ["navn"]
+
+    def __str__(self):
+        return f"{self.konto.kontonummer} {self.navn}"
 

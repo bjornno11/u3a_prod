@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>Leverandører</h1>
+
+    <div class="mb-3">
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-secondary">
+            Tilbake til regnskap
+        </a>
+
+        <a href="{% url 'regnskap:leverandor_ny' %}"
+           class="btn btn-primary">
+            Ny leverandør
+        </a>
+    </div>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Navn</th>
+                <th>Org.nr.</th>
+                <th>E-post</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for leverandor in leverandorer %}
+
+            <tr>
+
+                <td>
+                    {{ leverandor.konto.kontonummer }}
+                </td>
+
+                <td>
+                    {{ leverandor.navn }}
+                </td>
+
+                <td>
+                    {{ leverandor.orgnummer }}
+                </td>
+
+                <td>
+                    {{ leverandor.epost }}
+                </td>
+
+                <td>
+                    {% if leverandor.aktiv %}
+                        Aktiv
+                    {% else %}
+                        Inaktiv
+                    {% endif %}
+                </td>
+
+                <td class="text-end">
+
+                    <a href="{% url 'regnskap:leverandor_endre' leverandor.id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        Endre
+                    </a>
+
+                    {% if leverandor.aktiv %}
+                        <a href="{% url 'regnskap:leverandor_slett' leverandor.id %}"
+                           class="btn btn-sm btn-outline-warning">
+                            Sett inaktiv
+                        </a>
+                    {% endif %}
+
+                </td>
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="5">
+                    Ingen leverandører registrert.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+

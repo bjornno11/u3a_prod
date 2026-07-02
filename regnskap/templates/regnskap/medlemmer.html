@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h1>Medlemmer</h1>
+
+    <div class="mb-3">
+
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-secondary">
+            Tilbake til regnskap
+        </a>
+
+        <a href="{% url 'regnskap:medlemmer_synkroniser' %}"
+           class="btn btn-primary">
+            Synkroniser medlemmer
+        </a>
+
+    </div>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Medlemsnr.</th>
+                <th>Navn</th>
+                <th>E-post</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for medlem in medlemmer %}
+
+            <tr>
+
+                <td>
+                    {{ medlem.medlemsnummer }}
+                </td>
+
+                <td>
+                    {{ medlem.navn }}
+                </td>
+
+                <td>
+                    {{ medlem.epost }}
+                </td>
+
+                <td>
+                    {{ medlem.get_status_display }}
+                </td>
+
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="4">
+                    Ingen medlemmer.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+

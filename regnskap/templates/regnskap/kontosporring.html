@@ -14,32 +14,59 @@ Kontospørring
         {{ organisasjon.organisasjon }}
     </p>
 
-    <form method="get" class="mb-4">
+    <div class="mb-3">
+        <a href="{% url 'regnskap:dashboard' %}"
+           class="btn btn-secondary">
+            Esc Tilbake til regnskap
+        </a>
+    </div>
 
+    <form method="get"
+          class="mb-4"
+          id="bas-skjema">
         <label class="form-label">
             Konto
         </label>
 
         <div class="d-flex gap-2" style="max-width: 650px;">
-            <select name="konto"
-                    class="form-select">
-            <option value="">
-                Velg konto
-            </option>
 
-            {% for konto in kontoer %}
-            <option value="{{ konto.kontonummer }}">
-                {{ konto.kontonummer }} {{ konto.kontonavn }}
-            </option>
-            {% endfor %}
-        </select>
-
+        <input type="text"
+               name="konto"
+               class="form-control"
+               value="{{ valgt_konto|default:'' }}"
+               placeholder="Skriv kontonummer eller del av kontonavn"
+               autofocus>
             <button type="submit" class="btn btn-primary">
                 Vis
             </button>
         </div>
 
     </form>
+
+    {% if konto_treff %}
+        <div class="mb-4">
+            <h4>Velg konto</h4>
+
+            <table class="table table-sm table-striped">
+                <tbody>
+                    {% for konto in konto_treff %}
+                        <tr>
+                            <td style="width:100px;">
+                                <a href="{% url 'regnskap:kontosporring' %}?konto={{ konto.kontonummer }}">
+                                    {{ konto.kontonummer }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'regnskap:kontosporring' %}?konto={{ konto.kontonummer }}">
+                                    {{ konto.kontonavn }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 
     {% if valgt_konto %}
 
@@ -55,42 +82,62 @@ Kontospørring
             </a>
         </div>
         <table class="table table-striped table-sm">
+
             <thead>
                 <tr>
-                    <th>Dato</th>
-                    <th>Bilag</th>
-                    <th class="text-end">Beløp</th>
-                    <th class="text-end">Avd.</th>
-                    <th class="text-end">Prosj.</th>
+                    <th style="width:110px;">Dato</th>
+                    <th style="width:90px;">Bilag</th>
                     <th>Tekst</th>
+                    <th class="text-end" style="width:120px;">Debet</th>
+                    <th class="text-end" style="width:120px;">Kredit</th>
+                    <th class="text-end" style="width:70px;">Avd.</th>
+                    <th class="text-end" style="width:70px;">Prosj.</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for p in posteringer %}
-                <tr>
-                    <td>{{ p.bilag.bilagsdato }}</td>
 
-                    <td>
-                        {{ p.bilag.bilagsserie.kode }}-{{ p.bilag.bilagsnummer }}
-                    </td>
+                    <tr>
+                        <td>{{ p.bilag.bilagsdato }}</td>
 
-                    <td class="text-end">{{ p.belop }}</td>
+                        <td>
+                            <a href="{% url 'regnskap:bilag_endre' p.bilag.id %}">
+                                {{ p.bilag.bilagsserie.kode }}{{ p.bilag.bilagsnummer }}
+                            </a>
+                        </td>
 
-                    <td class="text-end">
-                        {% if p.avdeling %}
-                            {{ p.avdeling.avdelingsnummer }}
-                        {% endif %}
-                    </td>
+                        <td>
+                            {% if p.linjetekst %}
+                                {{ p.linjetekst }}
+                            {% else %}
+                                {{ p.bilag.bilagstekst }}
+                            {% endif %}
+                        </td>
 
-                    <td class="text-end">
-                        {% if p.prosjekt %}
-                            {{ p.prosjekt.prosjektnummer }}
-                        {% endif %}
-                    </td>
+                        <td class="text-end">
+                            {% if p.belop > 0 %}
+                                {{ p.belop }}
+                            {% endif %}
+                        </td>
 
-                    <td>{{ p.linjetekst }}</td>
-                </tr>
+                        <td class="text-end">
+                            {% if p.belop < 0 %}
+                                {{ p.belop|floatformat:2|cut:"-" }}
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            {% if p.avdeling %}
+                                {{ p.avdeling.avdelingsnummer }}
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            {% if p.prosjekt %}
+                                {{ p.prosjekt.prosjektnummer }}
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% empty %}
                 <tr>
                     <td colspan="7">
@@ -100,9 +147,21 @@ Kontospørring
                 {% endfor %}
 
                 <tr class="fw-bold">
-                    <td colspan="2">Sum</td>
-                    <td class="text-end">{{ sum_belop }}</td>
-                    <td colspan="3"></td>
+                    <td colspan="3">Sum</td>
+
+                    <td class="text-end">
+                        {% if sum_belop > 0 %}
+                            {{ sum_belop }}
+                        {% endif %}
+                    </td>
+
+                    <td class="text-end">
+                        {% if sum_belop < 0 %}
+                            {{ sum_belop|floatformat:2|cut:"-" }}
+                        {% endif %}
+                    </td>
+
+                    <td colspan="2"></td>
                 </tr>
             </tbody>
         </table>
@@ -114,4 +173,45 @@ Kontospørring
 </div>
 
 {% endblock %}
+
+{% block extra_js %}
+
+<script>
+    const basSkjema = document.getElementById("bas-skjema");
+
+    basSkjema.addEventListener(
+        "keydown",
+        function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                basSkjema.submit();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+            if (event.key === "F2") {
+                event.preventDefault();
+                basSkjema.submit();
+            }
+        }
+    );
+
+    BAS.initEsc("{% url 'regnskap:dashboard' %}");
+
+    BAS.initFooter({
+        F1: null,
+        F2: "Vis",
+        F4: null,
+        F5: null,
+        F6: null,
+        F8: null,
+        Esc: "Tilbake"
+    });
+</script>
+
+{% endblock %}
+
 

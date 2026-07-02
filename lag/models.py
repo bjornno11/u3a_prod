@@ -294,6 +294,26 @@ class LagMedlem(models.Model):
         related_name="lagmedlem",
     )
 
+    medlemsnummer = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Medlemsnummer. Brukes også som kontonummer i regnskapet.",
+    )
+
+    familiemedlem = models.BooleanField(
+        default=False,
+        help_text="Markerer om medlemmet er familiemedlem.",
+    )
+
+    hovedmedlem = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="familiemedlemmer",
+        help_text="Hovedmedlem dersom dette medlemmet er del av en familie.",
+    )
+
     STATUS_REGISTRERT = 1
     STATUS_GODKJENT = 2
     STATUS_UTMELDT = 6
@@ -322,8 +342,18 @@ class LagMedlem(models.Model):
         verbose_name_plural = "Lagmedlemmer"
         ordering = ["etternavn", "fornavn"]
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisasjon", "medlemsnummer"],
+                name="unik_medlemsnummer_per_organisasjon",
+            ),
+        ]
     def __str__(self):
         return f"{self.etternavn}, {self.fornavn}"
+
+    @property
+    def navn(self):
+        return f"{self.fornavn} {self.etternavn}"
 
 
 class LagRolle(models.Model):

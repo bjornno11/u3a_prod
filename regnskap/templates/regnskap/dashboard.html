@@ -119,6 +119,11 @@
                                             Kontoplan
                                         </a>
 
+                                        <a href="{% url 'regnskap:samlekontotyper' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Samlekontotyper
+                                        </a>
+
                                         <a href="{% url 'regnskap:bilagsserier' %}"
                                            class="d-block text-light text-decoration-none mb-2">
                                             Bilagsserier
@@ -147,6 +152,67 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menyReskontro">
+                                        🧾 Reskontro
+                                    </button>
+                                </h2>
+
+                                <div id="menyReskontro"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+
+                                    <div class="accordion-body p-2">
+
+                                        <a href="{% url 'regnskap:kunder' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Kunder
+                                        </a>
+                                        <a href="{% url 'regnskap:leverandorer' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Leverandører
+                                        </a>
+
+                                        <a href="{% url 'regnskap:medlemmer' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Medlemmer
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="accordion-item bg-transparent border-info">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-transparent text-info"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#menyVedlikehold">
+                                        🔧 Vedlikehold
+                                    </button>
+                                </h2>
+
+                                <div id="menyVedlikehold"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#regnskapMeny">
+
+                                    <div class="accordion-body p-2">
+
+                                        <a href="{% url 'regnskap:medlemmer_synkroniser' %}"
+                                           class="d-block text-light text-decoration-none mb-2">
+                                            Synkroniser medlemmer
+                                        </a>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
 
                             </div>
                             </div>

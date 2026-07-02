@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h1>
+        {% if kunde %}
+            Endre kunde
+        {% else %}
+            Ny kunde
+        {% endif %}
+    </h1>
+    <form method="post" id="bas-skjema">
+        {% csrf_token %}
+
+{% if not kunde %}
+
+        <div class="mb-3">
+            <label class="form-label">Samlekontotype</label>
+
+            <select name="samlekontotype"
+                    class="form-select"
+                    required>
+
+                <option value="">Velg samlekontotype</option>
+
+                {% for samlekontotype in samlekontotyper %}
+                    <option value="{{ samlekontotype.id }}">
+                        {{ samlekontotype.navn }}
+                        –
+                        {{ samlekontotype.hovedbokskonto.kontonummer }}
+                        {{ samlekontotype.hovedbokskonto.kontonavn }}
+                    </option>
+                {% endfor %}
+
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label class="form-label">Navn</label>
+            <input type="text"
+                   name="navn"
+                   class="form-control"
+                   value="{{ skjema.navn|default:'' }}"
+                   required>
+
+            <a href="{% url 'regnskap:leverandor_brreg_sok' %}"
+               class="btn btn-outline-secondary mt-2">
+                Søk i Brønnøysund
+            </a>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Organisasjonsnummer</label>
+            <input type="text" name="orgnummer" class="form-control" value="{{ skjema.orgnummer|default:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">E-post</label>
+            <input type="email" name="epost" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nettside</label>
+            <input type="url" name="url" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Telefon</label>
+            <input type="text" name="telefon" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Adresse</label>
+            <input type="text" name="adresse" class="form-control" value="{{ skjema.adresse|default:'' }}">
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Postnummer</label>
+                <input type="text" name="postnummer" class="form-control" value="{{ skjema.postnummer|default:'' }}">
+            </div>
+
+            <div class="col-md-5 mb-3">
+                <label class="form-label">Poststed</label>
+                <input type="text" name="poststed" class="form-control" value="{{ skjema.poststed|default:'' }}">
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Land</label>
+                <input type="text" name="land" class="form-control" value="{{ skjema.land|default:'Norge' }}"">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Kontaktperson</label>
+            <input type="text" name="kontaktperson" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bankkonto</label>
+            <input type="text" name="bankkonto" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">IBAN</label>
+            <input type="text" name="iban" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">BIC/SWIFT</label>
+            <input type="text" name="bic" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notat</label>
+            <textarea name="notat" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox"
+                   name="aktiv"
+                   class="form-check-input"
+                   id="aktiv"
+                   checked>
+            <label class="form-check-label" for="aktiv">
+                Aktiv
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="bas-lagre">
+            F2 Lagre
+        </button>
+
+        <a href="{% url 'regnskap:kunder' %}"
+           class="btn btn-secondary"
+           id="bas-avbryt">
+            Esc Avbryt
+        </a>
+
+    </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    BAS.initEnterSomTab();
+    BAS.initF2Lagre("bas-skjema");
+    BAS.initEsc("{% url 'regnskap:kunder' %}");
+    BAS.initFooter({
+        F1: null,
+        F2: "Lagre",
+        F4: null,
+        F5: null,
+        F6: null,
+        F8: null,
+        Esc: "Avbryt"
+    });
+</script>
+{% endblock %}
+

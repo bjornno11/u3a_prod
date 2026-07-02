@@ -54,9 +54,19 @@
             Vi vil ta kontakt med deg ved behov.
         </p>
 
-	<a href="{% url 'lokaladmin:dashboard' %}" class="btn btn-outline-secondary mb-3">
-	    ← Tilbake til lokaladmin
-	</a>
+    <div class="mt-4">
+
+        <a href="{% url 'registrer_medlem' %}"
+           class="btn btn-primary">
+            Registrer nytt medlem
+        </a>
+
+        <a href="{% url 'godkjenn_medlemmer' %}"
+           class="btn btn-outline-secondary">
+            Tilbake til medlemmer
+        </a>
+
+    </div>
         <hr class="mt-4">
 
         <div class="small text-muted">

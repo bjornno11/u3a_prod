@@ -212,6 +212,76 @@ urlpatterns = [
         name="kontojournal",
     ),
 
+    path(
+        "leverandorer/",
+        views.leverandorer,
+        name="leverandorer",
+    ),
+
+    path(
+        "leverandorer/ny/",
+        views.leverandor_ny,
+        name="leverandor_ny",
+    ),
+
+    path(
+        "leverandorer/<int:leverandor_id>/endre/",
+        views.leverandor_endre,
+        name="leverandor_endre",
+    ),
+
+    path(
+        "leverandorer/<int:leverandor_id>/slett/",
+        views.leverandor_slett,
+        name="leverandor_slett",
+    ),
+
+
+    path(
+        "leverandorer/brreg-sok/",
+        views.leverandor_brreg_sok,
+        name="leverandor_brreg_sok",
+    ),
+
+    path(
+        "kunder/",
+        views.kunder,
+        name="kunder",
+    ),
+
+    path(
+        "kunder/ny/",
+        views.kunde_ny,
+        name="kunde_ny",
+    ),
+
+    path(
+        "kunder/brreg-sok/",
+        views.kunde_brreg_sok,
+        name="kunde_brreg_sok",
+    ),
+
+    path(
+        "kunder/<int:kunde_id>/endre/",
+        views.kunde_endre,
+        name="kunde_endre",
+    ),
+
+    path(
+        "kunder/<int:kunde_id>/slett/",
+        views.kunde_slett,
+        name="kunde_slett",
+    ),
+
+    path(
+        "medlemmer/",
+        views.medlemmer,
+        name="medlemmer",
+    ),
+
+    path(
+        "medlemmer/synkroniser/",
+        views.medlemmer_synkroniser,
+        name="medlemmer_synkroniser",
+    ),
 ]
-
-
